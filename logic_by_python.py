@@ -1,139 +1,118 @@
-def handle_move(board, y, x, color):
-    '''This function receives the current state of the board and 
-    the color of the x-coordinate and y-coordinate of the place 
-    you want to play as arguments, processes the move appropriately, 
-    and returns the newly changed board. There are four states on 
-    the board: 'B', 'W', '.', '#'. 'B' is 'black', 'W' is white, 
-    '.' is an empty space '#' means a place where you cannot play temporarily because of a ko.'''
-    if board[y][x] != '.': # If the received coordinates are not empty on the board or 
-        return board       # are unplayable due to KO, the board is returned immediately.
-    if color == 'B':
-        opponent = 'W'
-    else:
-        opponent = 'B'
-    size = len(board)
-    y_direction = [0, 1, 0, -1]
-    x_direction = [1, 0, -1, 0]
-    killed_group = 0
+def add_neighbors(group: [(int, int)], y: int, x: int) -> [(int, int)]:
+    group.append((y, x + 1))
+    group.append((y, x - 1))
+    group.append((y + 1, x))
+    group.append((y - 1, x))
+    return group
 
-    def is_captured(y, x, color):
-        '''Check whether the liberty of this stone is blocked or not.
-        At first, it checks the condition of four adjacent places of the first stone, 
-        and if it is the same color as this stone, it expands the range again. 
-        Returns false immediately if at least one path is found in the middle, 
-        and returns true if no path is found during the loop. 
-        In order not to fall into an infinite loop, 
-        check whether a place has been visited once as a visited set.'''
-        group = [(y, x)] 
-        visited = set()
-        idx = 0
-        while idx < len(group):
-            coordinate = group[idx]
-            if coordinate in visited:
-                idx += 1
-                continue
-            y_pos = coordinate[0]
-            x_pos = coordinate[1]
-            if not (0 <= y_pos < size and 0 <= x_pos < size): 
-                group.pop(idx)
-                continue
-            if board[y_pos][x_pos] == color: 
-                group.append((y_pos + 1, x_pos))
-                group.append((y_pos - 1, x_pos))
-                group.append((y_pos, x_pos + 1))
-                group.append((y_pos, x_pos - 1))
-                visited.add((y_pos, x_pos))
-            elif board[y_pos][x_pos] == '.' or board[y_pos][x_pos] == '#':
-                return False
-            else:
-                group.pop(idx)
-        return bool(group)
+
+class Status:
+
+    empty = '.'
+    ko = '#'
+    black = 'B'
+    white = 'W'
+
+    def __init__(self, status) -> None:
+        self.status = status
+
+class Board:
+    def __init__(self, size: int) -> None:
+        self.coordinate_status = [[Status.empty] * size for _ in range(size)]
+        self.size = size
     
-    def grouping(y, x, color):
-        '''Returns a group of stones of the same color adjacent to this stone. 
-        At first, I put this stone and four places adjacent to it into a group, 
-        check their state, and if they are not the same color, 
-        I remove them from the group. If it is confirmed as the same color, 
-        add four adjacent places to the group from there and repeat the same operation. 
-        This also eliminates the possibility of infinite loops and duplication through the visited set.'''
+    def is_outside(self, y: int, x: int) -> bool:
+        return not (0 <= y < self.size and 0 <= x < self.size)
+    
+    def get_status(self, y: int, x: int) -> Status:
+        return self.coordinate_status[y][x]
+    
+    def change(self, y: int, x: int, status: Status):
+        self.coordinate_status[y][x] = status
+
+    def remove_dead_group(self, group: [(int, int)]):
+        for coord in group:
+            y, x = coord[0], coord[1]
+            self.coordinate_status[y][x] = Status.empty
+    
+    def get_dead_group(self, y: int, x: int) -> [(int, int)]:
+        state = self.get_status(y, x)
+        if state == Status.empty or state == Status.ko:
+            return []
+        opponent = Status.black if state == Status.white else Status.white
         group = [(y, x)]
-        visited = set()
         idx = 0
+        visited = set()
+
         while idx < len(group):
-            coordinate = group[idx]
-            if coordinate in visited:
+            coord = group[idx]
+            y_pos, x_pos = coord[0], coord[1]
+            if coord in visited or self.is_outside(y_pos, x_pos):
                 group.pop(idx)
                 continue
-            y_pos = coordinate[0]
-            x_pos = coordinate[1]
-            if not (0 <= y_pos < size and 0 <= x_pos < size):
-                group.pop(idx)
+
+            status = self.get_status(y_pos, x_pos)
+            if status == state:
+                group = add_neighbors(group, y_pos, x_pos)
+                visited.add(coord)
+                idx += 1
                 continue
-            if board[y_pos][x_pos] != color:
+            elif status == opponent:
                 group.pop(idx)
                 continue
             else:
-                group.append((y_pos + 1, x_pos))
-                group.append((y_pos - 1, x_pos))
-                group.append((y_pos, x_pos + 1))
-                group.append((y_pos, x_pos - 1))
-                visited.add((y_pos, x_pos))
-                idx += 1
+                return []
         return group
     
-    def remove_deadgroup(group):
-        '''This function receives the location of the group that is considered 
-        dead as an argument and changes the state of that location to an empty space.'''
-        for coordinate in group:
-            board[coordinate[0]][coordinate[1]] = '.'
-    
-    def add_move(y, x, color):
-        board[y][x] = color
+    def get_killed_by_move(self, y: int, x: int) -> [(int, int)]:
+        neighbors = add_neighbors([], y, x)
+        color = self.get_status(y, x)
+        dead = []
+        for neighbor in neighbors:
+            y_pos, x_pos = neighbor[0], neighbor[1]
+            if not self.is_outside(y_pos, x_pos) and self.get_status(y_pos, x_pos) != color:
+                dead += self.get_dead_group(y_pos, x_pos)
+        return dead
 
-    def clear_ko_spot():
-        '''This function changes the place marked with '#' to an empty space in the previous situation.'''
-        for i in range(size):
-            for j in range(size):
-                if board[i][j] == '#':
-                    board[i][j] = '.'
+    def clear_ko_spot(self):
+        for i in range(self.size):
+            for j in range(self.size):
+                if self.get_status(i, j) == Status.ko:
+                    self.change(i, j, Status.empty)
                     return
+        return
     
-    add_move(y, x, color)
-
-    suicide = is_captured(y, x, color) # Checks if the move the player is trying to play has liberty.
-
-    for i in range(4):
-        if is_captured(y + y_direction[i], x + x_direction[i], opponent):
-            dead = grouping(y + y_direction[i], x + x_direction[i], opponent)
-            killed_group += len(dead)
-            remove_deadgroup(dead)
+    def find_ko_spot(self, y: int, x: int) -> (int, int):
+        group = add_neighbors([], y, x)
+        for coord in group:
+            y, x = coord[0], coord[1]
+            if not self.is_outside(y, x) and self.get_status(y, x) == Status.empty:
+                return (y, x)
     
-    if not suicide:
-        clear_ko_spot()
-        return board
-    else:
-        if killed_group == 0:
-            board[y][x] = '.'
-            return board
-        elif killed_group == 1:
-            clear_ko_spot()
-            if len(grouping(y, x, color)) == 1:
-                for i in range(4):
-                    if board[y + y_direction[i]][x + x_direction[i]] == '.':
-                        board[y + y_direction[i]][x + x_direction[i]] = '#' 
-            return board
+class Go():
+    def __init__(self, size) -> None:
+        self.board = Board(size)
+
+    def handle_move(self, y: int, x: int, color: Status):
+        if self.board.get_status(y, x) != Status.empty:
+            return
+        self.board.change(y, x, color)
+        suicideGroup = self.board.get_dead_group(y, x)
+        print('suicide: ', suicideGroup)
+        killed = self.board.get_killed_by_move(y, x)
+        print('killed: ', killed)
+        self.board.remove_dead_group(killed)
+        if len(suicideGroup) == 0:
+            self.board.clear_ko_spot()
         else:
-            clear_ko_spot()
-            return board
-
-
-
-
-
-    
-    
-    
-    
-
-
-"# Go" 
+            if len(killed) == 0:
+                self.board.change(y, x, Status.empty)
+            elif len(killed) == 1 and len(suicideGroup) == 1:
+                self.board.clear_ko_spot()
+                new_ko_spot = self.board.find_ko_spot(y, x)
+                y_ko, x_ko = new_ko_spot[0], new_ko_spot[1]
+                self.board.change(y_ko, x_ko, Status.ko)
+            else:
+                self.board.clear_ko_spot()
+        return
+            
