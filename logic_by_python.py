@@ -1,11 +1,7 @@
-def add_neighbors(group: list, y: int, x: int) -> list:
+def add_neighbors(y: int, x: int) -> list:
     '''Receives a list and coordinates, appends coordinates adjacent to 
     the received coordinates to the list, and then returns the list.'''
-
-    group.append((y, x + 1))
-    group.append((y, x - 1))
-    group.append((y + 1, x))
-    group.append((y - 1, x))
+    group = [(y + 1, x), (y - 1, x), (y, x + 1), (y, x - 1)]
     return group
 
 def change_ko_spot(y= -1, x= -1):
@@ -32,10 +28,7 @@ class Board:
         '''Create a board by receiving the size and list. 
         If an empty list comes in, an empty board of size * size is created.'''
         self.size = size
-        if not board:
-            self.board = [[Status.empty] * size for _ in range(size)]
-        else:
-            self.board = board
+        self.board = [[Status.empty] * size for _ in range(size)] if not board else board
 
     def is_outside(self, y: int, x: int) -> bool:
         # Check if the coordinates are outside the boundaries of the board.
@@ -75,7 +68,7 @@ class Board:
 
             status = self.get_status(y_pos, x_pos)
             if status == state:
-                group = add_neighbors(group, y_pos, x_pos)
+                group += add_neighbors(y_pos, x_pos)
                 visited.add(coord)
                 idx += 1
                 continue
@@ -89,7 +82,7 @@ class Board:
     def get_killed_by_move(self, y: int, x: int) -> list:
         '''Returns a list of groups of opponents killed by playing at the coordinates. 
         If it doesn't exist, an empty list is returned.'''
-        neighbors = add_neighbors([], y, x)
+        neighbors = add_neighbors(y, x)
         color = self.get_status(y, x)
         dead = []
         for neighbor in neighbors:
@@ -100,7 +93,7 @@ class Board:
 
     def find_ko_spot(self, y: int, x: int) -> tuple:
         # Finds the location to be changed to ko spot and returns its coordinates.
-        group = add_neighbors([], y, x)
+        group = add_neighbors(y, x)
         for coord in group:
             y, x = coord[0], coord[1]
             if not self.is_outside(y, x) and self.get_status(y, x) == Status.empty:
