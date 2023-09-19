@@ -1,6 +1,7 @@
 import { Box } from "@mui/material";
 import { Coordinate } from "./types";
 
+
 interface GoStoneProps{
   size: number;
   color: string;

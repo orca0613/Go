@@ -28,7 +28,7 @@ export function GoBoard(props: GoBoardProps) {
     <Box sx={{ height: boardBoxLength, width: boardBoxLength }}>
       <BoardBox>
         <Box sx={{
-          borderWidth: "1px",
+          borderWidth: "1 px",
           borderStyle: "solid",
           height: boardLength,
           width: boardLength,

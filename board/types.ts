@@ -2,35 +2,35 @@
 export type Coordinate = [number, number]
 
 export interface Move {
-  coord: Coordinate
-  color: string
+  white: Coordinate[]
+  black: Coordinate[]
 }
 
-export const test_problem: Move[] = [
-  { color: 'black', coord: [2, 1] },
-  { color: 'black', coord: [2, 2] },
-  { color: 'black', coord: [2, 3] },
-  { color: 'black', coord: [3, 3] },
-  { color: 'black', coord: [3, 4] },
-  { color: 'black', coord: [4, 4] },
-  { color: 'black', coord: [5, 4] },
-  { color: 'black', coord: [6, 4] },
-  { color: 'black', coord: [6, 4] },
-  { color: 'black', coord: [6, 4] },
-  { color: 'black', coord: [7, 4] },
-  { color: 'black', coord: [8, 4] },
-  { color: 'black', coord: [9, 4] },
-  { color: 'black', coord: [9, 3] },
-  { color: 'black', coord: [9, 2] },
-  { color: 'black', coord: [10, 2] },
-
-  { color: 'white', coord: [3, 1] },
-  { color: 'white', coord: [3, 2] },
-  { color: 'white', coord: [4, 2] },
-  { color: 'white', coord: [4, 3] },
-  { color: 'white', coord: [5, 3] },
-  { color: 'white', coord: [7, 3] },
-  { color: 'white', coord: [8, 3] },
-  { color: 'white', coord: [8, 2] },
-  { color: 'white', coord: [9, 1] },
-]
+export const test_problem: Move = {
+  white: [
+    [3, 1],
+    [3, 2],
+    [4, 2],
+    [4, 3],
+    [5, 3],
+    [7, 3],
+    [8, 3],
+    [8, 2],
+    [9, 1],
+  ],
+  black: [
+    [2, 1],
+    [2, 2],
+    [2, 3],
+    [3, 3],
+    [4, 4],
+    [5, 4],
+    [6, 4],
+    [7, 4],
+    [8, 4],
+    [9, 4],
+    [9, 3],
+    [9, 2],
+    [10, 2],
+  ]
+}
