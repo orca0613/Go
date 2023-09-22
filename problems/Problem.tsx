@@ -25,8 +25,8 @@ export function Problem(props: ProblemProps) {
     setCurrentKey('0')
   }
 
-  function playMoveAndReturnNewBoard(coord: Coordinate, color: string) {
-    let newProblem: Board = _.cloneDeep(problem)
+  function playMoveAndReturnNewBoard(board: Board, coord: Coordinate, color: string) {
+    let newProblem: Board = _.cloneDeep(board)
     newProblem = handleMove(
       {
         board: newProblem,
@@ -44,7 +44,7 @@ export function Problem(props: ProblemProps) {
     const key = String(y * (N) + x)
     if (variations[currentKey].includes(key)) {
       const coord: Coordinate = [y, x]
-      const newBoard = playMoveAndReturnNewBoard(coord, 'b')
+      const newBoard = playMoveAndReturnNewBoard(problem, coord, 'b')
       const newKey = currentKey + '-' + key
       setCurrentKey(newKey)
       response(newBoard, newKey)
@@ -59,14 +59,7 @@ export function Problem(props: ProblemProps) {
       const r = Number(variations[key][0])
       const y = Math.floor(r / (N)), x = r % (N)
       const coord: Coordinate = [y, x]
-
-      let newProblem: Board = _.cloneDeep(board)
-      newProblem = handleMove({
-        board: newProblem,
-        color: 'w',
-        currentMove: coord,
-      })
-      setProblem(newProblem)
+      const newBoard = playMoveAndReturnNewBoard(board, coord, 'w')
       const newKey = key + '-' + String(r)
       setCurrentKey(key + '-' + String(r))
       if (variations[newKey].length === 0) {
