@@ -1,5 +1,5 @@
 import { GoPosition } from "./GoPosition";
-import { test_problem } from "./types";
+import { testProblem } from "../../problems/problem1";
 
 const lineSpacing = 40
 const N = 13
@@ -15,7 +15,7 @@ function App() {
       <GoPosition
         lines={N}
         lineSpacing={lineSpacing}
-        moves={test_problem}
+        board={testProblem}
       />
     </div>
   );

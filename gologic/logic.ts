@@ -1,100 +1,86 @@
-import { Coordinate, Move } from "../util/board/types"
 import _ from 'lodash'
+import { Board, Coordinate } from '../util/board/types'
 
-export function isOutside(x: number, y: number, size: number) {
-    return !(0 < x && x <= size && 0 < y && y <= size)
+export function isOutside(coord: Coordinate, size: number) {
+    const y = coord[0], x = coord[1]
+    return !(0 <= x && x < size && 0 <= y && y < size)
 }
 
-function addNeighbors(x: number, y: number) {
-    return [[x + 1, y], [x - 1, y], [x, y + 1], [x, y - 1]]
+export function addNeighbors(coord: Coordinate) {
+    const y = coord[0], x = coord[1]
+    const neighbors: Coordinate[] = [[y + 1, x], [y - 1, x], [y, x + 1], [y, x - 1]]
+    return neighbors
 }
 
-export function checkInclude(coordinates: number[][], coord: number[]) {
-    for (let i = 0; i < coordinates.length; i++) {
-        if (_.isEqual(coordinates[i], coord)) {
-            return true
+
+export function getStatus(board: Board, coord: Coordinate) {
+    const y = coord[0], x = coord[1]
+    return board[y][x]
+}
+
+export function changeStatus(board: Board, coord: Coordinate, value: string) {
+    const newBoard = board, y = coord[0], x = coord[1]
+    newBoard[y][x] = value
+    return newBoard
+}
+
+export function removeDeadGroup(board: Board, group: Coordinate[]) {
+    const newBoard = _.cloneDeep(board)
+    for (let i = 0; i < group.length; i++) {
+        const y = group[i][0], x = group[i][1]
+        newBoard[y][x] = '.'
+    }
+    return newBoard
+}
+
+export function getDeadGroup(board: Board, coord: Coordinate, color: string, opponentColor: string): Coordinate[] {
+    let newBoard: Board = _.cloneDeep(board)
+    const size = board.length
+    const y = coord[0], x = coord[1]
+    let group: Coordinate[] = [[y, x]]
+    let idx = 0
+
+    while (idx < group.length) {
+        const c = group[idx]
+        if (isOutside(c, size) || getStatus(newBoard, c) === color) {
+            group.splice(idx, 1)
+            continue
+        } else if (getStatus(newBoard , c) === opponentColor) {
+            group = group.concat(addNeighbors(c))
+            newBoard = changeStatus(newBoard, c, color)
+            idx += 1
+        } else {
+            return []
         }
     }
-    return false
-}
 
+    return group
+}
 interface handleMoveProps {
 
-    state: Move
+    board: Board
     color: string
     currentMove: Coordinate;
-    size: number
 }
 
 export function handleMove(props: handleMoveProps) {
-    const boardState = props.state;
+    let boardState = props.board;
     const currentMove = props.currentMove;
     const color = props.color;
-    const size = props.size;
-    const myColor = props.color
-    let opponentColor: string, myStones: number[][], opponentStones: number[][];
-    if (myColor === 'black') {
-        opponentColor = 'white'
-        myStones = boardState.black
-        opponentStones = boardState.white
+    const opponentColor = color === 'b'? 'w' : 'b'
+    const neighbors = addNeighbors(currentMove)
+
+    if (isOutside(currentMove, boardState.length) || getStatus(boardState, currentMove) !== '.') {
+        return boardState
     } else {
-        opponentColor = 'black'
-        myStones = boardState.white
-        opponentStones = boardState.black
+        boardState = changeStatus(boardState, currentMove, color)
     }
 
-    function getDeadGroup(x: number, y: number, color: string) {
-        
-        const visited: number[][] = []
-
-        let group = [[x, y]]
-        let idx = 0
-
-        while (idx < group.length) {
-            const c = group[idx]
-            if (checkInclude(visited, c) || isOutside(c[0], c[1], size) || checkInclude(myStones, c)) {
-                group.splice(idx, 1)
-                continue
-            }
-            if (checkInclude(opponentStones, c)) {
-                group = group.concat(addNeighbors(c[0], c[1]))
-                visited.push(c)
-                idx += 1
-            } else {
-                return []
-            }
-        }
-
-        return group
+    let dead: Coordinate[] = []
+    for (let i = 0; i < neighbors.length; i ++) {
+        dead = dead.concat(getDeadGroup(boardState, neighbors[i], color, opponentColor))
     }
 
-    function removeDeadGroup(deadGroup: number[][]) {
-        if (opponentColor === 'black') {
-            for (let i = 0; i < deadGroup.length; i++) {
-                for (let j = boardState.black.length; j > -1; j--) {
-                    if (_.isEqual(deadGroup[i], boardState.black[j])) {
-                        boardState.black.splice(j, 1)
-                    }
-                }
-            }
-        } else {
-            for (let i = 0; i < deadGroup.length; i++) {
-                for (let j = boardState.white.length; j > -1; j--) {
-                    if (_.isEqual(deadGroup[i], boardState.white[j])) {
-                        boardState.white.splice(j, 1)
-                    }
-                }
-            }
-        }
-    }
-
-    let dead: number[][] = []
-    const neighbors = addNeighbors(currentMove[0], currentMove[1])
-    for (let i = 0; i < 4; i++) {
-        dead = dead.concat(getDeadGroup(neighbors[i][0], neighbors[i][1], opponentColor))
-    }
-
-    removeDeadGroup(dead)
-
+    boardState = removeDeadGroup(boardState, dead)
     return boardState
 }
