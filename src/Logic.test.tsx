@@ -1,5 +1,5 @@
 import { addNeighbors, changeStatus, getDeadGroup, getStatus, handleMove, isOutside, removeDeadGroup } from './gologic/logic';
-import { Board, Coordinate } from './util/board/types';
+import { Board, Coordinate } from './util/types';
 
 
 
@@ -97,8 +97,8 @@ test('getDeadGroup', () => {
   const coord1: Coordinate = [0, 1]
   const coord2: Coordinate = [1, 0]
 
-  const case1 = getDeadGroup(board, coord1, 'b', 'w')
-  const case2 = getDeadGroup(board, coord2, 'b', 'w')
+  const case1 = getDeadGroup(board, coord1, 'w', 'b')
+  const case2 = getDeadGroup(board, coord2, 'w', 'b')
 
   const expectedCase1: Coordinate[] = [[0, 1]]
   const expectedCase2: Coordinate[] = []
