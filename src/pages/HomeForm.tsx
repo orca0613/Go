@@ -13,7 +13,8 @@ export function HomeForm() {
       <div>
         <Button onClick={e => movePage('problem')}>problem page</Button>
         <Button onClick={e => movePage('signup')}>sign up</Button>
-        <Button onClick={e => movePage('Test')}>test</Button>
+        <Button onClick={e => movePage('test-problem')}>register my problem</Button>
+        <Button onClick={e => movePage('test-variations')}>register variations</Button>
       </div>
       <h1>hello world</h1>
     </>

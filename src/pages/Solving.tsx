@@ -14,19 +14,14 @@ export function Solving() {
   }
 
 
-  const [form, setForm] = useState(form1)
 
-  const problem = Problem(form)
+
+  const problem = Problem(form1)
   return (
     <>
       <div>
-        {problem}
+        <Problem problem={form1.problem} variations={form1.variations}></Problem>
       </div>
-      {/* <Button onClick={() => setForm(form1)}>problem1</Button>
-      <Button onClick={() => setForm(form2)}>problem2</Button>
-      <Button onClick={() => setForm(form3)}>problem3</Button>
-      <Button onClick={() => setForm(form4)}>problem4</Button> */}
-
     </>
 
   )

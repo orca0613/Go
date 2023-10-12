@@ -2,9 +2,10 @@ import React, { useState } from "react";
 import { GoPosition } from "../util/GoPosition";
 import { Coordinate, Board, Variations, BoardInfo } from "../util/types" 
 import _ from 'lodash'
-import { Button } from "@mui/material";
-import { makeRandomNumber, playMoveAndReturnNewBoard } from "../util/functions";
+import { Box, Button } from "@mui/material";
+import { getCoordinate, makeRandomNumber, playMoveAndReturnNewBoard } from "../util/functions";
 import { boardWidth } from "../util/constants";
+import { MoveNumber } from "../util/MoveNumber";
 
 interface ProblemProps {
   problem: BoardInfo
@@ -15,21 +16,19 @@ export function Problem(props: ProblemProps) {
   const initialState = props.problem.board
   const variations = props.variations
   const N = initialState.length
-  const lineSpacing = boardWidth / N
+  const cellWidth = Math.round(boardWidth / N)
 
   const [problem, setProblem] = useState(initialState)
   const [currentKey, setCurrentKey] = useState('0')
   const [color, setColor] = useState(props.problem.color)
   const [selfPlay, setSelfPlay] = useState(false)
   const [history, setHistory] = useState([props.problem])
-  const [steps, setSteps] = useState(0)
 
   function reset() {
     setProblem(initialState)
     setCurrentKey('0')
     setColor(props.problem.color)
     setHistory([props.problem])
-    setSteps(0)
   }
 
   function addHistory(board: Board, color: string) {
@@ -37,42 +36,38 @@ export function Problem(props: ProblemProps) {
       board: board,
       color: color
     }
-    const H = history.slice(0, steps)
-    setHistory(H.concat([newHistory]))
-    setSteps(steps + 1)
+    setHistory(history.concat([newHistory]))
   }
 
-  function previous() {
-    const pre = history[steps - 1]
+  function goToPreviousMove() {
+    const pre = history.pop()
     if (pre === undefined) {
       return
     } else {
       setProblem(pre.board)
       setColor(pre.color)
-      if (steps > 0) {setSteps(steps - 1)}
-    }
-  }
-
-  function next() {
-    const next = history[steps + 1]
-    if (next === undefined) {
-      return
-    } else {
-      setProblem(next.board)
-      setColor(next.color)
-      if (steps < history.length) {setSteps(steps + 1)}
+      let newKey = currentKey
+      for (let i = currentKey.length - 1; i >= 0; i--) {
+        if (currentKey[i] === '-') {
+          newKey = currentKey.slice(0, i)
+          break
+        }
+      }
+      setCurrentKey(newKey)
     }
   }
   
   function handleClick(e: React.MouseEvent) {
-    const x = Math.floor(e.clientX / lineSpacing)
-    const y = Math.floor(e.clientY / lineSpacing)
-    const coord: Coordinate = [y, x]
+    const coord = getCoordinate(e, cellWidth)
+    const y = coord[0], x = coord[1]
     if (selfPlay) {
       const newProblem = playMoveAndReturnNewBoard(problem, coord, color)
       if (_.isEqual(newProblem, problem)) {
         return
       }
+      const key = String(y * N + x)
+      const newKey = currentKey + '-' + key
+      setCurrentKey(newKey)
       addHistory(problem, color)
       setProblem(newProblem)
       color === 'b'? setColor('w') : setColor('b')
@@ -117,13 +112,13 @@ export function Problem(props: ProblemProps) {
 
   return (
     <>
-      <div onClick={handleClick}>
-        <GoPosition lineSpacing={lineSpacing} lines={N - 1} board={problem}></GoPosition>
-      </div>
+      <Box onClick={handleClick}>
+        <GoPosition cellWidth={cellWidth} lines={N - 1} board={problem}></GoPosition>
+        <MoveNumber cellWidth={cellWidth} moves={currentKey} board={problem} ></MoveNumber>
+      </Box>
       <Button onClick={reset}>reset</Button>
       <Button onClick={changeMode}>{selfPlay? 'try' : 'practice'}</Button>
-      {selfPlay? <Button onClick={previous}>previous</Button> : <></>}
-      {selfPlay? <Button onClick={next}>next</Button> : <></>}
+      {selfPlay? <Button onClick={goToPreviousMove}>previous</Button> : <></>}
     </>
 
 

@@ -12,23 +12,23 @@ const BoardBox = styled(Box)({
 })
 
 interface GoBoardProps {
-  n: number;
-  spacingInPixels: number;
+  lines: number;
+  cellWidth: number;
   children?: React.ReactNode;
   // edgePadding?: number;
 }
 
 export function GoBoard(props: GoBoardProps) {
-  const s = props.spacingInPixels;
+  const s = props.cellWidth;
   // const edgePadding = props.edgePadding ?? 5;
   // Board length is number of lines x space between, +1 px for line on both sides
-  const boardLength = `${props.n * s + 1}px`
-  const boardBoxLength = `${(props.n + 1) * s + 2}px`
+  const boardLength = `${props.lines * s + 1}px`
+  const boardBoxLength = `${(props.lines + 1) * s + 2}px`
   return (
-    <Box sx={{ height: boardBoxLength, width: boardBoxLength }}>
-      <BoardBox>
+    <Box sx={{ height: boardBoxLength, width: boardBoxLength }} key={'board'}>
+      <BoardBox key={'board-box'}>
         <Box sx={{
-          borderWidth: "1 px",
+          borderWidth: "1px",
           borderStyle: "solid",
           height: boardLength,
           width: boardLength,
@@ -36,7 +36,7 @@ export function GoBoard(props: GoBoardProps) {
           backgroundImage: `linear-gradient(to right, black 1px, transparent 1px), 
           linear-gradient(to bottom, black 1px, transparent 1px)`,
           position: "absolute", // Important so children don't affect board position
-        }}/>
+        }} key={'cell'}/>
         {props.children}
       </BoardBox>
     </Box>

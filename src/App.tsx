@@ -3,7 +3,8 @@ import { HomeForm } from "./pages/HomeForm";
 import { NotFound } from "./pages/NotFound";
 import { Signup } from "./pages/SignUp";
 import { Solving } from "./pages/Solving";
-import { Test } from "./pages/Test";
+import { TestMakingProblem } from "./pages/TestMakingProblem";
+import { TestMakingVariations } from "./pages/TestMakingVariations"
 
 function App() {
   return (
@@ -13,7 +14,8 @@ function App() {
         <Route path="/problem" element={<Solving/>} />
         <Route path="/*" element={<NotFound/>} />
         <Route path="/signup" element={<Signup/>} />
-        <Route path="/test" element={<Test/>} />
+        <Route path="/test-problem" element={<TestMakingProblem/>} />
+        <Route path="/test-variations" element={<TestMakingVariations/>} />
       </Routes>
     </BrowserRouter>
   )
