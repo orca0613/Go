@@ -13,3 +13,11 @@ export type Variations = {
   [key: string]: string[]
 };
 
+export type ProblemInfo = {
+  problem: Board,
+  variations: Variations,
+  color: string,
+  level: number,
+  creator: string,
+  comment: string,
+}

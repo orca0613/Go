@@ -14,8 +14,8 @@ export function NotFound() {
   return (
     <>
       <h1>wrong address</h1>
-      <Button onClick={e => movePage('/')}>return</Button>
-      <Button onClick={e => movePage('problem')}>problem page</Button>
+      <Button onClick={() => movePage('/')}>return</Button>
+      <Button onClick={() => movePage('problem')}>problem page</Button>
     </>
   )
 }

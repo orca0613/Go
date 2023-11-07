@@ -10,7 +10,7 @@ interface FlowerPointProps{
 }
 
 export function FlowerPoint({ cellWidth, coord, borderWidth = 1}: FlowerPointProps) {
-  const pointSize = cellWidth / 20
+  const pointSize = cellWidth / 15
   return (
     <Box
       sx={{

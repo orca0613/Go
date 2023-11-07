@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import { GoPosition } from '../util/GoPosition'
-import { Board, BoardInfo, Coordinate, Variations } from '../util/types'
+import { Board, BoardInfo, Coordinate, ProblemInfo, Variations } from '../util/types'
 import _ from 'lodash'
 import { getCoordinate, playMoveAndReturnNewBoard } from '../util/functions'
 import { Button } from '@mui/material'
@@ -9,11 +9,13 @@ import { MoveNumber } from '../util/MoveNumber'
 
 
 interface MakingProps {
-  problem: BoardInfo
+  problemInfo: ProblemInfo
+  problemId: string
 }
 
 
 export function MakingVariations(props: MakingProps) {
+  
   // const [data, setData] = useState()
   // useEffect(() => {
   //   fetch("some-endpoint")
@@ -23,34 +25,20 @@ export function MakingVariations(props: MakingProps) {
   //     })
   //     .catch(error => console.log(JSON.stringify(error)))
   // }, [])
-  
-  const initialState = props.problem.board
+  const problemId = props.problemId
+  const initialState = props.problemInfo.problem
   const N = initialState.length
   const cellWidth = Math.round(boardWidth / N)
-  const initialVariations: Variations = {
-    '0': []
-  }
-
   const [problem, setProblem] = useState(initialState)
   const [currentKey, setCurrentKey] = useState('0')
-  const [color, setColor] = useState(props.problem.color)
-  const [variations, setVariations] = useState(initialVariations)
-  const [history, setHistory] = useState([props.problem])
-
-
-
-  function addVariations(key: string) {
-    const newVariations = { ...variations }
-    if (!newVariations[currentKey].includes(key)) {
-      newVariations[currentKey].push(key)
-    }
-    const newKey = currentKey + '-' + key
-    if (!(newKey in newVariations)) {
-      newVariations[newKey] = []
-    }
-    setVariations(newVariations)
-    setCurrentKey(newKey)
+  const [color, setColor] = useState(props.problemInfo.color)
+  const [variations, setVariations] = useState(props.problemInfo.variations)
+  const boardInfo = {
+    board: problem,
+    color: color,
   }
+  const [history, setHistory] = useState([boardInfo])
+  const [result, setResult] = useState(true)
 
   function addHistory(board: Board, color: string) {
     const newHistory: BoardInfo = {
@@ -79,6 +67,36 @@ export function MakingVariations(props: MakingProps) {
 
   }
 
+  function addVariations() {
+    if (currentKey in variations) {
+      console.log('exist this variation')
+      return
+    }
+    const newVariations = _.cloneDeep(variations)
+    const l = currentKey.split('-')
+    if ((l.length % 2) && result) {
+      console.log('invalid result')
+      return
+    }
+    console.log(variations)
+    newVariations[currentKey] = []
+    let key = currentKey
+    for (let i = l.length - 1; i > 0; i--) {
+      const value = l[i]
+      key = key.slice(0, key.length - (value.length + 1))
+      if (key in newVariations) {
+        newVariations[key].push(value)
+      } else {
+        newVariations[key] = [value]
+      }
+      if (key in variations) {
+        break
+      }
+    }
+    setVariations(newVariations)
+  }
+
+
 
   function handleClick(e: React.MouseEvent) {
     const coord: Coordinate = getCoordinate(e, cellWidth)
@@ -90,10 +108,25 @@ export function MakingVariations(props: MakingProps) {
     }
 
     addHistory(problem, color)
-    addVariations(modified)
+    // addVariations(modified)
+    const newKey = currentKey + '-' + modified
+    setCurrentKey(newKey)
     setProblem(newProblem)
     color === 'b' ? setColor('w') : setColor('b')
+    console.log(newKey)
+  }
+
+  function updateVariations() {
     console.log(variations)
+    fetch(`http://localhost:3001/problems/update-variations`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({problemId, variations}),
+    })
+      .then(response => alert('success'))
+      .catch(error => console.error('Error: ', error))
   }
 
 
@@ -102,6 +135,9 @@ export function MakingVariations(props: MakingProps) {
       <GoPosition cellWidth={cellWidth} lines={N - 1} board={problem}></GoPosition>
       <MoveNumber cellWidth={cellWidth} moves={currentKey} board={problem} ></MoveNumber>
       <Button onClick={goToPreviousMove}>previous</Button>
+      <Button onClick={addVariations}>add variations</Button>
+      <Button onClick={updateVariations}>update variations</Button>
+
     </div>
   )
 }

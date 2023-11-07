@@ -1,34 +1,41 @@
 import React, { useState } from "react";
 import { GoPosition } from "../util/GoPosition";
-import { Coordinate, Board, Variations, BoardInfo } from "../util/types" 
+import { Coordinate, Board, Variations, BoardInfo, ProblemInfo } from "../util/types" 
 import _ from 'lodash'
 import { Box, Button } from "@mui/material";
 import { getCoordinate, makeRandomNumber, playMoveAndReturnNewBoard } from "../util/functions";
 import { boardWidth } from "../util/constants";
 import { MoveNumber } from "../util/MoveNumber";
+import { TestBoard } from "../components/TestBoard";
 
 interface ProblemProps {
-  problem: BoardInfo
-  variations: Variations
+  problemInfo: ProblemInfo
 }
 export function Problem(props: ProblemProps) {
 
-  const initialState = props.problem.board
-  const variations = props.variations
+  const initialState = props.problemInfo.problem
+  const variations = props.problemInfo.variations
+  const comment = props.problemInfo.comment
+  const creator = props.problemInfo.creator
+  const level = props.problemInfo.level
   const N = initialState.length
   const cellWidth = Math.round(boardWidth / N)
-
   const [problem, setProblem] = useState(initialState)
   const [currentKey, setCurrentKey] = useState('0')
-  const [color, setColor] = useState(props.problem.color)
+  const [color, setColor] = useState(props.problemInfo.color)
   const [selfPlay, setSelfPlay] = useState(false)
-  const [history, setHistory] = useState([props.problem])
+  const boardInfo: BoardInfo = {
+    board: problem,
+    color: color,
+  }
+
+  const [history, setHistory] = useState([boardInfo])
 
   function reset() {
     setProblem(initialState)
     setCurrentKey('0')
-    setColor(props.problem.color)
-    setHistory([props.problem])
+    setColor(props.problemInfo.color)
+    setHistory([boardInfo])
   }
 
   function addHistory(board: Board, color: string) {
@@ -119,6 +126,10 @@ export function Problem(props: ProblemProps) {
       <Button onClick={reset}>reset</Button>
       <Button onClick={changeMode}>{selfPlay? 'try' : 'practice'}</Button>
       {selfPlay? <Button onClick={goToPreviousMove}>previous</Button> : <></>}
+      <div>
+        <p>level: {level}</p>
+      </div>
+      <TestBoard board={problem} boardSize={600}></TestBoard>
     </>
 
 
