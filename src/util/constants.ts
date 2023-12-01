@@ -1,6 +1,8 @@
 import { Coordinate } from "./types"
 
-export const boardWidth: number = 700
+export const boardWidth: number = 600
+
+export const sampleBoardSize: number = 120
 
 export const flowerPointPosition: Coordinate[][] = [
     [],
@@ -23,3 +25,14 @@ export const flowerPointPosition: Coordinate[][] = [
     [[3, 3], [3, 14], [14, 3], [14, 14]],
     [[3, 3], [3, 9], [3, 15], [9, 3], [9, 9], [9, 15], [15, 3], [15, 9], [15, 15]],
 ]
+
+export const USER_NAME = "userName"
+export const USER_LEVEL = "userLevel"
+export const API_URL = "http://localhost:3001"
+export const HOME = "http://localhost:5173/home"
+export const PROBLEM_PATH = "problems"
+export const REGISTER_PATH = "register"
+export const VARIATION_PATH = "test-variations"
+export const SIGNUP_PATH = "signup"
+export const LOGIN_PATH = ""
+export const SEARCH_PATH = "search"

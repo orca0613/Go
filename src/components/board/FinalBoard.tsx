@@ -1,6 +1,6 @@
 import { Box } from "@mui/system";
 import EmptyBoard from "./Board";
-import { Board, Coordinate } from "../util/types";
+import { Board, Coordinate } from "../../util/types";
 import Stones from "./Stones";
 import Background from "./Background";
 
@@ -9,18 +9,19 @@ interface TestProblemProps {
   boardWidth: number
   board: Board
   moves?: string
+  playable?: string[]
   onClick?: (c: Coordinate) => void
 }
 
-function TestProblem({lines, boardWidth, board, moves, onClick}: TestProblemProps) {
-  const cellSize = Math.round(boardWidth / (lines - 1)) // size of 1 space (width = height)
-  const stoneSize = Math.round(cellSize / 2)
-  const offset = Math.round(stoneSize * 1.2) + 2
+function FinalBoard({lines, boardWidth, board, moves, playable, onClick}: TestProblemProps) {
+  const cellSize = boardWidth < 200? boardWidth / (lines) : Math.round(boardWidth / (lines)) // size of 1 space (width = height)
+  const stoneSize = boardWidth < 200? cellSize / 2.1 : Math.round(cellSize / 2.1)
+  const offset = boardWidth < 200? stoneSize * 1.2 + 2 : Math.round(stoneSize * 1.2 + 2)
   const lineWidth = boardWidth / 400
-  boardWidth += (offset * 4) // total board size (width = height)
+  boardWidth += offset // total board size (width = height)
 
     return (
-      <Box sx={{m: "5rem", position: "relative"}}>
+      <Box sx={{position: "relative", width: boardWidth, margin:1}}>
         <Background
           boardWidth={boardWidth}
           lines={lines}
@@ -45,10 +46,11 @@ function TestProblem({lines, boardWidth, board, moves, onClick}: TestProblemProp
           board={board}
           style={{position: "absolute", left: 0, top: 0, zIndex: 2}}
           moves={moves}
+          variations={playable}
           onClick={onClick}
         />
       </Box>
     );
   }
   
-  export default TestProblem;
+  export default FinalBoard;

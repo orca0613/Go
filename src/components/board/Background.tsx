@@ -29,7 +29,7 @@ const Background = ({ boardWidth, lines, cellSize, offset, style}: BoardProps) =
         ctx.drawImage(img, 0, 0, boardWidth, boardWidth)
       }
     } 
-  }, [])
+  }, [lines])
 
   
 

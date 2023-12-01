@@ -1,5 +1,3 @@
-
-
 export type Board = string[][]
 
 export type BoardInfo = {
@@ -14,7 +12,18 @@ export type Variations = {
 };
 
 export type ProblemInfo = {
-  problem: Board,
+  _id: string,
+  initialState: Board,
+  variations: Variations,
+  color: string,
+  level: number,
+  creator: string,
+  comment: string,
+}
+
+export type ProblemInfoFromServer = {
+  _id: string,
+  initialState: string,
   variations: Variations,
   color: string,
   level: number,

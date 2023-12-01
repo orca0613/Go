@@ -1,7 +1,7 @@
 
 import React, { CSSProperties, useEffect, useRef } from 'react';
-import { Board, Coordinate } from '../util/types';
-import { divmod } from '../util/functions';
+import { Board, Coordinate } from '../../util/types';
+import { divmod } from '../../util/functions';
 
 interface StonesProps {
   lines: number
@@ -12,10 +12,12 @@ interface StonesProps {
   board: Board
   style?: CSSProperties
   moves?: string // A value that links the positions of the moves played ex)"0-28-47-38"
+  variations?: string[]
   onClick?: (c: Coordinate) => void
+  
 }
 
-const Stones = ({ lines, cellSize, stoneSize, offset, lineWidth, board, style, moves, onClick}: StonesProps) => {
+const Stones = ({ lines, cellSize, stoneSize, offset, lineWidth, board, style, moves, variations, onClick}: StonesProps) => {
   const numberSize = stoneSize
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const scaledSize = (cellSize * (lines - 1) + offset * 2);
@@ -44,8 +46,8 @@ const Stones = ({ lines, cellSize, stoneSize, offset, lineWidth, board, style, m
   }
 
   function drawMoveNumber(ctx: CanvasRenderingContext2D, coord: Coordinate, color: string, moveNumber: string) {
-    const x = cellSize * (coord[1]) + offset;
-    const y = cellSize * (coord[0]) + offset + numberSize / 3;
+    const x = cellSize * (coord[1]) + offset + 1;
+    const y = cellSize * (coord[0]) + offset + 1 + numberSize / 3;
 
     ctx.font = `normal normal bolder ${stoneSize}px sans-serif`;
     ctx.fillStyle = color === 'b'? 'white' : 'black';
@@ -80,7 +82,6 @@ const Stones = ({ lines, cellSize, stoneSize, offset, lineWidth, board, style, m
             }
         }
       }
-      ctx.stroke()
       // Draw move numbers
       if (moves) {
         const positions = moves.split('-').splice(1).reverse()
@@ -97,8 +98,18 @@ const Stones = ({ lines, cellSize, stoneSize, offset, lineWidth, board, style, m
           drawMoveNumber(ctx, coord, board[y][x], String(len))
         })
       }
+
+      //Draw variations points
+
+      if (variations) {
+        variations.map(position => {
+          const coord = divmod(Number(position), lines)
+          drawCircle(ctx, stoneSize / 3, coord, "green")
+        })
+      }
+      ctx.stroke()
     }
-  }, [board, moves]);
+  }, [board, moves, variations]);
   
   return (
     <canvas id="stones" ref={canvasRef} style={style} onClick={handleClick}></canvas>
