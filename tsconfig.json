@@ -1,0 +1,27 @@
+{
+  "compilerOptions": {
+    "target": "es5",
+    "lib": [
+      "dom",
+      "dom.iterable",
+      "esnext"
+    ],
+    "allowJs": true,
+    "skipLibCheck": true,
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "strict": true,
+    "forceConsistentCasingInFileNames": true,
+    "noFallthroughCasesInSwitch": true,
+    "module": "esnext",
+    "moduleResolution": "node",
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "noEmit": true,
+    "jsx": "react-jsx",
+  },
+  "include": [
+    "src"
+, "waste/GoStone.tsx", "waste/GoBoard.tsx", "waste/GoPosition.tsx", "waste/FlowerPoint.tsx", "waste/MoveNumber.tsx", "waste/AnswerPoint.tsx", "waste/Solving.tsx", "waste/ProblemPage_0.tsx", "waste/problems", "waste/TestMakingVariations.tsx"  ],
+  "types": ["jest", "jest-dom"],
+}
