@@ -1,11 +1,11 @@
 import { useState } from 'react'
 import { Board, BoardInfo, Coordinate, ProblemInfo } from '../../util/types'
 import _ from 'lodash'
-import { addAnswers, addVariations, playMoveAndReturnNewBoard, removeAnswers, removeVariations } from '../../util/functions'
-import { Box, Button, Divider, FormControl, InputLabel, MenuItem, Select, SelectChangeEvent, useMediaQuery } from '@mui/material'
+import { addCurrentVariation, playMoveAndReturnNewBoard, removeCurrentVariation } from '../../util/functions'
+import { Box, Button, Divider, FormControl, InputLabel, MenuItem, Select, SelectChangeEvent, Typography, useMediaQuery } from '@mui/material'
 import { LANGUAGE_IDX, boardWidth } from '../../util/constants'
 import FinalBoard from '../board/FinalBoard'
-import { updateAnswers, updateVariations } from '../../util/network'
+import { updateVariations } from '../../util/network'
 import { menuWords } from '../../util/menuWords'
 
 
@@ -19,13 +19,17 @@ export function MakingVariations(props: MakingProps) {
   const problemId = props.problemInfo._id
   const initialState = props.problemInfo.initialState
   const lines = initialState.length
+  const creator = props.problemInfo.creator
   const [problem, setProblem] = useState(initialState)
   const [currentKey, setCurrentKey] = useState('0')
   const [color, setColor] = useState(props.problemInfo.color)
   const [variations, setVariations] = useState(props.problemInfo.variations)
   const [answers, setAnswers] = useState(props.problemInfo.answers)
+  const [questions, setQuestions] = useState(props.problemInfo.questions)
   const [playable, setPlayable] = useState(variations[currentKey])
   const [answerMove, setAnswerMove] = useState(answers[currentKey])
+  const [questionMove, setQuestionMove] = useState(questions[currentKey])
+  const [update, setUpdate] = useState(false)
   const boardInfo = {
     board: problem,
     color: color,
@@ -61,6 +65,7 @@ export function MakingVariations(props: MakingProps) {
       setCurrentKey(newKey)
       setPlayable(variations[newKey])
       setAnswerMove(answers[newKey])
+      setQuestionMove(questions[newKey])
     }
 
   }
@@ -72,7 +77,7 @@ export function MakingVariations(props: MakingProps) {
         alert(menuWords.invalidResultWarning[languageIdx])
         return
       } else {
-        const newVariations = addVariations(currentKey, variations, l)
+        const newVariations = addCurrentVariation(currentKey, variations, l)
         setVariations(newVariations)
         alert(menuWords.saved[languageIdx])
       }
@@ -81,25 +86,31 @@ export function MakingVariations(props: MakingProps) {
         alert(menuWords.invalidResultWarning[languageIdx])
         return
       } else {
-        const newAnswers = addAnswers(currentKey, answers, l)
+        const newAnswers = addCurrentVariation(currentKey, answers, l)
         setAnswers(newAnswers)
         alert(menuWords.saved[languageIdx])
       }
     }
+    setUpdate(false)
   }
 
-  function updateVariationsAndAnswers() {
-    updateVariations(problemId, variations)
-    updateAnswers(problemId, answers)
+  function updateAll() {
+    updateVariations(problemId, variations, "variations")
+    updateVariations(problemId, answers, "answers")
+    updateVariations(problemId, questions, "questions", creator)
+    setUpdate(true)
   }
 
   function removeVariationsAndSetVariations() {
     if (variations.hasOwnProperty(currentKey) && variations[currentKey].length === 0) {
-      const newVariations = removeVariations(currentKey, variations)
+      const newVariations = removeCurrentVariation(currentKey, variations)
       setVariations(newVariations)
     } else if (answers.hasOwnProperty(currentKey) && answers[currentKey].length === 0) {
-      const newAnswers = removeAnswers(currentKey, answers)
+      const newAnswers = removeCurrentVariation(currentKey, answers)
       setAnswers(newAnswers)
+    } else if (questions.hasOwnProperty(currentKey) && questions[currentKey].length === 0) {
+      const newQuestions = removeCurrentVariation(currentKey, questions)
+      setQuestions(newQuestions)
     } else {
       alert(menuWords.invalidConditionWarning[languageIdx])
       return
@@ -121,6 +132,7 @@ export function MakingVariations(props: MakingProps) {
     setCurrentKey(newKey)
     setPlayable(variations[newKey])
     setAnswerMove(answers[newKey])
+    setQuestionMove(questions[newKey])
     setProblem(newProblem)
     color === 'b' ? setColor('w') : setColor('b')
   }
@@ -131,6 +143,7 @@ export function MakingVariations(props: MakingProps) {
     setCurrentKey('0')
     setPlayable(variations['0'])
     setAnswerMove(answers['0'])
+    setQuestionMove(questions['0'])
     setHistory([])
   }
 
@@ -146,6 +159,7 @@ export function MakingVariations(props: MakingProps) {
     setCurrentKey(newKey)
     setPlayable(variations[newKey])
     setAnswerMove(answers[newKey])
+    setQuestionMove(questions[newKey])
     color === 'b' ? setColor('w') : setColor('b')
   }
 
@@ -169,6 +183,7 @@ export function MakingVariations(props: MakingProps) {
           moves={currentKey}
           variations={playable}
           answers={answerMove}
+          questions={questionMove}
           onClick={handleClick}
           />
         </Box>
@@ -186,7 +201,8 @@ export function MakingVariations(props: MakingProps) {
           {divider}
           <Button onClick={addVariationsAndSetVariations}>{menuWords.addVariation[languageIdx]}</Button>
           {divider}
-          <Button onClick={updateVariationsAndAnswers}>{menuWords.updateVariation[languageIdx]}</Button>
+          <Button onClick={updateAll}>{menuWords.updateVariation[languageIdx]}</Button>
+          {update? <Typography sx={{ fontSize: 10, color: "inherit" }}>수정 완료</Typography> : <Typography sx={{ fontSize: 10, color: "red" }}>수정 미완료</Typography>}
           {divider}
           <Button onClick={removeVariationsAndSetVariations}>{menuWords.removeVariation[languageIdx]}</Button>
           {divider}

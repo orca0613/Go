@@ -3,3 +3,4 @@ build
 memo.txt
 .DS_STORE
 build
+src/components/Test.tsx

@@ -101,7 +101,7 @@ export function MakingProblem() {
         error={comment.length > 50? true : false}
         helperText={comment.length > 50? menuWords.commentLengthWarning[languageIdx] : ""}
         name='level'
-        label={menuWords.comment[languageIdx]} 
+        label={menuWords.explanation[languageIdx]} 
         variant='standard' 
         value={comment}
         onChange={commentChange}

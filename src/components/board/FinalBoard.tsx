@@ -4,17 +4,18 @@ import { Board, Coordinate } from "../../util/types";
 import Stones from "./Stones";
 import Background from "./Background";
 
-interface TestProblemProps {
+interface FinalBoardProps {
   lines: number
   boardWidth: number
   board: Board
   moves?: string
   variations?: string[]
   answers?: string[]
+  questions?: string[]
   onClick?: (c: Coordinate) => void
 }
 
-function FinalBoard({lines, boardWidth, board, moves, variations, answers, onClick}: TestProblemProps) {
+function FinalBoard({lines, boardWidth, board, moves, variations, answers, questions, onClick}: FinalBoardProps) {
   const cellSize = boardWidth < 200? boardWidth / (lines) : Math.round(boardWidth / (lines)) // size of 1 space (width = height)
   const stoneSize = boardWidth < 200? cellSize / 2.1 : Math.round(cellSize / 2.1)
   const offset = boardWidth < 200? stoneSize * 1.2 + 2 : Math.round(stoneSize * 1.2 + 2)
@@ -49,6 +50,7 @@ function FinalBoard({lines, boardWidth, board, moves, variations, answers, onCli
           moves={moves}
           variations={variations}
           answers={answers}
+          questions={questions}
           onClick={onClick}
         />
       </Box>

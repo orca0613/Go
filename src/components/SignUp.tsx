@@ -1,6 +1,6 @@
 import { Button, TextField, FormControl, InputLabel, Select, MenuItem, Box, SelectChangeEvent, Divider } from '@mui/material'
 import React, { useState } from 'react'
-import { LANGUAGE_IDX, defaultPoint } from '../util/constants'
+import { LANGUAGE_IDX } from '../util/constants'
 import { checkMail, checkUserName, createUser } from '../util/network'
 import { useNavigate } from 'react-router-dom'
 import { menuWords } from '../util/menuWords'
@@ -39,7 +39,6 @@ export function Signup() {
 
   const levelChange = (e: SelectChangeEvent) => {
     setLevel(Number(e.target.value))
-    console.log(e.target.value)
   }
 
   async function checkMailAndSetEmailError() {
@@ -89,8 +88,7 @@ export function Signup() {
     const email = form.email
     const password = form.password
     const name = form.name
-    const point: number = defaultPoint
-    createUser(email, password, name, level, point)
+    createUser(email, password, name, level)
   }
 
   async function checkInformationAndregister() {

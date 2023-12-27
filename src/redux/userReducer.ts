@@ -1,4 +1,4 @@
-import { SET_USERCREATED, SET_USERLEVEL, SET_USERNAME, SET_USERPOINT, SET_USERSOLVED, SET_USERTRIED, UserActionType } from "./userActionTypes"
+import { SET_USERASKED, SET_USERCREATED, SET_USERLEVEL, SET_USERNAME, SET_USERPOINT, SET_USERSOLVED, SET_USERTRIED, UserActionType } from "./userActionTypes"
 
 interface UserState {
     userName: string | null
@@ -7,6 +7,7 @@ interface UserState {
     userSolved: string[]
     userTried: string[]
     userCreated: string[]
+    userAsked: string[]
 }
 
 const initialState: UserState = {
@@ -16,6 +17,7 @@ const initialState: UserState = {
     userSolved: [],
     userTried: [],
     userCreated: [],
+    userAsked: [],
 }
 
 export function userReducer(state = initialState, action: UserActionType): UserState {
@@ -49,6 +51,11 @@ export function userReducer(state = initialState, action: UserActionType): UserS
             return {
                 ...state,
                 userCreated: action.payload
+            }
+        case SET_USERASKED:
+            return {
+                ...state,
+                userAsked: action.payload
             }
 
         default:

@@ -1,9 +1,7 @@
 import { Box, Button, TextField } from '@mui/material'
 import React, { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { API_URL, LANGUAGE_IDX, USERLEVEL, USERNAME, USERPOINT } from '../util/constants'
-import userStore from '../store/userStore'
-import { setUserCreated, setUserLevel, setUserName, setUserPoint, setUserSolved, setUserTried } from '../redux/actions'
+import { API_URL, ASKED, CREATED, LANGUAGE_IDX, SOLVED, TOKEN, TRIED, USERLEVEL, USERNAME, USERPOINT, WITHQUESTIONS } from '../util/constants'
 import { getUserDetail } from '../util/network'
 import { menuWords } from '../util/menuWords'
 
@@ -29,9 +27,13 @@ export function Login() {
     const detail = getUserDetail(name)
     if (detail) {
       detail.then(r => {
-        userStore.dispatch(setUserSolved(r.solved))
-        userStore.dispatch(setUserTried(r.tried))
-        userStore.dispatch(setUserCreated(r.created))
+        localStorage.setItem(USERPOINT, r.point)
+        localStorage.setItem(CREATED, r.created.join("&"))
+        localStorage.setItem(TRIED, r.tried.join("&"))
+        localStorage.setItem(SOLVED, r.solved.join("&"))
+        localStorage.setItem(ASKED, r.asked.join("&"))
+        localStorage.setItem(WITHQUESTIONS, r.withQuestions.join("&"))
+
       })
     }
     if (name.length > 0) {
@@ -55,8 +57,8 @@ export function Login() {
           alert(`${menuWords.hi[languageIdx]} ${user.name}`)
           localStorage.setItem(USERNAME, user.name)
           localStorage.setItem(USERLEVEL, user.level)
-          localStorage.setItem(USERPOINT, user.point)
           setName(user.name)
+          localStorage.setItem(TOKEN, user.token)
         } else {
           alert(user.response)
         }

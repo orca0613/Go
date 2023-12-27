@@ -1,24 +1,25 @@
 import { useEffect, useState } from 'react'
-import { Board, Coordinate, Variations } from '../../util/types'
+import { Board, Coordinate, ProblemInfo, Variations } from '../../util/types'
 import _ from 'lodash'
 import { addToKey, checkSolved, makeRandomNumber, playMoveAndReturnNewBoard } from '../../util/functions'
-import { LANGUAGE_IDX, boardWidth, bonus } from '../../util/constants'
+import { LANGUAGE_IDX, SOLVED, boardWidth, bonus } from '../../util/constants'
 import FinalBoard from '../board/FinalBoard'
 import { Box, Button, Divider, useMediaQuery } from '@mui/material'
-import { addCorrect, addPoint, addSolved, addWrong } from '../../util/network'
+import { addCount, addElement, addPoint } from '../../util/network'
 import { menuWords } from '../../util/menuWords'
 
 
 interface ProblemProps {
-  initialState: Board
-  variations: Variations
-  answers: Variations
-  turn: string
+  problemInfo: ProblemInfo
 }
 
 
-export function Problem({ initialState, variations, answers, turn }: ProblemProps) {
+export function Problem({ problemInfo }: ProblemProps) {
   
+  const turn = problemInfo.color
+  const answers = problemInfo.answers
+  const variations = problemInfo.variations
+  const initialState = problemInfo.initialState
   const [color, setColor] = useState(turn)
   const lines = initialState.length
   const [problem, setProblem] = useState(initialState)
@@ -58,7 +59,7 @@ export function Problem({ initialState, variations, answers, turn }: ProblemProp
     } else {
       alert(menuWords.wrong[languageIdx])
       if (!checkSolved()) {
-        addWrong()
+        addCount("wrong")
       }
     }
   }
@@ -77,9 +78,9 @@ export function Problem({ initialState, variations, answers, turn }: ProblemProp
       if (answers[key].length === 0) {
         alert(menuWords.correct[languageIdx])
         if (!checkSolved()) {
-          addCorrect()
+          addCount("correct")
           addPoint(bonus)
-          addSolved()
+          addElement(SOLVED)
         }
       } else {
         const random = makeRandomNumber(answers[key].length)
@@ -115,7 +116,7 @@ export function Problem({ initialState, variations, answers, turn }: ProblemProp
     } else {
       alert(menuWords.wrong[languageIdx])
       if (!checkSolved()) {
-        addWrong()
+        addCount("wrong")
       }
     }
   }

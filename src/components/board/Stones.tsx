@@ -15,16 +15,18 @@ interface StonesProps {
   moves?: string // A value that links the positions of the moves played ex)"0-28-47-38"
   variations?: string[]
   answers?: string[]
+  questions?: string[]
   onClick?: (c: Coordinate) => void
   
 }
 
-const Stones = ({ lines, cellSize, stoneSize, offset, lineWidth, board, style, moves, variations, answers, onClick}: StonesProps) => {
+const Stones = ({ lines, cellSize, stoneSize, offset, lineWidth, board, style, moves, variations, answers, questions, onClick}: StonesProps) => {
   const numberSize = stoneSize
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const scaledSize = (cellSize * (lines - 1) + offset * 2);
   const answerColor = "green"
   const wrongColor = "red"
+  const questionColor = "blue"
 
   function handleClick(e: React.MouseEvent) {
     const canvas = canvasRef.current
@@ -120,6 +122,13 @@ const Stones = ({ lines, cellSize, stoneSize, offset, lineWidth, board, style, m
         answers.map(position => {
           const coord = divmod(Number(position), lines)
           drawCircle(ctx, stoneSize / 3, coord, answerColor)
+        })
+      }
+
+      if (questions) {
+        questions.map(position => {
+          const coord = divmod(Number(position), lines)
+          drawCircle(ctx, stoneSize / 3, coord, questionColor)
         })
       }
       ctx.stroke()

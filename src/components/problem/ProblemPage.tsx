@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import _ from 'lodash'
-import {  Box, Button, Divider, useMediaQuery } from "@mui/material";
+import {  Box, Button, Typography, useMediaQuery } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import { MakingVariations } from "./MakingVariations";
 import { ProblemInformation } from "./ProblemInformation";
@@ -8,17 +8,17 @@ import problemStore from "../../store/problemStore";
 import { setProblemIndex } from "../../redux/actions";
 import { Problem } from "./Problem";
 import { ModifyProblem } from "./ModifyProblem";
-import { addDislike, addLike, addSolved, addTried, addView, deductDislike, deductLike, deductPoint } from "../../util/network";
-import { LANGUAGE_IDX, USERNAME, bonus, initialVariations } from "../../util/constants";
+import { addCount, addElement, deductPoint, getProblemInformations, getReply, removeProblem } from "../../util/network";
+import { LANGUAGE_IDX, SOLVED, TRIED, USERNAME, bonus, initialVariations } from "../../util/constants";
 import { ShowAnswer } from "./ShowAnswer";
 import { menuWords } from "../../util/menuWords";
 import { checkTried } from "../../util/functions";
 import { SelfMode } from "./SelfMode";
+import { ReplyBox } from "../ReplyBox";
 
 export function ProblemPage() {
   const navigate = useNavigate()
   const problems = problemStore.getState().problemList
-  console.log(problems.length)
   if (problems.length === 0) {
     return <Button onClick={() => navigate("/home")}>home</Button>
   }
@@ -33,47 +33,61 @@ export function ProblemPage() {
   const [variationMode, setVariationMode] = useState(true)
   const [showAnswer, setShowAnswer] = useState(false)
   const [like, setLike] = useState(false)
+  const [likeCount, setLikeCount] = useState(0)
+  const [dislikeCount, setDislikeCount] = useState(0)
   const [dislike, setDislike] = useState(false)
+  const [answerRegistered, setAnswerRegistered] = useState(true)
   const isMobile = useMediaQuery("(max-width: 600px)")
   const languageIdx = Number(localStorage.getItem(LANGUAGE_IDX))
-  const divider = <Divider orientation="horizontal" sx={{mt: 1, mb: 2 }} />
 
-  const info = <ProblemInformation
-    creator={creator}
-    level={problemInfo.level}
-    color={problemInfo.color}
-    comment={problemInfo.comment}
-  />
+  const [info, setInfo] = useState(<ProblemInformation
+    problemInfo={problemInfo}
+    correct={0}
+    wrong={0}
+    view={0}
+  />)
 
   const [problem, setProblem] = useState(<Problem
-    initialState={problemInfo.initialState}
-    variations={problemInfo.variations}
-    answers={problemInfo.answers}
-    turn={problemInfo.color}
+    problemInfo={problemInfo}
   />)
 
   const [selfMode, setSelfMode] = useState(<SelfMode
-    boardInfo={{
-      board: problemInfo.initialState,
-      color: problemInfo.color,
-    }}
-    variations={problemInfo.variations}
-    answers={problemInfo.answers}
+    problemInfo={problemInfo}
   />)
 
   const [answer, setAnswer] = useState(<ShowAnswer
     problemInfo={problemInfo}
   />)
+
+  const [replyBox, setReplyBox] = useState(<ReplyBox 
+    problemId={problemInfo._id}
+  />)
   
   useEffect(() => {
     const newProblemInfo = problems[index]
-    if (!checkTried()) {
-      addTried()
-      if (!_.isEqual(newProblemInfo.answers, initialVariations)) {
+    if (!_.isEqual(newProblemInfo.answers, initialVariations)) {
+      setAnswerRegistered(true)
+      if (!checkTried()) {
+        addElement(TRIED)
+        const tried = localStorage.getItem(TRIED)
+        localStorage.setItem(TRIED, tried + "&" + newProblemInfo._id)
         deductPoint(bonus)
       }
+    } else {
+      setAnswerRegistered(false)
     }
-    addView()
+    const newInfo = getProblemInformations(newProblemInfo._id)
+    .then(info => {
+      setInfo(<ProblemInformation
+        problemInfo={newProblemInfo}
+        correct={info.correct ?? 0}
+        wrong={info.wrong ?? 0}
+        view={info.view ?? 0}
+      />)
+      setLikeCount(info.like)
+      setDislikeCount(info.dislike)
+    })
+    addCount("view")
     setProblemInfo(newProblemInfo)
     setId(newProblemInfo._id)
     setCreator(newProblemInfo.creator)
@@ -84,23 +98,17 @@ export function ProblemPage() {
     setLike(false)
     setDislike(false)
     setProblem(<Problem
-      initialState={newProblemInfo.initialState}
-      variations={newProblemInfo.variations}
-      answers={newProblemInfo.answers}
-      turn={newProblemInfo.color}
+      problemInfo={newProblemInfo}
       />)
     setSelfMode(<SelfMode
-      boardInfo={{
-        board: newProblemInfo.initialState,
-        color: newProblemInfo.color,
-      }}
-      variations={newProblemInfo.variations}
-      answers={newProblemInfo.answers}
+      problemInfo={newProblemInfo}
       />)
     setAnswer(<ShowAnswer
       problemInfo={newProblemInfo}
     />)
-
+    setReplyBox(<ReplyBox 
+      problemId={newProblemInfo._id}
+    />)
   }, [index])
 
   function changeSelfPlayMode() {
@@ -109,21 +117,25 @@ export function ProblemPage() {
 
   function handleLike() {
     if (like) {
-      deductLike()
+      addCount("deductLike")
       setLike(false)
+      setLikeCount(likeCount - 1)
     } else {
-      addLike()
+      addCount("like")
       setLike(true)
+      setLikeCount(likeCount + 1)
     }
   }
 
   function handleDislike() {
     if (dislike) {
-      deductDislike()
+      addCount("deductDislike")
       setDislike(false)
+      setDislikeCount(dislikeCount - 1)
     } else {
-      addDislike()
+      addCount("dislike")
       setDislike(true)
+      setDislikeCount(dislikeCount + 1)
     }
   }
 
@@ -155,51 +167,68 @@ export function ProblemPage() {
       return
     } else {
       setShowAnswer(true)
-      addSolved()
+      addElement(SOLVED)
     }
   }
 
+  function removeProblemAndMove() {
+    removeProblem(problemInfo._id, creator)
+    navigate("/home")
+  }
 
   return (
-    <Box display="flex">
-      <Box
-        sx={{
-          flex: isMobile ? undefined : `0 0 200px`,
-          mr: isMobile ? '0' : '1ch',
-          width: 300
-        }}
-      >
-        {info}
-        <Box textAlign="center">
-          {modifyMode? 
-          <Box>
-            <Button sx={{margin: 3}} onClick={modifyVariations}>{menuWords.returnProblem[languageIdx]}</Button>
-            <Button onClick={changeVariationMode}>
-              {variationMode? menuWords.modifyProblem[languageIdx] : menuWords.modifyVariations[languageIdx]}
-            </Button>
-          </Box> : 
-          <Box display="grid">
-            <Button sx={{margin: 2}} onClick={changeSelfPlayMode}>{selfPlay? menuWords.try[languageIdx] : menuWords.practice[languageIdx]}</Button>
-            <Button sx={{margin: 2}} onClick={() => changeProblem(index - 1)}>{menuWords.previousProblem[languageIdx]}</Button>
-            <Button sx={{margin: 2}} onClick={() => changeProblem(index + 1)}>{menuWords.nextProblem[languageIdx]}</Button>
-            <Button sx={{margin: 2}} onClick={setShowAnswerAndsetSolved}>{showAnswer? menuWords.returnProblem[languageIdx] : menuWords.showAnswer[languageIdx]}</Button>
-            {creator === username? <Button sx={{margin: 2}} onClick={modifyVariations}>{modifyMode? menuWords.returnProblem[languageIdx] : menuWords.modify[languageIdx]}</Button> : 
-              <Box sx={{alignItems: "center", margin: 2}}>
-                <Button sx={{color: like? "green" : "black"}} onClick={handleLike}>{menuWords.like[languageIdx]}</Button>
-                <Button sx={{color: dislike? "red" : "black"}} onClick={handleDislike}>{menuWords.dislike[languageIdx]}</Button>
-              </Box>}
-          </Box>
+    <Box>
+      <Box display="flex" textAlign="center">
+        <Box
+          sx={{
+            flex: isMobile ? undefined : `0 0 200px`,
+            mr: isMobile ? '0' : '1ch',
+            width: 300
+          }}
+        >
+          {info}
+          {answerRegistered?
+            <></> :
+            <Typography sx={{color: "red", fontSize:10}}>{menuWords.noAnswerWarning[languageIdx]}</Typography>
           }
+          <Box textAlign="center">
+            {modifyMode? 
+            <Box>
+              <Button sx={{margin: 3}} onClick={modifyVariations}>{menuWords.returnProblem[languageIdx]}</Button>
+              <Button onClick={changeVariationMode}>
+                {variationMode? menuWords.modifyProblem[languageIdx] : menuWords.modifyVariations[languageIdx]}
+              </Button>
+            </Box> : 
+            <Box display="grid">
+              <Button sx={{margin: 2}} onClick={changeSelfPlayMode}>{selfPlay? menuWords.try[languageIdx] : menuWords.practice[languageIdx]}</Button>
+              <Button sx={{margin: 2}} onClick={() => changeProblem(index - 1)}>{menuWords.previousProblem[languageIdx]}</Button>
+              <Button sx={{margin: 2}} onClick={() => changeProblem(index + 1)}>{menuWords.nextProblem[languageIdx]}</Button>
+              <Button sx={{margin: 2}} onClick={setShowAnswerAndsetSolved}>{showAnswer? menuWords.returnProblem[languageIdx] : menuWords.showAnswer[languageIdx]}</Button>
+              {creator === username? 
+                <Box display="grid">
+                  <Button sx={{margin: 2}} onClick={modifyVariations}>{modifyMode? menuWords.returnProblem[languageIdx] : menuWords.modify[languageIdx]}</Button>
+                  <Button sx={{color: "red"}} onClick={removeProblemAndMove}>{menuWords.deleteProblem[languageIdx]}</Button>
+                </Box> : 
+                <Box sx={{alignItems: "center", margin: 2}}>
+                  <Button sx={{color: like? "green" : "black"}} onClick={handleLike}>{menuWords.like[languageIdx]} {likeCount}</Button>
+                  <Button sx={{color: dislike? "red" : "black"}} onClick={handleDislike}>{menuWords.dislike[languageIdx]} {dislikeCount}</Button>
+                </Box>}
+            </Box>
+            }
+          </Box>
         </Box>
+        {modifyMode? 
+        <>
+          {variationMode? <MakingVariations problemInfo={problemInfo}></MakingVariations> :
+          <ModifyProblem problemInfo={problemInfo}></ModifyProblem>}
+        </> :
+        <>
+          {showAnswer? answer : selfPlay? selfMode : problem}
+        </>}
       </Box>
-      {modifyMode? 
-      <>
-        {variationMode? <MakingVariations problemInfo={problemInfo}></MakingVariations> :
-        <ModifyProblem problemInfo={problemInfo}></ModifyProblem>}
-      </> :
-      <>
-        {showAnswer? answer : selfPlay? selfMode : problem}
-      </>}
+      <Box sx={{mt:10}}>
+        {modifyMode? <></> : replyBox}
+      </Box>
     </Box>
   )
 

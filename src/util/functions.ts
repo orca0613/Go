@@ -1,8 +1,6 @@
 import { getDeadGroup, handleMove } from "../gologic/logic"
-import { setUserLevel, setUserName, setUserPoint } from "../redux/actions"
 import problemStore from "../store/problemStore"
-import userStore from "../store/userStore"
-import { LANGUAGE_IDX, USERLEVEL, USERNAME, USERPOINT } from "./constants"
+import { LANGUAGE_IDX, SOLVED, TRIED, USERLEVEL, USERNAME, USERPOINT } from "./constants"
 import { menuWords } from "./menuWords"
 import { Board, Coordinate, Variations } from "./types"
 import _ from 'lodash'
@@ -72,7 +70,7 @@ export function divmod(num1: number, num2: number): Coordinate {
   return [share, remainder]
 }
 
-export function addVariations(currentKey: string, variations: Variations, l: string[]) {
+export function addCurrentVariation(currentKey: string, variations: Variations, l: string[]) {
   if (currentKey in variations) {
     console.log(menuWords.duplicateVariationWarning[languageIdx])
     return variations
@@ -95,31 +93,7 @@ export function addVariations(currentKey: string, variations: Variations, l: str
   return newVariations
 }
 
-export function addAnswers(currentKey: string, answers: Variations, l: string[]) {
-  if (currentKey in answers) {
-    console.log(menuWords.duplicateVariationWarning[languageIdx])
-    return answers
-  }
-  const newAnswers = _.cloneDeep(answers)
-  newAnswers[currentKey] = []
-  let key = currentKey
-  for (let i = l.length - 1; i > 0; i--) {
-    const value = l[i]
-    key = key.slice(0, key.length - (value.length + 1))
-    if (key in newAnswers) {
-      newAnswers[key].push(value)
-    } else {
-      newAnswers[key] = [value]
-    }
-    if (key in answers) {
-      break
-    }
-  }
-  return newAnswers
-}
-
-
-export function removeVariations(currentKey: string, variations: Variations) {
+export function removeCurrentVariation(currentKey: string, variations: Variations) {
   const newVariations = _.cloneDeep(variations)
   let key = currentKey
   const l = currentKey.split("-")
@@ -133,24 +107,8 @@ export function removeVariations(currentKey: string, variations: Variations) {
       break
     }
   }
+  alert("removed")
   return newVariations
-}
-
-export function removeAnswers(currentKey: string, answers: Variations) {
-  const newAnswers = _.cloneDeep(answers)
-  let key = currentKey
-  const l = currentKey.split("-")
-  while (true) {
-    if (newAnswers[key].length === 0 && key !== '0') {
-      delete newAnswers[key]
-      const lastMove = l.pop()
-      key = lastMove? key.slice(0, key.length - (lastMove.length + 1)) : key
-      newAnswers[key] = newAnswers[key].filter(element => element !== lastMove)
-    } else {
-      break
-    }
-  }
-  return newAnswers
 }
 
 export function isLegalBoard(board: Board) {
@@ -189,22 +147,21 @@ export function addToKey(coord: Coordinate, lines: number, key: string) {
 }
 
 export function logout() {
-  localStorage.removeItem(USERNAME)
-  localStorage.removeItem(USERLEVEL)
-  localStorage.removeItem(USERPOINT)
+  const languageIdx = localStorage.getItem(LANGUAGE_IDX)?? "0"
+  localStorage.clear()
+  localStorage.setItem(LANGUAGE_IDX, languageIdx)
 }
 
 export function checkSolved() {
   const idx = problemStore.getState().curIndex
   const problemId = problemStore.getState().problemList[idx]._id
-  const solved = userStore.getState().userSolved
+  const solved = localStorage.getItem(SOLVED)?.split("&")?? []
   return solved.includes(problemId)
 }
 
 export function checkTried() {
   const idx = problemStore.getState().curIndex
   const problemId = problemStore.getState().problemList[idx]._id
-  const tried = userStore.getState().userTried
-  console.log(tried)
+  const tried = localStorage.getItem(TRIED)?.split("&")?? []
   return tried.includes(problemId)
 }

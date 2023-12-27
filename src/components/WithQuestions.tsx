@@ -4,18 +4,15 @@ import { Box } from '@mui/material';
 import { ProblemInfo } from '../util/types';
 import SampleProblemBox from './problem/SampleProblemBox';
 import { getProblemById } from '../util/network';
-import { SOLVED, TRIED } from '../util/constants';
+import { WITHQUESTIONS } from '../util/constants';
 
-export default function UnresolvedProblems() {
-  const tried = localStorage.getItem(TRIED)?.split("&")?? []
-  const solved = localStorage.getItem(SOLVED)?.split("&")?? []
-  const unresolved = tried.filter(element => !solved.includes(element)).join("&")
-
+export default function WithQuestions() {
+  const withQuestions = localStorage.getItem(WITHQUESTIONS)?? ""
   const [problems, setProblems] = useState<ProblemInfo[]>([]);
 
 
   useEffect(() => {
-    const result = getProblemById(unresolved)
+    const result = getProblemById(withQuestions)
     const newProblems: ProblemInfo[] = []
     result.then(r => {
       r.map(p => {
@@ -27,7 +24,8 @@ export default function UnresolvedProblems() {
       })
       setProblems(newProblems)
     })
-    }, [unresolved])
+    }, [withQuestions])
+
   return (
     <Box>
       {problems.length > 0? <SampleProblemBox problems={problems}></SampleProblemBox> : ""}

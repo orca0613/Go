@@ -13,6 +13,8 @@ import { MyPage } from "./components/MyPage";
 import SolvedProblems from "./components/SolvedProblems";
 import UnresolvedProblems from "./components/UnresolvedProblems";
 import CreatedProblems from "./components/CreatedProblems";
+import AskedProblems from "./components/AskedProblem";
+import WithQuestions from "./components/WithQuestions";
 
 
 function App() {
@@ -33,6 +35,8 @@ function App() {
           <Route path="/unresolved" element={<UnresolvedProblems />} />
           <Route path="/solved" element={<SolvedProblems />} />
           <Route path="/created" element={<CreatedProblems />} />
+          <Route path="/asked" element={<AskedProblems />} />
+          <Route path="/with-questions" element={<WithQuestions />} />
 
         </Route>
       </Routes>

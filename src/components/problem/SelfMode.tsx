@@ -1,28 +1,31 @@
 import { useState } from 'react'
-import { Board, BoardInfo, Coordinate, Variations } from '../../util/types'
+import { Board, BoardInfo, Coordinate, ProblemInfo, Variations } from '../../util/types'
 import _ from 'lodash'
-import { addToKey, playMoveAndReturnNewBoard, removeFromKey } from '../../util/functions'
+import { addCurrentVariation, addToKey, playMoveAndReturnNewBoard, removeFromKey } from '../../util/functions'
 import { LANGUAGE_IDX, boardWidth } from '../../util/constants'
 import FinalBoard from '../board/FinalBoard'
 import { Box, Button, Divider, useMediaQuery } from '@mui/material'
 import { menuWords } from '../../util/menuWords'
+import { updateVariations } from '../../util/network'
 
 
 interface SelfModeProps {
-  boardInfo: BoardInfo
-  variations: Variations
-  answers: Variations
+  problemInfo: ProblemInfo
 }
 
 
-export function SelfMode({ boardInfo, variations, answers}: SelfModeProps) {
+export function SelfMode({ problemInfo }: SelfModeProps) {
   
-  const initialState = boardInfo.board
-  const [color, setColor] = useState(boardInfo.color)
+  const initialState = problemInfo.initialState
+  const answers = problemInfo.answers
+  const variations = problemInfo.variations
+  const creator = problemInfo.creator
+  const [color, setColor] = useState(problemInfo.color)
   const lines = initialState.length
   const [problem, setProblem] = useState(initialState)
   const [currentKey, setCurrentKey] = useState('0')
   const [history, setHistory] = useState<BoardInfo[]>([])
+  const [questions, setQuestions] = useState(problemInfo.questions)
   const [moves, setMoves] = useState<Coordinate[]>([])
   const [nextMove, setNextMove] = useState<Coordinate | null>(null)
   const isMobile = useMediaQuery("(max-width: 600px)")
@@ -93,7 +96,7 @@ export function SelfMode({ boardInfo, variations, answers}: SelfModeProps) {
 
   function reset() {
     setProblem(initialState)
-    setColor(boardInfo.color)
+    setColor(problemInfo.color)
     setCurrentKey('0')
     setHistory([])
   }
@@ -126,6 +129,17 @@ export function SelfMode({ boardInfo, variations, answers}: SelfModeProps) {
     } else {
       alert("There is no this variation")
     }
+  }
+
+  async function request() {
+    if (variations.hasOwnProperty(currentKey) || answers.hasOwnProperty(currentKey)) {
+      alert("this variation already has been registered")
+      return
+    }
+    const l = currentKey.split("-")
+    const newQuestions = addCurrentVariation(currentKey, questions, l)
+    setQuestions(newQuestions)
+    updateVariations(problemInfo._id, newQuestions, "questions", creator)
   }
 
   return (
@@ -164,7 +178,9 @@ export function SelfMode({ boardInfo, variations, answers}: SelfModeProps) {
             {divider}
             <Button sx={{color: "red"}} onClick={reset}>{menuWords.reset[languageIdx]}</Button>
             {divider}
-            <Button onClick={checkAnswer}>check answer</Button>
+            <Button onClick={checkAnswer}>{menuWords.checkAnswer[languageIdx]}</Button>
+            {divider}
+            <Button onClick={request}>{menuWords.requestVariation[languageIdx]}</Button>
           </Box>
         </Box>
 

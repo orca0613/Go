@@ -1,15 +1,13 @@
-import { setUserCreated, setUserSolved, setUserTried } from "../redux/actions"
+
 import problemStore from "../store/problemStore"
-import userStore from "../store/userStore"
-import { API_URL, LANGUAGE_IDX, PROBLEMINFO_DB_PATH, PROBLEM_DB_PATH, USERDETAIL_DB_PATH, USERNAME, USERPOINT, USER_DB_PATH, initialVariations } from "./constants"
+import { API_URL, CREATED, LANGUAGE_IDX, PROBLEMINFO_DB_PATH, PROBLEM_DB_PATH, SOLVED, TOKEN, TRIED, USERDETAIL_DB_PATH, USERNAME, USERPOINT, USER_DB_PATH, initialVariations } from "./constants"
 import { convertFromTwoDToString } from "./functions"
 import { menuWords } from "./menuWords"
-import { Board, ProblemInfoFromServer } from "./types"
+import { Board, CreatorInfo, InformationOfProblem, ProblemInfoFromServer, ReplyForm } from "./types"
 
 const languageIdx = Number(localStorage.getItem(LANGUAGE_IDX))
 
 export async function getProblemById(problemIdList: string): Promise<ProblemInfoFromServer[]> {
-  console.log(problemIdList)
   const response = await fetch(`${API_URL}${PROBLEM_DB_PATH}/get-by-id/${problemIdList}`)
   const problem = await response.json()
   return problem
@@ -66,15 +64,15 @@ export function checkUserName(name: string) {
     .catch(error => console.error('Error', error))
 }
 
-export function createUser(email: string, password: string, name: string, level: number, point: number) {
+export function createUser(email: string, password: string, name: string, level: number) {
   // 회원가입. 이메일, 패스워드, 네임의 체크가 완료되지 않으면 바로 리턴됨. 회원가입 
-  console.log(point)
+
   fetch(`${API_URL}${USER_DB_PATH}/create`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
     },
-    body: JSON.stringify({email, password, name, level, point}),
+    body: JSON.stringify({email, password, name, level}),
   })
     .then(response => response.json())
     .then(data => alert(data.response))
@@ -85,71 +83,74 @@ export function createProblem(comment: string, problem: Board, creator: string |
   const initialState = convertFromTwoDToString(problem);
   const variations = initialVariations
   const answers = initialVariations
+  const questions = initialVariations
+  const token = localStorage.getItem(TOKEN)
 
   fetch(`${API_URL}${PROBLEM_DB_PATH}/create`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
+      'authorization': `Bearer ${token}`
+
     },
-    body: JSON.stringify({initialState, creator, variations, answers, level, comment, color}),
-  })
-    .then(response => response.json())
-    .then(data => alert(data.response))
-    .catch(error => console.error('Error:', error));
-}
-
-export function removeProblem(id: string) {
-  fetch(`${API_URL}${PROBLEM_DB_PATH}/delete/${id}`, {
-    method: "DELETE"
-  })
-    .then(response => response.json())
-    .then(data => alert(data.response))
-    .catch(error => {console.log("Error", error)})
-}
-
-export function removeProblemInformation(problemId: string) {
-  fetch(`${API_URL}${PROBLEMINFO_DB_PATH}/delete/${problemId}`, {
-    method: "DELETE"
+    body: JSON.stringify({initialState, creator, variations, answers, questions, level, comment, color}),
   })
     .then(response => response.json())
     .then(data => {
-      addCreated(data.id)
+      const created = localStorage.getItem(CREATED)
+      localStorage.setItem(CREATED, created + "&" + data.id)
       alert(data.response)
+    })
+    .catch(error => console.error('Error:', error));
+}
+
+export function removeProblem(id: string, creator: string) {
+  const created = localStorage.getItem(CREATED)?.split("&")?? []
+  const idx = created.indexOf(id)
+  if (idx < 0) {
+    return
+  }
+  const token = localStorage.getItem(TOKEN)
+  fetch(`${API_URL}${PROBLEM_DB_PATH}/delete`, {
+    method: 'DELETE',
+    headers: {
+      'Content-Type': 'application/json',
+      'authorization': `Bearer ${token}`
+    },
+    body: JSON.stringify({id, creator}),
+  })
+    .then(response => response.json())
+    .then(data => {
+      alert(data.response)
+      created.splice(idx, 1)
+      localStorage.setItem(CREATED, created.join("&"))
     })
     .catch(error => {console.log("Error", error)})
 }
 
-export function updateVariations(problemId: string, variations: object) {
+export function updateVariations(problemId: string, variations: object, where: string, creator?: string) {
+  const token = localStorage.getItem(TOKEN)
   fetch(`${API_URL}${PROBLEM_DB_PATH}/update-variations`, {
     method: 'PATCH',
     headers: {
       'Content-Type': 'application/json',
+      'authorization': `Bearer ${token}`
     },
-    body: JSON.stringify({problemId, variations}),
+    body: JSON.stringify({problemId, variations, where, creator}),
   })
     .then(response => response.json())
-    .catch(error => console.error('Error: ', error))
-}
-
-export function updateAnswers(problemId: string, answers: object) {
-  fetch(`${API_URL}${PROBLEM_DB_PATH}/update-answers`, {
-    method: 'PATCH',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({problemId, answers}),
-  })
-    .then(response => response.json())
-    .then(data => alert(data.response))
+    .then(r => console.log(r.response))
     .catch(error => console.error('Error: ', error))
 }
 
 export function modifyProblem(problemId: string, problem: Board, comment: string, level: number, color: string) {
   const initialState = convertFromTwoDToString(problem)
+  const token = localStorage.getItem(TOKEN)
   fetch(`${API_URL}${PROBLEM_DB_PATH}/modify-problem`, {
     method: 'PATCH',
     headers: {
       'Content-Type': 'application/json',
+      'authorization': `Bearer ${token}`
     },
     body: JSON.stringify({problemId, initialState, comment, level, color}),
   })
@@ -162,12 +163,13 @@ export function addPoint(point: number) {
   const name = localStorage.getItem(USERNAME)
   const curPoint = Number(localStorage.getItem(USERPOINT))
   const newPoint = curPoint + point
+  const token = localStorage.getItem(TOKEN)
   localStorage.setItem(USERPOINT, String(newPoint))
-  console.log(newPoint)
-  fetch(`${API_URL}${USER_DB_PATH}/add-point`, {
+  fetch(`${API_URL}${USERDETAIL_DB_PATH}/add-point`, {
     method: "PATCH",
     headers: {
       "Content-Type": "application/json",
+      'authorization': `Bearer ${token}`
     },
     body: JSON.stringify({name, point})
   })
@@ -178,150 +180,48 @@ export function deductPoint(point: number) {
   const name = localStorage.getItem(USERNAME)
   const curPoint = Number(localStorage.getItem(USERPOINT))
   const newPoint = curPoint - point
+  const token = localStorage.getItem(TOKEN)
   localStorage.setItem(USERPOINT, String(newPoint))
-  console.log(newPoint)
-  fetch(`${API_URL}${USER_DB_PATH}/deduct-point`, {
+  fetch(`${API_URL}${USERDETAIL_DB_PATH}/deduct-point`, {
     method: "PATCH",
     headers: {
       "Content-Type": "application/json",
+      'authorization': `Bearer ${token}`
     },
     body: JSON.stringify({name, point})
   })
     .catch(error => console.error("Error: ", error))
 }
 
-export function addView() {
+export function addCount(where: string) {
   const idx = problemStore.getState().curIndex
   const problemId = problemStore.getState().problemList[idx]._id
-  fetch(`${API_URL}${PROBLEMINFO_DB_PATH}/add-view`, {
+  const token = localStorage.getItem(TOKEN)
+  fetch(`${API_URL}${PROBLEMINFO_DB_PATH}/add-count`, {
     method: 'PATCH',
     headers: {
       'Content-Type': 'application/json',
+      'authorization': `Bearer ${token}`
     },
-    body: JSON.stringify({problemId}),
+    body: JSON.stringify({problemId, where}),
   })
     .catch(error => console.error("Error: ", error))
 }
 
-export function addLike() {
-  const idx = problemStore.getState().curIndex
-  const problemId = problemStore.getState().problemList[idx]._id
-  fetch(`${API_URL}${PROBLEMINFO_DB_PATH}/add-like`, {
-    method: 'PATCH',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({problemId}),
-  })
-    .catch(error => console.error("Error: ", error))
-}
-
-export function deductLike() {
-  const idx = problemStore.getState().curIndex
-  const problemId = problemStore.getState().problemList[idx]._id
-  fetch(`${API_URL}${PROBLEMINFO_DB_PATH}/deduct-like`, {
-    method: 'PATCH',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({problemId}),
-  })
-    .catch(error => console.error("Error: ", error))
-}
-
-
-export function addDislike() {
-  const idx = problemStore.getState().curIndex
-  const problemId = problemStore.getState().problemList[idx]._id
-  fetch(`${API_URL}${PROBLEMINFO_DB_PATH}/add-dislike`, {
-    method: 'PATCH',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({problemId}),
-  })
-    .catch(error => console.error("Error: ", error))
-}
-
-export function deductDislike() {
-  const idx = problemStore.getState().curIndex
-  const problemId = problemStore.getState().problemList[idx]._id
-  fetch(`${API_URL}${PROBLEMINFO_DB_PATH}/deduct-dislike`, {
-    method: 'PATCH',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({problemId}),
-  })
-    .catch(error => console.error("Error: ", error))
-}
-
-
-export function addCorrect() {
-  const idx = problemStore.getState().curIndex
-  const problemId = problemStore.getState().problemList[idx]._id
-  fetch(`${API_URL}${PROBLEMINFO_DB_PATH}/add-correct`, {
-    method: 'PATCH',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({problemId}),
-  })
-    .catch(error => console.error("Error: ", error))
-}
-
-export function addWrong() {
-  const idx = problemStore.getState().curIndex
-  const problemId = problemStore.getState().problemList[idx]._id
-  fetch(`${API_URL}${PROBLEMINFO_DB_PATH}/add-wrong`, {
-    method: 'PATCH',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({problemId}),
-  })
-    .catch(error => console.error("Error: ", error))
-}
-
-export function addTried() {
+export function addElement(where: string) {
   const idx = problemStore.getState().curIndex
   const problemId = problemStore.getState().problemList[idx]._id
   const name = localStorage.getItem(USERNAME)
-  const tried = userStore.getState().userTried
-  const newTried = tried.concat([problemId])
-  userStore.dispatch(setUserTried(newTried))
-  fetch(`${API_URL}${USERDETAIL_DB_PATH}/add-tried`, {
+  const token = localStorage.getItem(TOKEN)
+  fetch(`${API_URL}${USERDETAIL_DB_PATH}/add-element`, {
     method: 'PATCH',
     headers: {
       'Content-Type': 'application/json',
+      'authorization': `Bearer ${token}`
     },
-    body: JSON.stringify({problemId, name}),
+    body: JSON.stringify({problemId, name, where}),
   })
     .catch(error => console.error("Error: ", error))
-}
-
-
-export function addSolved() {
-  const idx = problemStore.getState().curIndex
-  const problemId = problemStore.getState().problemList[idx]._id
-  const name = localStorage.getItem(USERNAME)
-  const solved = userStore.getState().userSolved
-  const newSolved = solved.concat([problemId])
-  userStore.dispatch(setUserSolved(newSolved))
-  fetch(`${API_URL}${USERDETAIL_DB_PATH}/add-solved`, {
-    method: 'PATCH',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({problemId, name}),
-  })
-    .catch(error => console.error("Error: ", error))
-}
-
-export function addCreated(problemId: string) {
-  const created = userStore.getState().userCreated
-  const newCreated = created.concat([problemId])
-  userStore.dispatch(setUserCreated(newCreated))
 }
 
 export async function getUserDetail(name: string | null) {
@@ -333,27 +233,41 @@ export async function getUserDetail(name: string | null) {
   return detail
 }
 
-export async function getQuestion(problemId: string) {
-  const response = await fetch(`${API_URL}${PROBLEMINFO_DB_PATH}/get-question/${problemId}`)
-  const question = await response.json()
-  return question
+export async function getAllCreators(): Promise<string[]> {
+  const result: string[] = []
+  const response = await fetch(`${API_URL}${USERDETAIL_DB_PATH}/get-creators`)
+  const creators: CreatorInfo[] = await response.json()
+  creators.map(c => {
+    result.push(c.name)
+  })
+  return result 
 }
 
-export async function updateQuestion(problemId: string, questions: object) {
-  fetch(`${API_URL}${PROBLEMINFO_DB_PATH}/update-question`, {
+export async function getProblemInformations(problemId: string): Promise<InformationOfProblem> {
+  const info = await fetch(`${API_URL}${PROBLEMINFO_DB_PATH}/get/${problemId}`)
+  const informations: InformationOfProblem = await info.json()
+  return informations
+}
+
+export function addReply(problemId: string, reply: ReplyForm) {
+  const token = localStorage.getItem(TOKEN)
+  fetch(`${API_URL}${PROBLEMINFO_DB_PATH}/add-reply`, {
     method: 'PATCH',
     headers: {
       'Content-Type': 'application/json',
+      'authorization': `Bearer ${token}`
     },
-    body: JSON.stringify({problemId, questions}),
+    body: JSON.stringify({problemId, reply}),
   })
+    .then(response => response.json())
+    .then(r => {
+      alert(r.response)
+    })
     .catch(error => console.error("Error: ", error))
 }
 
-export async function getAllCreators(): Promise<string[]> {
-  const response = await fetch(`${API_URL}${USERDETAIL_DB_PATH}/get-creators`)
-  const creators = await response.json()
-  return creators 
+export async function getReply(problemId: string): Promise<ReplyForm[]> {
+  const response = await fetch(`${API_URL}${PROBLEMINFO_DB_PATH}/get-reply/${problemId}`)
+  const replies: ReplyForm[] = await response.json()
+  return replies
 }
-
-

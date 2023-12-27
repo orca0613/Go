@@ -4,11 +4,10 @@ import { Box } from '@mui/material';
 import { ProblemInfo } from '../util/types';
 import SampleProblemBox from './problem/SampleProblemBox';
 import { getProblemById } from '../util/network';
-import userStore from '../store/userStore';
+import { CREATED } from '../util/constants';
 
 export default function CreatedProblems() {
-  const created = userStore.getState().userCreated
-  const stringified = created.join("&")
+  const stringified = localStorage.getItem(CREATED)?? ""
   const [problems, setProblems] = useState<ProblemInfo[]>([]);
 
 
@@ -25,7 +24,7 @@ export default function CreatedProblems() {
       })
       setProblems(newProblems)
     })
-    }, [created])
+    }, [stringified])
     
   return (
     <Box>

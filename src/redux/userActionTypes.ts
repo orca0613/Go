@@ -4,6 +4,7 @@ export const SET_USERPOINT = "SET_USERPOINT"
 export const SET_USERSOLVED = "SET_USERSOLVED"
 export const SET_USERTRIED = "SET_USERTRIED"
 export const SET_USERCREATED = "SET_USERCREATED"
+export const SET_USERASKED = "SET_USERASKED"
 
 export interface SetUserNameAction {
     type: typeof SET_USERNAME
@@ -35,9 +36,15 @@ export interface SetUserCreatedAction {
     payload: string[]
 }
 
+export interface SetUserAskedAction {
+    type: typeof SET_USERASKED
+    payload: string[]
+}
+
 
 
 
 
 export type UserActionType = SetUserNameAction | SetUserLevelAction | 
-    SetUserPointAction | SetUserSolvedAction | SetUserTriedAction |SetUserCreatedAction
+    SetUserPointAction | SetUserSolvedAction | SetUserTriedAction |SetUserCreatedAction |
+    SetUserAskedAction
