@@ -1,21 +1,44 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import { HomeForm } from "./pages/HomeForm";
+import { Login } from "./components/Login";
 import { NotFound } from "./pages/NotFound";
-import { Signup } from "./pages/SignUp";
-import { Solving } from "./pages/Solving";
-import { TestMakingProblem } from "./pages/TestMakingProblem";
-import { TestMakingVariations } from "./pages/TestMakingVariations"
+import { Signup } from "./components/SignUp";
+import { HomeForm } from "./pages/HomeForm";
+import { MakingProblem } from "./components/problem/MakingProblem";
+import Layout from "./pages/layout";
+import SearchingByCreator from "./components/SearchByCreator";
+import SearchingByLevel from "./components/SearchByLevel";
+import AllProblems from "./components/problem/AllProblems";
+import { ProblemPage } from "./components/problem/ProblemPage";
+import { MyPage } from "./components/MyPage";
+import SolvedProblems from "./components/SolvedProblems";
+import UnresolvedProblems from "./components/UnresolvedProblems";
+import CreatedProblems from "./components/CreatedProblems";
+import WithQuestions from "./components/WithQuestions";
+import LikedProblems from "./components/LikedProblems";
+
 
 function App() {
   return (
     <BrowserRouter>
       <Routes>
-        <Route path="/" element={<HomeForm/>} />
-        <Route path="/problem" element={<Solving/>} />
-        <Route path="/*" element={<NotFound/>} />
-        <Route path="/signup" element={<Signup/>} />
-        <Route path="/test-problem" element={<TestMakingProblem/>} />
-        <Route path="/test-variations" element={<TestMakingVariations/>} />
+        <Route element={<Layout />}>
+          <Route path="/home" element={<HomeForm/>} />
+          <Route path="/" element={<Login/>} />
+          <Route path="/all-problems" element={<AllProblems />} />
+          <Route path="/*" element={<NotFound/>} />
+          <Route path="/signup" element={<Signup/>} />
+          <Route path="/create" element={<MakingProblem />} />
+          <Route path="/mypage" element={<MyPage></MyPage>} />
+          <Route path="/search-creator" element={<SearchingByCreator></SearchingByCreator>} />
+          <Route path="/search-level" element={<SearchingByLevel></SearchingByLevel>} />
+          <Route path="/problem" element={<ProblemPage />} />
+          <Route path="/unresolved" element={<UnresolvedProblems />} />
+          <Route path="/solved" element={<SolvedProblems />} />
+          <Route path="/created" element={<CreatedProblems />} />
+          <Route path="/liked" element={<LikedProblems />} />
+          <Route path="/with-questions" element={<WithQuestions />} />
+
+        </Route>
       </Routes>
     </BrowserRouter>
   )

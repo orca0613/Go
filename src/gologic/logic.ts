@@ -6,7 +6,7 @@ export function isOutside(coord: Coordinate, size: number) {
     return !(0 <= x && x < size && 0 <= y && y < size)
 }
 
-export function addNeighbors(coord: Coordinate) {
+export function getNeighbors(coord: Coordinate) {
     const y = coord[0], x = coord[1]
     const neighbors: Coordinate[] = [[y + 1, x], [y - 1, x], [y, x + 1], [y, x - 1]]
     return neighbors
@@ -46,7 +46,7 @@ export function getDeadGroup(board: Board, coord: Coordinate, color: string, opp
             group.splice(idx, 1)
             continue
         } else if (getStatus(newBoard , c) === color) {
-            group = group.concat(addNeighbors(c))
+            group = group.concat(getNeighbors(c))
             newBoard = changeStatus(newBoard, c, opponentColor)
             idx += 1
         } else {
@@ -68,7 +68,7 @@ export function handleMove(props: handleMoveProps) {
     const currentMove = props.currentMove;
     const color = props.color;
     const opponentColor = color === 'b'? 'w' : 'b'
-    const neighbors = addNeighbors(currentMove)
+    const neighbors = getNeighbors(currentMove)
 
     if (isOutside(currentMove, boardState.length) || getStatus(boardState, currentMove) !== '.') {
         return boardState
@@ -81,8 +81,8 @@ export function handleMove(props: handleMoveProps) {
         dead = dead.concat(getDeadGroup(boardState, neighbors[i], opponentColor, color))
     }
 
-    const suicide: Coordinate[] = getDeadGroup(boardState, currentMove, color, opponentColor)
-    if (dead.length === 0 && suicide.length > 0) {
+    const suicideGroup: Coordinate[] = getDeadGroup(boardState, currentMove, color, opponentColor)
+    if (dead.length === 0 && suicideGroup.length > 0) {
         boardState = changeStatus(boardState, currentMove, '.')
         return boardState
     }

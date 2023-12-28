@@ -1,22 +1,17 @@
-import React from 'react'
-import { Button } from '@mui/material'
-import { useNavigate } from 'react-router-dom'
+
+import { Button, Typography } from '@mui/material'
+import { menuWords } from '../util/menuWords'
+import { LANGUAGE_IDX, USERNAME } from '../util/constants'
+
 
 export function HomeForm() {
-  const navigate = useNavigate()
+  const username = localStorage.getItem(USERNAME)
+  const languageIdx = Number(localStorage.getItem(LANGUAGE_IDX))
 
-  const movePage = (address: string) => {
-      navigate(address)
-  }
+
   return (
     <>
-      <div>
-        <Button onClick={e => movePage('problem')}>problem page</Button>
-        <Button onClick={e => movePage('signup')}>sign up</Button>
-        <Button onClick={e => movePage('test-problem')}>register my problem</Button>
-        <Button onClick={e => movePage('test-variations')}>register variations</Button>
-      </div>
-      <h1>hello world</h1>
+      <Typography variant='h3' sx={{margin: 3, fontWeight: "bold"}}>{menuWords.welcome[languageIdx]} {username}</Typography>
     </>
   )
 }
