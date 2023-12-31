@@ -1,4 +1,4 @@
-import { Coordinate } from "./types"
+import { Coordinate, ProblemInfo } from "./types"
 
 export const boardWidth: number = 650
 export const sampleBoardSize: number = 120
@@ -23,6 +23,18 @@ export const flowerPointPosition: Coordinate[][] = [
     [[3, 3], [3, 14], [14, 3], [14, 14]],
     [[3, 3], [3, 9], [3, 15], [9, 3], [9, 9], [9, 15], [15, 3], [15, 9], [15, 15]],
 ]
+
+export const initialProblemInfo: ProblemInfo = {
+    _id: "",
+    initialState: [["."]],
+    variations: {},
+    answers: {},
+    questions: {},
+    color: "",
+    level: 0,
+    creator: "",
+    comment: "",
+}
 export const initialVariations = {"0": []}
 export const API_URL = "http://localhost:3001"
 export const HOME = "http://localhost:5173/home"

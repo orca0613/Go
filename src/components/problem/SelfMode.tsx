@@ -6,7 +6,7 @@ import { LANGUAGE_IDX, USERNAME, boardWidth } from '../../util/constants'
 import FinalBoard from '../board/FinalBoard'
 import { Box, Button, Divider, useMediaQuery } from '@mui/material'
 import { menuWords } from '../../util/menuWords'
-import { updateVariations } from '../../util/network'
+import { updateVariations } from '../../network/problem'
 
 
 interface SelfModeProps {
@@ -144,46 +144,43 @@ export function SelfMode({ problemInfo }: SelfModeProps) {
   }
 
   return (
-
-          <Box
-          sx={{
-            display: 'flex',
-            width: isMobile ? '100vw' : '800',
-            flexDirection: isMobile ? 'column' : 'row',
-            gap: isMobile ? '1ch' : 0,
-          }}
-        >
-          <Box
-          >
-            <FinalBoard 
-            lines={problem.length}
-            board={problem}
-            boardWidth={boardWidth}
-            moves={currentKey}
-            onClick={handleClick}
-            />
-          </Box>
-          <Box
-            textAlign="center"
-            sx={{
-              flex: isMobile ? undefined : `1 0 0px`,
-              // mr: isMobile ? '0' : '1ch',
-              mt: 3
-            }}
-          >
-            <Button onClick={goToPreviousMove}>{menuWords.previous[languageIdx]}</Button>
-            {divider}
-            <Button onClick={goToNextMove}>{menuWords.next[languageIdx]}</Button>
-            {divider}
-            <Button onClick={playPass}>{menuWords.pass[languageIdx]}</Button>
-            {divider}
-            <Button sx={{color: "red"}} onClick={reset}>{menuWords.reset[languageIdx]}</Button>
-            {divider}
-            <Button onClick={checkAnswer}>{menuWords.checkAnswer[languageIdx]}</Button>
-            {divider}
-            <Button onClick={request}>{menuWords.requestVariation[languageIdx]}</Button>
-          </Box>
-        </Box>
-
+    <Box
+      sx={{
+        display: 'flex',
+        width: isMobile ? '100vw' : '800',
+        flexDirection: isMobile ? 'column' : 'row',
+        gap: isMobile ? '1ch' : 0,
+      }}
+    >
+      <Box>
+        <FinalBoard 
+        lines={problem.length}
+        board={problem}
+        boardWidth={boardWidth}
+        moves={currentKey}
+        onClick={handleClick}
+        />
+      </Box>
+      <Box
+        textAlign="center"
+        sx={{
+          flex: isMobile ? undefined : `1 0 0px`,
+          // mr: isMobile ? '0' : '1ch',
+          mt: 3
+        }}
+      >
+        <Button onClick={goToPreviousMove}>{menuWords.previous[languageIdx]}</Button>
+        {divider}
+        <Button onClick={goToNextMove}>{menuWords.next[languageIdx]}</Button>
+        {divider}
+        <Button onClick={playPass}>{menuWords.pass[languageIdx]}</Button>
+        {divider}
+        <Button sx={{color: "red"}} onClick={reset}>{menuWords.reset[languageIdx]}</Button>
+        {divider}
+        <Button onClick={checkAnswer}>{menuWords.checkAnswer[languageIdx]}</Button>
+        {divider}
+        <Button onClick={request}>{menuWords.requestVariation[languageIdx]}</Button>
+      </Box>
+    </Box>
   )
 }

@@ -2,7 +2,8 @@ import { ProblemInfo } from '../../util/types'
 import { useEffect, useState } from 'react'
 import { convertFromStringToTwoD } from '../../util/functions'
 import SampleProblemBox from './SampleProblemBox'
-import { getAllProblems } from '../../util/network'
+import { getAllProblems } from '../../network/problem'
+
 
 export default function AllProblems() {
 

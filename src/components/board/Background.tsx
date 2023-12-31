@@ -4,10 +4,10 @@ import { CSSProperties, useEffect, useRef } from 'react';
 
 interface BoardProps {
   boardWidth: number 
-  lines: number
-  cellSize: number
-  offset: number
-  style?: CSSProperties
+  lines: number 
+  cellSize: number 
+  offset: number 
+  style?: CSSProperties 
 }
 
 const Background = ({ boardWidth, lines, cellSize, offset, style}: BoardProps) => {

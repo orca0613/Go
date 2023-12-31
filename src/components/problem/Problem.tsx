@@ -1,12 +1,13 @@
 import { useEffect, useState } from 'react'
-import { Board, Coordinate, ProblemInfo, Variations } from '../../util/types'
+import { Board, Coordinate, ProblemInfo } from '../../util/types'
 import _ from 'lodash'
-import { addToKey, checkSolved, makeRandomNumber, playMoveAndReturnNewBoard } from '../../util/functions'
+import { addElementToLocalStorage, addToKey, isInLocalStorage, makeRandomNumber, playMoveAndReturnNewBoard } from '../../util/functions'
 import { LANGUAGE_IDX, SOLVED, USERNAME, boardWidth, bonus } from '../../util/constants'
 import FinalBoard from '../board/FinalBoard'
 import { Box, Button, Divider, useMediaQuery } from '@mui/material'
-import { changeCount, addElement, changePoint } from '../../util/network'
 import { menuWords } from '../../util/menuWords'
+import { changeCount } from '../../network/problemInformation'
+import { addElement, changePoint } from '../../network/userDetail'
 
 
 interface ProblemProps {
@@ -16,11 +17,12 @@ interface ProblemProps {
 
 export function Problem({ problemInfo }: ProblemProps) {
   
+  const problemId = problemInfo._id
   const turn = problemInfo.color
   const answers = problemInfo.answers
   const variations = problemInfo.variations
   const initialState = problemInfo.initialState
-  const username = localStorage.getItem(USERNAME)
+  const username = localStorage.getItem(USERNAME)?? ""
   const [color, setColor] = useState(turn)
   const lines = initialState.length
   const [problem, setProblem] = useState(initialState)
@@ -59,8 +61,8 @@ export function Problem({ problemInfo }: ProblemProps) {
       response(newProblem, newKey)
     } else {
       alert(menuWords.wrong[languageIdx])
-      if (!checkSolved()) {
-        changeCount("wrong", username?? "")
+      if (!isInLocalStorage(SOLVED, problemId)) {
+        changeCount(problemId, "wrong", username)
       }
     }
   }
@@ -78,10 +80,11 @@ export function Problem({ problemInfo }: ProblemProps) {
     } else if (answers.hasOwnProperty(key) && answers[key]) {
       if (answers[key].length === 0) {
         alert(menuWords.correct[languageIdx])
-        if (!checkSolved()) {
-          changeCount("correct", username?? "")
-          changePoint(bonus, "add")
-          addElement(SOLVED)
+        if (!isInLocalStorage(SOLVED, problemId)) {
+          changeCount(problemId, "correct", username)
+          changePoint(bonus)
+          addElement(problemId, username, SOLVED)
+          addElementToLocalStorage(SOLVED, problemId)
         }
       } else {
         const random = makeRandomNumber(answers[key].length)
@@ -116,8 +119,8 @@ export function Problem({ problemInfo }: ProblemProps) {
       response(problem, newKey)
     } else {
       alert(menuWords.wrong[languageIdx])
-      if (!checkSolved()) {
-        changeCount("wrong", username?? "")
+      if (!isInLocalStorage(SOLVED, problemId)) {
+        changeCount(problemId, "wrong", username)
       }
     }
   }

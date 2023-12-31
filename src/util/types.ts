@@ -1,11 +1,11 @@
 export type Board = string[][]
 
-export type Coordinate = [number, number]
-
 export type BoardInfo = {
   board: Board,
   color: string,
 }
+
+export type Coordinate = [number, number]
 
 export type Variations = {
   [key: string]: string[]
@@ -60,4 +60,10 @@ export type InformationOfProblem = {
   correct: number,
   wrong: number,
   reply?: object[]
+}
+
+export type nBoardInfo = {
+  board: Board,
+  color: String,
+  key: String,
 }

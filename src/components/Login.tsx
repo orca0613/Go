@@ -2,8 +2,8 @@ import { Box, Button, TextField } from '@mui/material'
 import React, { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { API_URL, ASKED, CREATED, DISLIKED, LANGUAGE_IDX, LIKED, SOLVED, TOKEN, TRIED, USERLEVEL, USERNAME, USERPOINT, WITHQUESTIONS } from '../util/constants'
-import { getUserDetail } from '../util/network'
 import { menuWords } from '../util/menuWords'
+import { getUserDetail } from '../network/userDetail'
 
 export function Login() {
 	const navigate = useNavigate()
@@ -35,7 +35,6 @@ export function Login() {
         localStorage.setItem(WITHQUESTIONS, r.withQuestions.join("&"))
         localStorage.setItem(LIKED, r.liked.join("&"))
         localStorage.setItem(DISLIKED, r.disliked.join("&"))
-
       })
     }
     if (name.length > 0) {

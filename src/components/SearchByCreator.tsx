@@ -2,13 +2,14 @@
 import React, { useEffect, useState } from 'react';
 import Autocomplete from '@mui/material/Autocomplete';
 import TextField from '@mui/material/TextField';
-import { getAllCreators, getProblemByCreator } from '../util/network';
 import { Box, Button } from '@mui/material';
 import { ProblemInfo } from '../util/types';
 import { convertFromStringToTwoD } from '../util/functions';
 import SampleProblemBox from './problem/SampleProblemBox';
 import { menuWords } from '../util/menuWords';
 import { LANGUAGE_IDX } from '../util/constants';
+import { getProblemByCreator } from '../network/problem';
+import { getAllCreators } from '../network/userDetail';
 
 // Define your data structure (replace this with your own data)
 interface Option {
@@ -27,18 +28,20 @@ export default function SearchingByCreator() {
   const languageIdx = Number(localStorage.getItem(LANGUAGE_IDX))
 
   useEffect(() => {
-    const result = getProblemByCreator(creator)
-    const newProblems: ProblemInfo[] = []
-    result.then(r => {
-      r.map(p => {
-        const newProblem: ProblemInfo = {
-          ...p,
-          initialState: convertFromStringToTwoD(p.initialState)
-        }
-        newProblems.push(newProblem)
+    if (creator) {
+      const result = getProblemByCreator(creator)
+      const newProblems: ProblemInfo[] = []
+      result.then(r => {
+        r.map(p => {
+          const newProblem: ProblemInfo = {
+            ...p,
+            initialState: convertFromStringToTwoD(p.initialState)
+          }
+          newProblems.push(newProblem)
+        })
+        setProblems(newProblems)
       })
-      setProblems(newProblems)
-    })
+    }
   }, [creator])
 
   function changeCreator() {
@@ -60,7 +63,6 @@ export default function SearchingByCreator() {
         })
       })
       setOptions(newOptions)
-      console.log(newOptions)
     })
   }, [])
 

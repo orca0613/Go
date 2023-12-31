@@ -1,6 +1,6 @@
 import { getDeadGroup, handleMove } from "../gologic/logic"
 import problemStore from "../store/problemStore"
-import { LANGUAGE_IDX, SOLVED, TRIED, USERLEVEL, USERNAME, USERPOINT } from "./constants"
+import { LANGUAGE_IDX, SOLVED } from "./constants"
 import { menuWords } from "./menuWords"
 import { Board, Coordinate, Variations } from "./types"
 import _ from 'lodash'
@@ -152,14 +152,33 @@ export function logout() {
   localStorage.setItem(LANGUAGE_IDX, languageIdx)
 }
 
-export function checkSolved() {
-  const idx = problemStore.getState().curIndex
-  const problemId = problemStore.getState().problemList[idx]._id
-  const solved = localStorage.getItem(SOLVED)?.split("&")?? []
-  return solved.includes(problemId)
+export function isInLocalStorage(where: string, val: string) {
+  const lst = localStorage.getItem(where)?.split("&")
+  if (!lst) {
+    return false
+  }
+  return lst.includes(val)
 }
 
-export function checkTried(problemId: string) {
-  const tried = localStorage.getItem(TRIED)?.split("&")?? []
-  return tried.includes(problemId)
+export function deleteElementFromLocalStorage(where: string, val: string) {
+  const storage = localStorage.getItem(where)?.split("&")
+  if (!storage) {
+    return
+  }
+  const newStorage = storage.filter(element => {
+    return element !== val
+  })
+  localStorage.setItem(where, newStorage.join("&"))
+}
+
+export function addElementToLocalStorage(where: string, val: string) {
+  const storage = localStorage.getItem(where)
+  if (!storage) {
+    return
+  }
+  if (storage.split("&").includes(val)) {
+    return
+  }
+  localStorage.setItem(where, storage + "&" + val)
+  return
 }

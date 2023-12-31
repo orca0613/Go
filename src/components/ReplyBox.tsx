@@ -1,10 +1,10 @@
 import { Box, Button, Divider, TextField, Typography } from "@mui/material"
 import { ReplyForm } from "../util/types"
 import { useEffect, useState } from "react"
-import { addReply, getReply } from "../util/network"
 import { Reply } from "./Reply"
 import { LANGUAGE_IDX, USERNAME } from "../util/constants"
 import { menuWords } from "../util/menuWords"
+import { addReply, getReply } from "../network/problemInformation"
 
 interface ReplyBoxProps {
   problemId: string
@@ -19,11 +19,13 @@ export function ReplyBox({ problemId }: ReplyBoxProps) {
   
 
   useEffect(() => {
-    const newAllReplies = getReply(problemId)
+    if (problemId) {
+      const newAllReplies = getReply(problemId)
       newAllReplies.then(r => {
         setAllReplies(r)
       })
       setInputValue("")
+    }
   }, [problemId, reply])
 
   function handleInputValueChange(e: React.ChangeEvent<HTMLInputElement>) {

@@ -8,7 +8,7 @@ interface ProblemListState {
 
 const initialState: ProblemListState = {
   problemList: [],
-  curIndex: 0
+  curIndex: -1
 }
 
 export function problemReducer(state = initialState, action: ProblemActionType): ProblemListState {

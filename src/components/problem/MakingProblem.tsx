@@ -5,41 +5,44 @@ import { Box, Button, Divider, FormControl, InputLabel, MenuItem, Select, Select
 import { isLegalBoard, makingEmptyBoard } from "../../util/functions"
 import { isOutside } from "../../gologic/logic"
 import FinalBoard from "../board/FinalBoard"
-import { createProblem } from "../../util/network"
 import { menuWords } from "../../util/menuWords"
+import { createProblem } from "../../network/problem"
 
 export function MakingProblem() {
-  const [level, setLevel] = useState(18)
   const creator = localStorage.getItem(USERNAME)
   const [boardSize, setBoardSize] = useState(9)
   let emptyBoard = makingEmptyBoard(boardSize)
   const [problem, setProblem] = useState(emptyBoard)
-  const [color, setColor] = useState("")
-  const [comment, setComment] = useState('')
-  const [turn, setTurn] = useState('b')
   const divider = <Divider orientation="horizontal" sx={{mt: 1, mb: 2, borderColor: "whitesmoke" }} />
   const isMobile = useMediaQuery("(max-width: 600px)")
   const languageIdx = Number(localStorage.getItem(LANGUAGE_IDX))
+  const [info, setInfo] = useState({
+    comment: "",
+    turn: "b",
+    color: "",
+    level: 18,
+  })
 
-
-
+  function changeInfo(where: string, val:any) {
+    setInfo({
+      ...info,
+      [where]: val
+    })
+  }
+  
   const commentChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setComment(e.target.value)
+    changeInfo("comment", e.target.value)
   }
 
   function addMove(coord: Coordinate) {
-    if (color === "") {
+    if (info.color === "") {
       alert(menuWords.chooseColorWarning[languageIdx])
       return
     }
     const y = coord[0], x = coord[1]
     const newProblem = [...problem]
-    newProblem[y][x] = color
+    newProblem[y][x] = info.color
     setProblem(newProblem)
-  }
-
-  function colorChange(c: string) {
-    setColor(c)
   }
 
   function handleClick(coord: Coordinate) {
@@ -48,20 +51,18 @@ export function MakingProblem() {
   }
 
   function registerProblemAndResetBoard() {
-    if (comment.length > 50) {return}
+    if (info.comment.length > 50) {return}
     if (!isLegalBoard(problem)) {
       alert(menuWords.invalidBoardWarning[languageIdx])
       return
     }
-    createProblem(comment, problem, creator, level, turn)
+    createProblem(info.comment, problem, creator, info.level, info.turn)
     setProblem(emptyBoard)
-    setComment("")
-    setColor("")
+    changeInfo("comment", "")
   }
 
   function handleTurnChange(e: SelectChangeEvent) {
-    const newTurn = e.target.value
-    newTurn === "black"? setTurn("b") : setTurn("w")
+    changeInfo("turn", e.target.value)
   }
 
   function handleBoardSizeChange(e: SelectChangeEvent) {
@@ -69,13 +70,11 @@ export function MakingProblem() {
   }
 
   function levelChange(e: SelectChangeEvent) {
-    setLevel(Number(e.target.value))
+    changeInfo("level", Number(e.target.value))
   }
 
   useEffect(() => {
     setProblem(makingEmptyBoard(boardSize))
-    setColor("")
-    setComment("")
   }, [boardSize])
 
 
@@ -98,12 +97,12 @@ export function MakingProblem() {
         }}
       >
         <TextField sx={{height: 150}}
-        error={comment.length > 50? true : false}
-        helperText={comment.length > 50? menuWords.commentLengthWarning[languageIdx] : ""}
+        error={info.comment.length > 50? true : false}
+        helperText={info.comment.length > 50? menuWords.commentLengthWarning[languageIdx] : ""}
         name='level'
         label={menuWords.explanation[languageIdx]} 
         variant='standard' 
-        value={comment}
+        value={info.comment}
         onChange={commentChange}
         />
         {divider}
@@ -143,12 +142,12 @@ export function MakingProblem() {
           <Select
             labelId="turn-select-label"
             id="turn-select"
-            value={turn === "b"? "black" : "white"}
+            value={info.turn}
             label={menuWords.turn[languageIdx]}
             onChange={handleTurnChange}
           >
-            <MenuItem value={"black"}>{menuWords.black[languageIdx]}</MenuItem>
-            <MenuItem value={"white"}>{menuWords.white[languageIdx]}</MenuItem>
+            <MenuItem value={"b"}>{menuWords.black[languageIdx]}</MenuItem>
+            <MenuItem value={"w"}>{menuWords.white[languageIdx]}</MenuItem>
           </Select>
         </FormControl>
         <FormControl sx={{ml: 3, width:70}} variant="standard">
@@ -156,7 +155,7 @@ export function MakingProblem() {
           <Select
             labelId="level-select-label"
             id="level-select"
-            value={String(level)}
+            value={String(info.level)}
             label={menuWords.level[languageIdx]}
             onChange={levelChange}
           >
@@ -209,11 +208,11 @@ export function MakingProblem() {
             // mr: isMobile ? '0' : '1ch',
           }}
         >
-          <Button sx={{color: color === "w"? "black" : ""}} onClick={() => colorChange('w')}>{menuWords.white[languageIdx]}</Button>
+          <Button sx={{color: info.color === "w"? "black" : ""}} onClick={() => changeInfo("color", "w")}>{menuWords.white[languageIdx]}</Button>
           {divider}
-          <Button sx={{color: color === "b"? "black" : ""}} onClick={() => colorChange('b')}>{menuWords.black[languageIdx]}</Button>
+          <Button sx={{color: info.color === "b"? "black" : ""}} onClick={() => changeInfo("color", "b")}>{menuWords.black[languageIdx]}</Button>
           {divider}
-          <Button sx={{color: color === "."? "black" : ""}} onClick={() => colorChange('.')}>{menuWords.remove[languageIdx]}</Button>
+          <Button sx={{color: info.color === "."? "black" : ""}} onClick={() => changeInfo("color", ".")}>{menuWords.remove[languageIdx]}</Button>
           {divider}
           <Button sx={{color: "red"}} onClick={() => setProblem(emptyBoard)}>{menuWords.allClear[languageIdx]}</Button>
           {divider}

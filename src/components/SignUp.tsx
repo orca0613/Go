@@ -1,9 +1,9 @@
 import { Button, TextField, FormControl, InputLabel, Select, MenuItem, Box, SelectChangeEvent, Divider } from '@mui/material'
 import React, { useState } from 'react'
 import { LANGUAGE_IDX } from '../util/constants'
-import { checkMail, checkUserName, createUser } from '../util/network'
 import { useNavigate } from 'react-router-dom'
 import { menuWords } from '../util/menuWords'
+import { checkMail, checkUserName, createUser } from '../network/user'
 
 interface SignupFormInput {
     email: string,

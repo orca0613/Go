@@ -23,7 +23,8 @@ export const menuWords = {
   saved: ["Saved", "저장되었습니다.", "已保存", "保存されました"],
   invalidConditionWarning: ["Invalid condition", "적합하지 않은 조건입니다", "无效条件", "無効な条件"],
   previous: ["previous", "이전 수", "上一步", "以前"],
-  addVariation: ["add variatiton", "변화도 추가하기", "添加变化", "変化図を追加"],
+  addVariation: ["add variatiton", "실패도 추가하기", "添加失败", "失敗図を追加"],
+  addAnswers: ["add answers", "정답도 추가하기", "添加答案", "正解図を追加"],
   updateVariation: ["update variations", "변화도 저장 완료하기", "更新变化", "変化図の保存を完了する"],
   removeVariation: ["remove variation", "변화도 지우기", "删除变化", "変化図削除する"],
   reset: ["reset", "초기화", "初始化", "初期化"],
@@ -79,5 +80,8 @@ export const menuWords = {
   views: ["VIEWS", "조회수", "观看次数", "ヒット"],
   correctRate: ["CORRECT RATE", "정답률", "正确率", "正解率"],
   requestVariation: ["request variation", "변화도 요청", "请求变化", "変化図要請"],
-  requestsReceived: ["Requests received", "받은 요청들", "收到的请求", "受け取ったリクエスト"]
+  requestsReceived: ["Requests received", "받은 요청들", "收到的请求", "受け取ったリクエスト"],
+  complete: ["complete", "수정 완료", "修改完成", "修正完了"],
+  incomplete: ["incomplete", "수정 미완료", "修改未完成", "修正未完了"],
+  liked: ["liked", "좋아하는 문제", "喜欢的问题", "好きな問題"],
 }

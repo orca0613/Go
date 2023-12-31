@@ -10,11 +10,7 @@ import SearchingByLevel from "./components/SearchByLevel";
 import AllProblems from "./components/problem/AllProblems";
 import { ProblemPage } from "./components/problem/ProblemPage";
 import { MyPage } from "./components/MyPage";
-import SolvedProblems from "./components/SolvedProblems";
-import UnresolvedProblems from "./components/UnresolvedProblems";
-import CreatedProblems from "./components/CreatedProblems";
-import WithQuestions from "./components/WithQuestions";
-import LikedProblems from "./components/LikedProblems";
+import MyPageProblems from "./components/MyPageProblems";
 
 
 function App() {
@@ -29,15 +25,11 @@ function App() {
           <Route path="/signup" element={<Signup/>} />
           <Route path="/create" element={<MakingProblem />} />
           <Route path="/mypage" element={<MyPage></MyPage>} />
+          <Route path="/mypage/:part" element={<MyPageProblems></MyPageProblems>} />
           <Route path="/search-creator" element={<SearchingByCreator></SearchingByCreator>} />
           <Route path="/search-level" element={<SearchingByLevel></SearchingByLevel>} />
           <Route path="/problem" element={<ProblemPage />} />
-          <Route path="/unresolved" element={<UnresolvedProblems />} />
-          <Route path="/solved" element={<SolvedProblems />} />
-          <Route path="/created" element={<CreatedProblems />} />
-          <Route path="/liked" element={<LikedProblems />} />
-          <Route path="/with-questions" element={<WithQuestions />} />
-
+          <Route path="/problem/:problemId" element={<ProblemPage />} />
         </Route>
       </Routes>
     </BrowserRouter>

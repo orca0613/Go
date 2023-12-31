@@ -16,9 +16,9 @@ export default function SampleProblemBox({ problems }: SampleProblemBoxProps) {
 		navigate(address)
   }
 
-  function setIdexAndOpenProblem(index: number) {
+  function setIdexAndOpenProblem(index: number, problemId: string) {
     problemStore.dispatch(setProblemIndex(index))
-    movePage("/problem")
+    movePage(`/problem/${problemId}`)
   }
 
   problemStore.dispatch(setProblemList(problems))
@@ -34,7 +34,7 @@ export default function SampleProblemBox({ problems }: SampleProblemBoxProps) {
             sx={{mb: 16, width: sampleBoardSize + 16}} 
             key={index}
             component="div"
-            onClick={() => setIdexAndOpenProblem(index)}>
+            onClick={() => setIdexAndOpenProblem(index, problem._id)}>
               <SampleProblem sampleProblem={problem} key={index}></SampleProblem>
             </Box>
           )

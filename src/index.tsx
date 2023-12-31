@@ -4,4 +4,8 @@ import App from './App';
 
 // Type assertion to tell TypeScript that createRoot exists
 const root = (ReactDOM as any).createRoot(document.getElementById('root'));
-root.render(<App />);
+root.render(
+  <React.StrictMode>
+    <App />
+  </React.StrictMode>
+);
