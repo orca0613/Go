@@ -1,10 +1,5 @@
 export type Board = string[][]
 
-export type BoardInfo = {
-  board: Board,
-  color: string,
-}
-
 export type Coordinate = [number, number]
 
 export type Variations = {
@@ -23,7 +18,7 @@ export type ProblemInfo = {
   comment: string,
 }
 
-export type ProblemInfoFromServer = {
+export type ProblemFromServer = {
   _id: string,
   initialState: string,
   variations: Variations,
@@ -51,19 +46,36 @@ export type ReplyForm = {
   date: Date,
 }
 
-export type InformationOfProblem = {
+export type ProblemInformation = {
   _id: string,
   problemId: string,
   view: number,
-  like: number,
-  dislike: number,
-  correct: number,
+  liked: string[],
+  disliked: string[],
+  correctUser: string[],
   wrong: number,
   reply?: object[]
+  totalCorrectUserLevel: number,
+  totalWrongUserLevel: number,
 }
 
-export type nBoardInfo = {
+export type BoardInfo = {
   board: Board,
-  color: String,
-  key: String,
+  color: string,
+  key: string,
+}
+
+export type UserDetail = {
+  name: string,
+  point: number,
+  created: string[],
+  withQuestions: string[],
+  tried: string[],
+  solved: string[],
+  liked: string[],
+  disliked: string[],
+  asked: string[],
+  myFollowers: string[],
+  followList: string[],
+  loginTime: Date,
 }

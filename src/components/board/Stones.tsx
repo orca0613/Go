@@ -5,6 +5,7 @@ import { divmod } from '../../util/functions';
 import _ from 'lodash';
 
 interface StonesProps {
+  boardWidth: number
   lines: number
   cellSize: number
   stoneSize: number
@@ -20,7 +21,7 @@ interface StonesProps {
   
 }
 
-const Stones = ({ lines, cellSize, stoneSize, offset, lineWidth, board, style, moves, variations, answers, questions, onClick}: StonesProps) => {
+const Stones = ({boardWidth, lines, cellSize, stoneSize, offset, lineWidth, board, style, moves, variations, answers, questions, onClick}: StonesProps) => {
   const numberSize = stoneSize
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const scaledSize = (cellSize * (lines - 1) + offset * 2);
@@ -96,7 +97,6 @@ const Stones = ({ lines, cellSize, stoneSize, offset, lineWidth, board, style, m
         positions.map(position => {
           len -= 1
           if (_.isEqual(position, "p")) {
-            console.log("shit")
             return
           }
           const coord = divmod(Number(position), lines)
@@ -133,7 +133,7 @@ const Stones = ({ lines, cellSize, stoneSize, offset, lineWidth, board, style, m
       }
       ctx.stroke()
     }
-  }, [board, moves, variations, answers]);
+  }, [board, moves, variations, answers, boardWidth]);
   
   return (
     <canvas id="stones" ref={canvasRef} style={style} onClick={handleClick}></canvas>

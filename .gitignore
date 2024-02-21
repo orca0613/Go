@@ -2,3 +2,7 @@ node_modules
 .DS_STORE
 build
 memo.txt
+.firebase/
+.firebaserc
+firebase.json
+src/components/Test.tsx

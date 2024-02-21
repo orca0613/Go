@@ -1,43 +1,40 @@
 import { useEffect, useState } from "react"
-import { addElementToLocalStorage, deleteElementFromLocalStorage, isInLocalStorage } from "../util/functions"
 import { DISLIKED, LANGUAGE_IDX, LIKED } from "../util/constants"
-import { Box, Button } from "@mui/material"
+import { Box, Button, Grid } from "@mui/material"
 import { menuWords } from "../util/menuWords"
-import { changeCount, getProblemInformations } from "../network/problemInformation"
+import { addUsername, deleteUsername, getProblemInformations } from "../network/problemInformation"
 import { addElement, deleteElement } from "../network/userDetail"
 
 interface LADProps {
   problemId: string,
-  username: string
+  username: string,
 }
 
 export function LikeAndDislike({ problemId, username }: LADProps) {
   const languageIdx = Number(localStorage.getItem(LANGUAGE_IDX))
   const [info, setInfo] = useState({
-    liked: false,
+    like: false,
+    dislike: false,
     likeCount: 0,
-    disliked: false,
-    dislikeCount: 0
+    dislikeCount: 0,
   })
 
   function handleLike() {
     const c = info.likeCount
-    if (info.liked) {
-      changeCount(problemId, "like", username, true)
+    if (info.like) {
+      deleteUsername(username, problemId, LIKED)
       deleteElement(problemId, username, LIKED)
-      deleteElementFromLocalStorage(LIKED, problemId)
       setInfo({
         ...info,
-        liked: false,
+        like: false,
         likeCount: c - 1
       })
     } else {
-      changeCount(problemId, "like", username)
       addElement(problemId, username, LIKED)
-      addElementToLocalStorage(LIKED, problemId)
+      addUsername(username, problemId, LIKED)
       setInfo({
         ...info,
-        liked: true,
+        like: true,
         likeCount: c + 1
       })
     }
@@ -45,46 +42,45 @@ export function LikeAndDislike({ problemId, username }: LADProps) {
 
   function handleDislike() {
     const c = info.dislikeCount
-    if (info.disliked) {
-      changeCount(problemId, "dislike", username, true)
+    if (info.dislike) {
       deleteElement(problemId, username, DISLIKED)
-      deleteElementFromLocalStorage(DISLIKED, problemId)
+      deleteUsername(username, problemId, DISLIKED)
       setInfo({
         ...info,
-        disliked: false,
+        dislike: false,
         dislikeCount: c - 1
       })
     } else {
-      changeCount(problemId, "dislike", username)
+      addUsername(username, problemId, DISLIKED)
       addElement(problemId, username, DISLIKED)
-      addElementToLocalStorage(DISLIKED, problemId)
       setInfo({
         ...info,
-        disliked: true,
+        dislike: true,
         dislikeCount: c + 1
       })
     }
   }
 
   useEffect(() => {
-    const newLiked = isInLocalStorage(LIKED, problemId)
-    const newDisliked = isInLocalStorage(DISLIKED, problemId)
     if (problemId) {
       const newInformation = getProblemInformations(problemId)
       .then(information => {
         setInfo({
-          liked: newLiked,
-          likeCount: information.like,
-          disliked: newDisliked,
-          dislikeCount: information.dislike
+          like: information.liked.includes(username),
+          likeCount: information.liked.length,
+          dislike: information.disliked.includes(username),
+          dislikeCount: information.disliked.length
         })
       })
+
     }
   }, [problemId])
   return (
-    <Box sx={{alignItems: "center", margin: 2}}>
-      <Button sx={{color: info.liked? "green" : "black"}} onClick={handleLike}>{menuWords.like[languageIdx]} {info.likeCount}</Button>
-      <Button sx={{color: info.disliked? "red" : "black"}} onClick={handleDislike}>{menuWords.dislike[languageIdx]} {info.dislikeCount}</Button>
-    </Box>
+    <Grid container textAlign="center">
+      <Grid item xs={12}>
+        <Button sx={{color: info.like? "green" : "black"}} onClick={handleLike}>{menuWords.like[languageIdx]} {info.likeCount}</Button>
+        <Button sx={{color: info.dislike? "red" : "black"}} onClick={handleDislike}>{menuWords.dislike[languageIdx]} {info.dislikeCount}</Button>
+      </Grid>
+    </Grid>
   )
 }

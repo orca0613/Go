@@ -1,128 +1,129 @@
 import _ from "lodash";
-import { Board, Coordinate, Variations, nBoardInfo } from "../util/types";
+import { Board, Coordinate, Variations, BoardInfo } from "../util/types";
+import { addToKey, makeRandomNumber, playMoveAndReturnNewBoard } from "../util/functions";
 
-class Game {
-  private board: Board;
-  private answers: Variations;
-  private variations: Variations;
-  private lines: number;
-  private storage: nBoardInfo[];
-  private idx: number;
-  private key: string;
+export class Game {
+  private answers: Variations
+  private variations: Variations
+  private lines: number
+  private history: BoardInfo[]
+  private idx: number
+  private state: BoardInfo
+  private initState: BoardInfo
 
-  constructor(board: Board, answers: Variations, variations: Variations, lines: number) {
-    this.board = board;
+  constructor(board: Board, answers: Variations, variations: Variations, color: string) {
     this.answers = answers
-    this.variations = variations;
-    this.lines = lines
-    this.storage = []
-    this.idx = 0
-    this.key = "0"
-  }
-
-  private isOutside(coord: Coordinate) {
-    const y = coord[0], x = coord[1]
-    return !(0 <= y && y <= this.lines && 0 <= x && x < this.lines)
-  }
-
-  private addNeighbors(coord: Coordinate) {
-    const y = coord[0], x = coord[1]
-    const neighbors: Coordinate[] = [[y + 1, x], [y - 1, x], [y, x + 1], [y, x - 1]]
-    return neighbors
-  }
-
-  private getStatus(board: Board, coord: Coordinate) {
-    const y = coord[0], x = coord[1]
-    return board[y][x]
-  }
-
-  private changeStatus(board: Board, coord: Coordinate, value: string) {
-    const newBoard = board, y = coord[0], x = coord[1]
-    newBoard[y][x] = value
-    return newBoard
-  }
-
-  private removeDeadGroup(board: Board, group: Coordinate[]) {
-    const newBoard = _.cloneDeep(board)
-    for (const c of group) {
-      const y = c[0], x = c[1]
-      newBoard[y][x] = "."
-    }
-    return newBoard
-  }
-
-  private getDeadGroup(board: Board, coord: Coordinate, color: string, opponentColor: string): Coordinate[] {
-    let newBoard = _.cloneDeep(board)
-    const y = coord[0], x = coord[1]
-    let group: Coordinate[] = [[y, x]]
-    let idx = 0
-
-    while (idx < group.length) {
-      const c = group[idx]
-      if (this.isOutside(c) || this.getStatus(newBoard, c) === opponentColor) {
-        group.splice(idx, 1)
-      } else if (this.getStatus(newBoard, c) === color) {
-        group = group.concat(this.addNeighbors(c))
-        newBoard = this.changeStatus(newBoard, c, opponentColor)
-        idx += 1
-      } else {
-        return []
-      }
-    }
-    return group
-  }
-
-  public playMove(color: string, currentMove: Coordinate, currentKey: string) {
-    let board = this.board
-    this.addHistory(board, color, currentKey)
-    if (this.isOutside(currentMove) || this.getStatus(board, currentMove) !== ".") {
-      return board
-    }
-    board = this.changeStatus(board, currentMove, color)
-    const opponentColor = color === "b"? "w" : "b"
-    const neighbors = this.addNeighbors(currentMove)
-    let dead: Coordinate[] = []
-    for (const neighbor of neighbors) {
-      dead = dead.concat(this.getDeadGroup(board, neighbor, opponentColor, color))
-    }
-    const suicideGroup: Coordinate[] = this.getDeadGroup(board, currentMove, color, opponentColor)
-    if (dead.length === 0 && suicideGroup.length > 0) {
-      board = this.changeStatus(board, currentMove, ".")
-      return board
-    }
-    board = this.removeDeadGroup(board, dead)
-    const newBoardInfo: nBoardInfo = {
-      board: board,
-      color: opponentColor,
-      key: currentKey,
-    }
-    return newBoardInfo
-  }
-
-  private addHistory(board: Board, color: string, key: string) {
-    const newBoardInfo: nBoardInfo = {
+    this.variations = variations
+    this.lines = board.length
+    this.state = {
       board: board,
       color: color,
-      key: key,
+      key: "0"
     }
-    this.storage.splice(this.idx)
-    this.storage.push(newBoardInfo)
-    this.idx = this.storage.length - 1
-    this.key = key
+    this.initState = {
+      board: board,
+      color: color,
+      key: "0"
+    }
+    this.history = [this.initState]
+    this.idx = 0
   }
 
-  public previousMove() {
+  public getState() {
+    return this.state
+  }
+
+  public clearHistory() {
+    this.history = [this.initState]
+    this.idx = 0
+  }
+
+  public playMove(info: BoardInfo, currentMove: Coordinate): BoardInfo {
+    const color = info.color
+    const key = info.key
+    let board = info.board
+    const newBoard = playMoveAndReturnNewBoard(board, currentMove, color)
+    if (_.isEqual(board, newBoard)) {
+      return info
+    }
+    const newColor = color === "b"? "w" : "b"
+    const newKey = addToKey(currentMove, this.lines, key)
+    const newState: BoardInfo = {
+      board: newBoard,
+      color: newColor,
+      key: newKey
+    }
+    this.addHistory(newState)
+    this.state = newState
+    return newState
+  }
+
+  public tryMove(info: BoardInfo, currentMove: Coordinate): BoardInfo {
+    const key = info.key
+    const y = currentMove[0], x = currentMove[1]
+    const converted = String(y * this.lines + x)
+    if (this.variations.hasOwnProperty(key) && this.variations[key].includes(converted) || 
+    this.answers.hasOwnProperty(key) && this.answers[key].includes(converted)) {
+      const newBoard = playMoveAndReturnNewBoard(info.board, currentMove, info.color)
+      const newColor = info.color === "b"? "w" : "b"
+      const newKey = addToKey(currentMove, this.lines, info.key)
+      const newState: BoardInfo = {
+        board: newBoard,
+        color: newColor,
+        key: newKey
+      }
+      return this.response(newState)
+    } else {
+      return info
+    }
+  }
+
+  private response(info: BoardInfo): BoardInfo {
+    const key = info.key
+    if (this.variations.hasOwnProperty(key)) {
+      const random = makeRandomNumber(this.variations[key].length)
+      const nextMove = Number(this.variations[key][random])
+      const y = Math.floor(nextMove / this.lines), x = nextMove % this.lines
+      const coord: Coordinate = [y, x]
+      return this.playMove(info, coord)
+    } else {
+      if (this.answers[key].length === 0) {
+        this.addHistory(info)
+        return info
+      } else {
+        const random = makeRandomNumber(this.answers[key].length)
+        const nextMove = Number(this.answers[key][random])
+        const y = Math.floor(nextMove / this.lines), x = nextMove % this.lines
+        const coord: Coordinate = [y, x]
+        return this.playMove(info, coord)
+      }
+    }
+  }
+
+  private addHistory(boardInfo: BoardInfo) {
+    const newHistory = this.history.slice(0, this.idx + 1)
+    this.idx = newHistory.length
+    newHistory.push(boardInfo)
+    this.history = newHistory
+  }
+
+  public previousMove(): BoardInfo {
     if (this.idx > 0) {
       this.idx -= 1
     }
-    return this.storage[this.idx]
+    const newState = this.history[this.idx]
+    this.state = newState
+    return newState
   }
   
-  public nextMove() {
-    if (this.idx + 1 < this.storage.length) {
+  public nextMove(): BoardInfo {
+    if (this.idx + 1 < this.history.length) {
       this.idx += 1
     }
-    return this.storage[this.idx]
+    const newState = this.history[this.idx]
+    this.state
+    return newState
   }
-  
 }
+
+

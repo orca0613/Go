@@ -9,7 +9,6 @@ import { getProblemByIdList } from '../network/problem';
 
 export default function MyPageProblems() {
   const { part } = useParams()
-  console.log(part)
   const [problems, setProblems] = useState<ProblemInfo[]>([]);
 
 
@@ -23,7 +22,6 @@ export default function MyPageProblems() {
       } else {
         idList = localStorage.getItem(part)?? ""
       }
-      console.log(part)
       const result = getProblemByIdList(idList)
       const newProblems: ProblemInfo[] = []
       result.then(r => {

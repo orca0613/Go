@@ -2,7 +2,7 @@ import * as React from 'react';
 import Menu from '@mui/material/Menu';
 import MenuItem from '@mui/material/MenuItem';
 import { useNavigate } from 'react-router-dom';
-import { NavButton } from '../pages/layout/NavButton';
+import { NavButton } from './layout/NavButton';
 import { menuWords } from '../util/menuWords';
 import { LANGUAGE_IDX } from '../util/constants';
 

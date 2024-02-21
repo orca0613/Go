@@ -2,10 +2,11 @@ import * as React from 'react';
 import Menu from '@mui/material/Menu';
 import MenuItem from '@mui/material/MenuItem';
 import { useNavigate } from 'react-router-dom';
-import { NavButton } from '../pages/layout/NavButton';
+import { NavButton } from './layout/NavButton';
 import { logout } from '../util/functions';
 import { menuWords } from '../util/menuWords';
 import { LANGUAGE_IDX } from '../util/constants';
+import { Box } from '@mui/material';
 
 export default function UserMenu() {
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
@@ -31,7 +32,7 @@ export default function UserMenu() {
   }
 
   return (
-    <div>
+    <Box>
       <NavButton
         id="basic-button"
         aria-controls={open ? 'basic-menu' : undefined}
@@ -53,6 +54,6 @@ export default function UserMenu() {
         <MenuItem onClick={moveToMyPage}>{menuWords.myPage[languageIdx]}</MenuItem>
         <MenuItem onClick={logoutAndMove}>{menuWords.logout[languageIdx]}</MenuItem>
       </Menu>
-    </div>
+    </Box>
   );
 }

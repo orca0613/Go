@@ -24,12 +24,12 @@ const Background = ({ boardWidth, lines, cellSize, offset, style}: BoardProps) =
       canvas.height = cellSize * (lines - 1) + offset * 2;
   
       const img = new Image()
-      img.src = "../../public/images/wood4.jpg"
+      img.src = "/public/images/wood4.jpg"
       img.onload = function() {
         ctx.drawImage(img, 0, 0, boardWidth, boardWidth)
       }
     } 
-  }, [lines])
+  }, [lines, boardWidth])
 
   
 

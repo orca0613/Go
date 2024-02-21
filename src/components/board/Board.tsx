@@ -1,7 +1,7 @@
 
 import { CSSProperties, useEffect, useRef } from 'react';
 import { Coordinate } from '../../util/types';
-import { flowerPointPosition } from '../../util/constants';
+import { boardWidth, flowerPointPosition } from '../../util/constants';
 
 interface BoardProps {
   boardWidth: number
@@ -12,7 +12,7 @@ interface BoardProps {
   style?: CSSProperties
 }
 
-const EmptyBoard = ({ lines, cellSize, offset, lineWidth, style}: BoardProps) => {
+const EmptyBoard = ({ lines, cellSize, offset, lineWidth, style, boardWidth}: BoardProps) => {
 
   const starPoints = flowerPointPosition[lines - 1]
   const starPointSize = Math.min(5, cellSize / 10)
@@ -59,7 +59,7 @@ const EmptyBoard = ({ lines, cellSize, offset, lineWidth, style}: BoardProps) =>
         drawCircle(ctx, starPointSize, point, 'b')
       })
     }
-  }, [lines]);
+  }, [lines, boardWidth]);
 
   return (
     <canvas id="empty-board" ref={canvasRef} style={style} ></canvas>

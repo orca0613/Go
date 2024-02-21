@@ -82,8 +82,9 @@ export default function SearchingByCreator() {
         />
         <Button onClick={changeCreator}>{menuWords.search[languageIdx]}</Button>
       </Box>
-      <SampleProblemBox problems={problems}></SampleProblemBox>
-
+      <Box>
+        {problems.length > 0? <SampleProblemBox problems={problems}></SampleProblemBox> : ""}
+      </Box>
     </Box>
   );
 };

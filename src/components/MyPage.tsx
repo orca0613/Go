@@ -53,14 +53,14 @@ export function MyPage() {
         {divider}
         <Button sx={{fontSize: 18}} onClick={() => navigate(`${SOLVED}`)}>{menuWords.solved[languageIdx]} : {info.solved.length}</Button>
         {divider}
-        <Button sx={{fontSize: 18}} onClick={() => navigate("unresolved")}>{menuWords.unresolved[languageIdx]} : {info.tried.length - info.solved.length}</Button>
+        <Button sx={{fontSize: 18}} onClick={() => navigate("unresolved")}>{menuWords.unresolved[languageIdx]} : {Math.max(info.tried.length - info.solved.length, 0)}</Button>
         {divider}
         <Button sx={{fontSize: 18}} onClick={() => navigate(`${LIKED}`)}>{menuWords.liked[languageIdx]} : {info.liked.length}</Button>
         {divider}
         {/* <Button sx={{fontSize: 18}} onClick={() => navigate("/asked")}>asked : {asked.length}</Button>
         {divider} */}
         {info.withQuestions.length? 
-          <Button sx={{fontSize: 18, color: "red"}} onClick={() => navigate("/with-questions")}>{menuWords.requestsReceived[languageIdx]} : {info.withQuestions.length}</Button> :
+          <Button sx={{fontSize: 18, color: "red"}} onClick={() => navigate(`${WITHQUESTIONS}`)}>{menuWords.requestsReceived[languageIdx]} : {info.withQuestions.length}</Button> :
           <></>
         }
       </Box>

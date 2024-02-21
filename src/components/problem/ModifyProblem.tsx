@@ -1,6 +1,6 @@
 import { useState } from "react"
 import { Coordinate, ProblemInfo } from "../../util/types"
-import { LANGUAGE_IDX, boardWidth } from "../../util/constants"
+import { LANGUAGE_IDX } from "../../util/constants"
 import { Box, Button, Divider, FormControl, InputLabel, MenuItem, Select, SelectChangeEvent, TextField, useMediaQuery } from "@mui/material"
 import { isLegalBoard } from "../../util/functions"
 import { isOutside } from "../../gologic/logic"
@@ -11,9 +11,10 @@ import { modifyProblem } from "../../network/problem"
 
 interface ModifyProblemProps {
   problemInfo: ProblemInfo
+  boardWidth: number
 }
 
-export function ModifyProblem({ problemInfo }: ModifyProblemProps) {
+export function ModifyProblem({ problemInfo, boardWidth }: ModifyProblemProps) {
   const id = problemInfo._id
   const [problem, setProblem] = useState(problemInfo.initialState)
   const boardSize = problem.length

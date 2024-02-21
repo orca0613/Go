@@ -28,23 +28,6 @@ export function deleteElement(element: string, name: string, where: string) {
     .catch(error => console.error("Error: ", error))
 }
 
-export function changePoint(point: number) {
-  const name = localStorage.getItem(USERNAME)
-  const curPoint = Number(localStorage.getItem(USERPOINT))
-  const newPoint = curPoint + point
-  const token = localStorage.getItem(TOKEN)
-  localStorage.setItem(USERPOINT, String(newPoint))
-  fetch(`${API_URL}${USERDETAIL_DB_PATH}/change-point`, {
-    method: "PATCH",
-    headers: {
-      "Content-Type": "application/json",
-      'authorization': `Bearer ${token}`
-    },
-    body: JSON.stringify({name, point})
-  })
-    .catch(error => console.error("Error: ", error))
-}
-
 export async function getUserDetail(name: string | null) {
   if (name === null) {
     return
@@ -63,3 +46,21 @@ export async function getAllCreators(): Promise<string[]> {
   })
   return result 
 }
+
+export function changeInfoAndPoint(problemId: string, where: string, point: number) {
+  const name = localStorage.getItem(USERNAME)
+  const curPoint = Number(localStorage.getItem(USERPOINT))
+  const newPoint = curPoint + point
+  const token = localStorage.getItem(TOKEN)
+  localStorage.setItem(USERPOINT, String(newPoint))
+  fetch(`${API_URL}${USERDETAIL_DB_PATH}/change`, {
+    method: "PATCH",
+    headers: {
+      "Content-Type": "application/json",
+      'authorization': `Bearer ${token}`
+    },
+    body: JSON.stringify({name, point, problemId, where})
+  })
+    .catch(error => console.error("Error: ", error))
+}
+

@@ -1,8 +1,8 @@
 import { getDeadGroup, handleMove } from "../gologic/logic"
-import problemStore from "../store/problemStore"
-import { LANGUAGE_IDX, SOLVED } from "./constants"
+import problemStore from "../redux/problemStore"
+import { ASKED, CREATED, DISLIKED, FOLLOWLIST, LANGUAGE_IDX, LIKED, MYFOLLOWERS, SOLVED, TRIED, USERPOINT, WITHQUESTIONS } from "./constants"
 import { menuWords } from "./menuWords"
-import { Board, Coordinate, Variations } from "./types"
+import { Board, Coordinate, Variations, UserDetail } from "./types"
 import _ from 'lodash'
 
 const languageIdx = Number(localStorage.getItem(LANGUAGE_IDX))
@@ -107,7 +107,8 @@ export function removeCurrentVariation(currentKey: string, variations: Variation
       break
     }
   }
-  alert("removed")
+  console.log(variations)
+  console.log(newVariations)
   return newVariations
 }
 
@@ -181,4 +182,35 @@ export function addElementToLocalStorage(where: string, val: string) {
   }
   localStorage.setItem(where, storage + "&" + val)
   return
+}
+
+export function getAverageLevel(total: number, divider:number): number {
+  if (divider === 0) {
+    return 19
+  }
+  const average = total / divider
+  console.log(average)
+  if (average <= 18 && average <= 1) {
+    return Math.round(average)
+  }
+  if (average <= -1 && average <= -9) {
+    return Math.round(average)
+  }
+  if (average > 0) {
+    return 1
+  }
+  return -1
+}
+
+export function settingUserDetail(detail: UserDetail) {
+  localStorage.setItem(USERPOINT, String(detail.point))
+  localStorage.setItem(CREATED, detail.created.join("&"))
+  localStorage.setItem(TRIED, detail.tried.join("&"))
+  localStorage.setItem(SOLVED, detail.solved.join("&"))
+  localStorage.setItem(ASKED, detail.asked.join("&"))
+  localStorage.setItem(WITHQUESTIONS, detail.withQuestions.join("&"))
+  localStorage.setItem(LIKED, detail.liked.join("&"))
+  localStorage.setItem(DISLIKED, detail.disliked.join("&"))
+  localStorage.setItem(MYFOLLOWERS, detail.myFollowers.join("&"))
+  localStorage.setItem(FOLLOWLIST, detail.followList.join("&"))
 }
