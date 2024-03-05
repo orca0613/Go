@@ -4,7 +4,7 @@ import { Board, Coordinate } from '../../util/types';
 import { divmod } from '../../util/functions';
 import _ from 'lodash';
 
-interface StonesProps {
+interface StonesTestProps {
   boardWidth: number
   lines: number
   cellSize: number
@@ -18,13 +18,11 @@ interface StonesProps {
   answers?: string[]
   questions?: string[]
   onClick?: (c: Coordinate) => void
-  
 }
 
-const Stones = ({boardWidth, lines, cellSize, stoneSize, offset, lineWidth, board, style, moves, variations, answers, questions, onClick}: StonesProps) => {
+const Stones = ({boardWidth, lines, cellSize, stoneSize, offset, lineWidth, board, style, moves, variations, answers, questions, onClick}: StonesTestProps) => {
   const numberSize = stoneSize
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const scaledSize = (cellSize * (lines - 1) + offset * 2);
   const answerColor = "green"
   const wrongColor = "red"
   const questionColor = "blue"
@@ -40,8 +38,8 @@ const Stones = ({boardWidth, lines, cellSize, stoneSize, offset, lineWidth, boar
   }
 
   function drawCircle(ctx: CanvasRenderingContext2D, size: number, coordinate: Coordinate, color: string) {
-    const y = cellSize * (coordinate[0]) + 1 + offset;
-    const x = cellSize * (coordinate[1]) + 1 + offset;
+    const y = cellSize * (coordinate[0]) + offset;
+    const x = cellSize * (coordinate[1]) + offset;
 
     ctx.fillStyle = color;
     ctx.lineWidth = lineWidth
@@ -53,8 +51,8 @@ const Stones = ({boardWidth, lines, cellSize, stoneSize, offset, lineWidth, boar
   }
 
   function drawMoveNumber(ctx: CanvasRenderingContext2D, coord: Coordinate, color: string, moveNumber: string) {
-    const x = cellSize * (coord[1]) + offset + 1;
-    const y = cellSize * (coord[0]) + offset + 1 + numberSize / 3;
+    const x = cellSize * (coord[1]) + offset;
+    const y = cellSize * (coord[0]) + offset + numberSize / 3;
 
     ctx.font = `normal normal bolder ${stoneSize}px sans-serif`;
     ctx.fillStyle = color === 'b'? 'white' : 'black';
@@ -72,21 +70,19 @@ const Stones = ({boardWidth, lines, cellSize, stoneSize, offset, lineWidth, boar
 
       const scale = window.devicePixelRatio
     
-      canvas.width = scaledSize * scale;
-      canvas.height = scaledSize * scale;
       ctx.scale(scale, scale)
   
-      canvas.width = cellSize * (lines - 1) + offset * 2;
-      canvas.height = cellSize * (lines - 1) + offset * 2;
+      canvas.width = boardWidth
+      canvas.height = boardWidth
 
       // Draw stones
       for (let i = 0; i < lines; i++) {
         for (let j = 0; j < lines; j++) {
-            if (board[i][j] === 'b') {
-                drawCircle(ctx, stoneSize, [i, j], 'black')
-            } else if (board[i][j] === 'w') {
-                drawCircle(ctx, stoneSize, [i, j], 'white')
-            }
+          if (board[i][j] === 'b') {
+              drawCircle(ctx, stoneSize, [i, j], 'black')
+          } else if (board[i][j] === 'w') {
+              drawCircle(ctx, stoneSize, [i, j], 'white')
+          }
         }
       }
       // Draw move numbers
@@ -133,7 +129,7 @@ const Stones = ({boardWidth, lines, cellSize, stoneSize, offset, lineWidth, boar
       }
       ctx.stroke()
     }
-  }, [board, moves, variations, answers, boardWidth]);
+  }, [board, moves, variations, answers, boardWidth, lines]);
   
   return (
     <canvas id="stones" ref={canvasRef} style={style} onClick={handleClick}></canvas>

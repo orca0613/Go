@@ -2,15 +2,13 @@
 import { CSSProperties, useEffect, useRef } from 'react';
 
 
-interface BoardProps {
+interface BackgroundProps {
   boardWidth: number 
   lines: number 
-  cellSize: number 
-  offset: number 
   style?: CSSProperties 
 }
 
-const Background = ({ boardWidth, lines, cellSize, offset, style}: BoardProps) => {
+const Background = ({ boardWidth, lines, style}: BackgroundProps) => {
 
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
@@ -20,11 +18,11 @@ const Background = ({ boardWidth, lines, cellSize, offset, style}: BoardProps) =
   
     if (ctx && canvas) {
   
-      canvas.width = cellSize * (lines - 1) + offset * 2;
-      canvas.height = cellSize * (lines - 1) + offset * 2;
+      canvas.width = boardWidth;
+      canvas.height = boardWidth;
   
       const img = new Image()
-      img.src = "/public/images/wood4.jpg"
+      img.src = "/images/wood4.jpg"
       img.onload = function() {
         ctx.drawImage(img, 0, 0, boardWidth, boardWidth)
       }

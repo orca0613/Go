@@ -91,5 +91,17 @@ export const menuWords = {
   registeredVariationWarning: ["This variation has already been registered", "이미 등록되어 있는 변화도입니다", "这是已经注册的渐变", "すでに登録されている変更図です"],
   noVariationWarning: ["There is no this variation", "등록되어 있지 않은 변화도입니다.", "没有这个变化", "登録されていない変更図です"],
   rightWay: ["You are on the right way", "올바른 길로 가고 있습니다", "你走在正确的轨道上", "正しい道を進んでいます"],
-  deletedProblemWarning: ["The problem has been deleted", "문제가 삭제 되었습니다", "问题已被删除", "問題が削除されました"]
+  deletedProblemWarning: ["The problem has been deleted", "문제가 삭제 되었습니다", "问题已被删除", "問題が削除されました"],
+  requestSuggestion: [
+    "This move has not been registered. if you want to request variation of this move please push request variation button.",
+    "등록되어 있지 않은 수입니다. 출제자에게 변화도를 요청하시려면 변화도 요청을 눌러주세요.",
+    "此手牌未注册。如果您想请求此类变化图，请按请求变化按钮。",
+    "この手は登録されていません。この手の変化図を要求したい場合は、変化図要請ボタンを押してください"
+  ],
+  checkMailWarning: [
+    "A verification email has been sent. You can log in after authentication.", 
+    "인증 메일이 발송 되었습니다. 인증 후 로그인 가능합니다.", 
+    "验证电子邮件已发送。认证后即可登录。", 
+    "確認メールが送信されました。認証後ログイン可能となります。"
+  ],
 }

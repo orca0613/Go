@@ -1,8 +1,9 @@
-import { API_URL, PROBLEMINFO_DB_PATH, TOKEN } from "../util/constants"
-import { ProblemInformation, ReplyForm } from "../util/types"
+import { API_URL, PROBLEMINFO_DB_PATH, USERINFO, initialUserInfo } from "../util/constants"
+import { ProblemInformation, ReplyForm, UserInfo } from "../util/types"
 
 export async function changeCount(problemId:string, where: string, name: string, count: number) {
-  const token = localStorage.getItem(TOKEN)
+  const userInfo: UserInfo = JSON.parse(localStorage.getItem(USERINFO) || initialUserInfo)
+  const token = userInfo.token
   await fetch(`${API_URL}${PROBLEMINFO_DB_PATH}/change-count`, {
     method: 'PATCH',
     headers: {
@@ -15,7 +16,8 @@ export async function changeCount(problemId:string, where: string, name: string,
 }
 
 export async function addReply(problemId: string, reply: ReplyForm, name: string) {
-  const token = localStorage.getItem(TOKEN)
+  const userInfo: UserInfo = JSON.parse(localStorage.getItem(USERINFO) || initialUserInfo)
+  const token = userInfo.token
   await fetch(`${API_URL}${PROBLEMINFO_DB_PATH}/add-reply`, {
     method: 'PATCH',
     headers: {
@@ -44,7 +46,8 @@ export async function getReply(problemId: string): Promise<ReplyForm[]> {
 }
 
 export async function addUsername(username: string, problemId: string, where: string) {
-  const token = localStorage.getItem(TOKEN)
+  const userInfo: UserInfo = JSON.parse(localStorage.getItem(USERINFO) || initialUserInfo)
+  const token = userInfo.token
   await fetch(`${API_URL}${PROBLEMINFO_DB_PATH}/add-name`, {
     method: 'PATCH',
     headers: {
@@ -57,7 +60,8 @@ export async function addUsername(username: string, problemId: string, where: st
 }
 
 export async function deleteUsername(username: string, problemId: string, where: string) {
-  const token = localStorage.getItem(TOKEN)
+  const userInfo: UserInfo = JSON.parse(localStorage.getItem(USERINFO) || initialUserInfo)
+  const token = userInfo.token
   await fetch(`${API_URL}${PROBLEMINFO_DB_PATH}/delete-name`, {
     method: 'PATCH',
     headers: {
@@ -70,7 +74,8 @@ export async function deleteUsername(username: string, problemId: string, where:
 }
 
 export async function addCorrectUser(problemId:string, name: string, level: number) {
-  const token = localStorage.getItem(TOKEN)
+  const userInfo: UserInfo = JSON.parse(localStorage.getItem(USERINFO) || initialUserInfo)
+  const token = userInfo.token
   await fetch(`${API_URL}${PROBLEMINFO_DB_PATH}/add-correct`, {
     method: 'PATCH',
     headers: {
@@ -83,7 +88,8 @@ export async function addCorrectUser(problemId:string, name: string, level: numb
 }
 
 export async function addWrong(problemId:string, name: string, level: number) {
-  const token = localStorage.getItem(TOKEN)
+  const userInfo: UserInfo = JSON.parse(localStorage.getItem(USERINFO) || initialUserInfo)
+  const token = userInfo.token
   await fetch(`${API_URL}${PROBLEMINFO_DB_PATH}/add-wrong`, {
     method: 'PATCH',
     headers: {

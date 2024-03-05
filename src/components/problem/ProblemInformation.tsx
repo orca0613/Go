@@ -1,11 +1,10 @@
-import { Box, Button, Divider, Grid, Typography, useMediaQuery } from "@mui/material";
+import { Box, Typography, useMediaQuery } from "@mui/material";
 import { menuWords } from "../../util/menuWords";
 import { LANGUAGE_IDX } from "../../util/constants";
 import { ProblemInfo } from "../../util/types";
 import { useEffect, useState } from "react";
 import { getProblemInformations } from "../../network/problemInformation";
-
-const divider = <Divider orientation="horizontal" sx={{mt: "0.5vh", mb: "0.5vh", borderColor:"whitesmoke" }} />
+import { useWindowSize } from "react-use";
 
 interface PIProps {
   problemInfo: ProblemInfo
@@ -14,7 +13,9 @@ interface PIProps {
 export function ProblemInformation({ problemInfo }: PIProps) {
 
   const languageIdx = Number(localStorage.getItem(LANGUAGE_IDX))
-  const isMobile = useMediaQuery("(max-width: 800px)")
+  const {width, height} = useWindowSize()
+  const isMobile = height > width * 2 / 3 || width < 1000
+  const margin = 1
   const [info, setInfo] = useState({
     color: problemInfo.color,
     creator: problemInfo.creator,
@@ -46,20 +47,17 @@ export function ProblemInformation({ problemInfo }: PIProps) {
     }
   }, [problemInfo])
   return (
-    <Box textAlign="center">
-      <Typography mb="0.5ch" variant="body1">
-        {info.color === "b"? menuWords.blackTurn[languageIdx] : menuWords.whiteTurn[languageIdx]}
+    <Box textAlign="center" display={isMobile? "flex" : "grid"} justifyContent="center">
+      <Typography sx={{margin: margin}} mb="0.5ch" variant="body1">
+        {info.color === "b"? menuWords.blackTurn[languageIdx] : menuWords.whiteTurn[languageIdx]} / {info.level > 0? `${info.level}${menuWords.K[languageIdx]}` : `${Math.abs(info.level)}${menuWords.D[languageIdx]}`}
       </Typography>
-      <Typography sx={{margin: 2, display: isMobile? "none" : ""}} mb="0.5ch" variant="body1">{info.creator}</Typography>
-      <Typography sx={{margin: 2, display: isMobile? "none" : ""}} mb="0.5ch" variant="body1">
-        {menuWords.LEVEL[languageIdx]} : {info.level > 0? `${info.level}${menuWords.K[languageIdx]}` : `${Math.abs(info.level)}${menuWords.D[languageIdx]}`}
-      </Typography>
-      <Typography sx={{margin: 2, display: isMobile? "none" : ""}} mb="0.5ch" variant="body1">{menuWords.views[languageIdx]} : {info.view}</Typography>
-      <Typography sx={{margin: 2, display: isMobile? "none" : ""}} mb="0.5ch" variant="body1">
+      <Typography sx={{margin: margin}} mb="0.5ch" variant="body1">{info.creator}</Typography>
+      <Typography sx={{margin: margin, display: isMobile? "none" : ""}} mb="0.5ch" variant="body1">{menuWords.views[languageIdx]} : {info.view}</Typography>
+      <Typography sx={{margin: margin, display: isMobile? "none" : ""}} mb="0.5ch" variant="body1">
         {menuWords.correctRate[languageIdx]} : {info.correct + info.wrong > 0? `${String(info.correct / (info.correct + info.wrong) * 100).slice(0, 4)}` : 0} % 
       </Typography>
-      <Typography sx={{margin: 2, display: isMobile? "none" : ""}} mb="0.5ch" variant="body1">{info.correct} / {info.correct + info.wrong}</Typography>
-      <Typography sx={{height:60, margin: 2, display: isMobile? "none" : ""}} mb="0.5ch" variant="body1">{info.comment? info.comment : menuWords.noComment[languageIdx]}</Typography>
+      <Typography sx={{margin: margin, display: isMobile? "none" : ""}} mb="0.5ch" variant="body1">({info.correct} / {info.correct + info.wrong})</Typography>
+      <Typography sx={{height:60, margin: margin, display: isMobile? "none" : ""}} mb="0.5ch" variant="body1">{info.comment? info.comment : menuWords.noComment[languageIdx]}</Typography>
     </Box>
   )
 }

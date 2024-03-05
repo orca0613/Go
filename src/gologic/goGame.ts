@@ -74,7 +74,7 @@ export class Game {
       }
       return this.response(newState)
     } else {
-      return info
+      return this.playMove(info, currentMove)
     }
   }
 

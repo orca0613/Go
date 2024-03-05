@@ -1,11 +1,21 @@
 
-import { Box, Button, Grid, Typography } from '@mui/material'
+import { Button, Typography } from '@mui/material'
 import { menuWords } from '../util/menuWords'
-import { LANGUAGE_IDX, USERNAME } from '../util/constants'
+import { LANGUAGE_IDX, USERINFO, initialUserInfo } from '../util/constants'
+import { UserInfo } from '../util/types'
+import { useEffect, useState } from 'react'
 
 export function HomeForm() {
-  const username = localStorage.getItem(USERNAME)?? ""
+
+  const userInfo: UserInfo = JSON.parse(localStorage.getItem(USERINFO) || initialUserInfo)
+  const [username, setUsername] = useState(userInfo.name)
   const languageIdx = Number(localStorage.getItem(LANGUAGE_IDX))
+
+  useEffect(() => {
+    const newUserInfo: UserInfo = JSON.parse(localStorage.getItem(USERINFO) || initialUserInfo)
+    setUsername(newUserInfo.name)
+  }, [userInfo])
+
 
   return (
     <>

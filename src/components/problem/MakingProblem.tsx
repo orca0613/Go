@@ -1,7 +1,7 @@
-import { useEffect, useState } from "react"
-import { Coordinate } from "../../util/types"
-import { LANGUAGE_IDX, USERNAME, boardWidth } from "../../util/constants"
-import { Box, Button, Divider, FormControl, Grid, InputLabel, MenuItem, Select, SelectChangeEvent, TextField, useMediaQuery } from "@mui/material"
+import { useState } from "react"
+import { Coordinate, UserInfo } from "../../util/types"
+import { LANGUAGE_IDX, USERINFO, boardSizeArray, initialUserInfo, levelArray } from "../../util/constants"
+import { Box, Button, FormControl, Grid, InputLabel, MenuItem, Select, SelectChangeEvent, TextField, useMediaQuery } from "@mui/material"
 import { isLegalBoard, makingEmptyBoard } from "../../util/functions"
 import { isOutside } from "../../gologic/logic"
 import FinalBoard from "../board/FinalBoard"
@@ -10,13 +10,14 @@ import { createProblem } from "../../network/problem"
 import { useWindowSize } from "react-use"
 
 export function MakingProblem() {
-  const creator = localStorage.getItem(USERNAME)
+  const userDetail: UserInfo = JSON.parse(localStorage.getItem(USERINFO) || initialUserInfo)
+  const creator = userDetail.name
   const [boardSize, setBoardSize] = useState(9)
   let emptyBoard = makingEmptyBoard(boardSize)
   const [problem, setProblem] = useState(emptyBoard)
-  const isMobile = useMediaQuery("(max-width: 800px)")
-  const margin = 1
   const {width, height} = useWindowSize()
+  const isMobile = height > width * 2 / 3 || width < 1000
+  const margin = 1
   const languageIdx = Number(localStorage.getItem(LANGUAGE_IDX))
   const [info, setInfo] = useState({
     comment: "",
@@ -24,7 +25,7 @@ export function MakingProblem() {
     color: "",
     level: 18,
   })  
-
+  
   function changeInfo(where: string, val:any) {
     setInfo({
       ...info,
@@ -68,19 +69,26 @@ export function MakingProblem() {
   }
 
   function handleBoardSizeChange(e: SelectChangeEvent) {
-    setBoardSize(Number(e.target.value))
+    const newSize = Number(e.target.value)
+    if (newSize === boardSize) {
+      return
+    }
+    const newBoard = makingEmptyBoard(newSize)
+    setBoardSize(Number(newSize))
+    setProblem(newBoard)
   }
 
   function levelChange(e: SelectChangeEvent) {
     changeInfo("level", Number(e.target.value))
   }
 
-  useEffect(() => {
+  function resetBoard() {
     setProblem(makingEmptyBoard(boardSize))
-  }, [boardSize])
+
+  }
 
   const leftMenu = 
-  <Box textAlign="center" justifyContent="center" sx={{width: isMobile? width : width / 5}}>
+  <Box textAlign="center" justifyContent="center" display={isMobile? "grid" : ""} sx={{width: isMobile? width : width / 5}}>
     <TextField sx={{margin: margin, width: isMobile? width / 2 : width / 8, height: isMobile? "" : height / 5}}
     error={info.comment.length > 50? true : false}
     helperText={info.comment.length > 50? menuWords.commentLengthWarning[languageIdx] : ""}
@@ -100,23 +108,9 @@ export function MakingProblem() {
       variant="standard"
       onChange={handleBoardSizeChange}
       >
-        <MenuItem value={3}>3</MenuItem>
-        <MenuItem value={4}>4</MenuItem>
-        <MenuItem value={5}>5</MenuItem>
-        <MenuItem value={6}>6</MenuItem>
-        <MenuItem value={7}>7</MenuItem>
-        <MenuItem value={8}>8</MenuItem>
-        <MenuItem value={9}>9</MenuItem>
-        <MenuItem value={10}>10</MenuItem>
-        <MenuItem value={11}>11</MenuItem>
-        <MenuItem value={12}>12</MenuItem>
-        <MenuItem value={13}>13</MenuItem>
-        <MenuItem value={14}>14</MenuItem>
-        <MenuItem value={15}>15</MenuItem>
-        <MenuItem value={16}>16</MenuItem>
-        <MenuItem value={17}>17</MenuItem>
-        <MenuItem value={18}>18</MenuItem>
-        <MenuItem value={19}>19</MenuItem>
+        {boardSizeArray.map(size => {
+          return (<MenuItem key={size} value={size}>{size}</MenuItem>)
+        })}
       </Select>
     </FormControl>
     <FormControl variant="standard" sx={{margin: margin, width: isMobile? width / 2 : width / 16}}>
@@ -141,39 +135,21 @@ export function MakingProblem() {
         label={menuWords.level[languageIdx]}
         onChange={levelChange}
       >
-        <MenuItem value={18}>{`18${menuWords.K[languageIdx]}`}</MenuItem>
-        <MenuItem value={17}>{`17${menuWords.K[languageIdx]}`}</MenuItem>
-        <MenuItem value={16}>{`16${menuWords.K[languageIdx]}`}</MenuItem>
-        <MenuItem value={15}>{`15${menuWords.K[languageIdx]}`}</MenuItem>
-        <MenuItem value={14}>{`14${menuWords.K[languageIdx]}`}</MenuItem>
-        <MenuItem value={13}>{`13${menuWords.K[languageIdx]}`}</MenuItem>
-        <MenuItem value={12}>{`12${menuWords.K[languageIdx]}`}</MenuItem>
-        <MenuItem value={11}>{`11${menuWords.K[languageIdx]}`}</MenuItem>
-        <MenuItem value={10}>{`10${menuWords.K[languageIdx]}`}</MenuItem>
-        <MenuItem value={9}>{`9${menuWords.K[languageIdx]}`}</MenuItem>
-        <MenuItem value={8}>{`8${menuWords.K[languageIdx]}`}</MenuItem>
-        <MenuItem value={7}>{`7${menuWords.K[languageIdx]}`}</MenuItem>
-        <MenuItem value={6}>{`6${menuWords.K[languageIdx]}`}</MenuItem>
-        <MenuItem value={5}>{`5${menuWords.K[languageIdx]}`}</MenuItem>
-        <MenuItem value={4}>{`4${menuWords.K[languageIdx]}`}</MenuItem>
-        <MenuItem value={3}>{`3${menuWords.K[languageIdx]}`}</MenuItem>
-        <MenuItem value={2}>{`2${menuWords.K[languageIdx]}`}</MenuItem>
-        <MenuItem value={1}>{`1${menuWords.K[languageIdx]}`}</MenuItem>
-        <MenuItem value={-1}>{`1${menuWords.D[languageIdx]}`}</MenuItem>
-        <MenuItem value={-2}>{`2${menuWords.D[languageIdx]}`}</MenuItem>
-        <MenuItem value={-3}>{`3${menuWords.D[languageIdx]}`}</MenuItem>
-        <MenuItem value={-4}>{`4${menuWords.D[languageIdx]}`}</MenuItem>
-        <MenuItem value={-5}>{`5${menuWords.D[languageIdx]}`}</MenuItem>
-        <MenuItem value={-6}>{`6${menuWords.D[languageIdx]}`}</MenuItem>
-        <MenuItem value={-7}>{`7${menuWords.D[languageIdx]}`}</MenuItem>
-        <MenuItem value={-8}>{`8${menuWords.D[languageIdx]}`}</MenuItem>
-        <MenuItem value={-9}>{`9${menuWords.D[languageIdx]}`}</MenuItem>
+        {levelArray.map(level => {
+          if (level < 0) {
+            return <MenuItem key={level} value={level}>{`${Math.abs(level)}${menuWords.D[languageIdx]}`}</MenuItem>
+          } else if (level > 0) {
+            return <MenuItem key={level} value={level}>{`${level}${menuWords.K[languageIdx]}`}</MenuItem>
+          } else {
+            return
+          }
+        })}
       </Select>
     </FormControl>
   </Box>
 
   const rightMenu = 
-  <Box textAlign="center" display={isMobile? "flex" : "grid"} justifyContent="center">
+  <Box textAlign="center" display={isMobile? "flex" : "grid"} justifyContent={isMobile? "space-between" : "center"}>
     <Button sx={{margin: margin, color: info.color === "b"? "inherit" : ""}} onClick={() => changeInfo("color", "b")}>
       {menuWords.BLACK[languageIdx]}
     </Button>
@@ -182,6 +158,9 @@ export function MakingProblem() {
     </Button>
     <Button sx={{margin: margin, color: info.color === "."? "inherit" : ""}} onClick={() => changeInfo("color", ".")}>
       {menuWords.remove[languageIdx]}
+    </Button>
+    <Button sx={{margin: margin, color: "red"}} onClick={resetBoard}>
+      {menuWords.reset[languageIdx]}
     </Button>
     <Button sx={{margin: margin, color: "green"}} onClick={registerProblemAndResetBoard}>
       {menuWords.create[languageIdx]}
@@ -197,16 +176,16 @@ export function MakingProblem() {
         {leftMenu}
       </Grid>
       <Grid justifyContent="center" item sx={{
-        margin: margin, 
-        width: isMobile? width / 7 * 5 : Math.min(width / 2, height / 7 * 5), 
-        height: isMobile? width / 7 * 5 : Math.min(width / 2, height / 7 * 5)
+        width: isMobile? width : height - 100, 
+        height: isMobile? width : height - 100
       }}>
-        <FinalBoard
+      <FinalBoard
         lines={boardSize}
         board={problem}
-        boardWidth={isMobile? width / 7 * 5 : Math.min(width / 2, height / 7 * 5)}
+        boardWidth={isMobile? width : height - 100}
         onClick={handleClick}
-        />
+      >
+      </FinalBoard>
       </Grid>
       <Grid item sx={{margin: margin, width: isMobile? width : width / 6}}>
         {rightMenu}

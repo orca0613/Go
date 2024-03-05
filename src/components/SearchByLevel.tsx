@@ -4,7 +4,7 @@ import { Box, Button, FormControl, InputLabel, MenuItem, Select, SelectChangeEve
 import { ProblemInfo } from '../util/types';
 import SampleProblemBox from './problem/SampleProblemBox';
 import { menuWords } from '../util/menuWords';
-import { LANGUAGE_IDX } from '../util/constants';
+import { LANGUAGE_IDX, levelArray } from '../util/constants';
 import { getProblemByLevel } from '../network/problem';
 
 
@@ -44,33 +44,15 @@ export default function SearchingByLevel() {
             label={menuWords.level[languageIdx]}
             onChange={handleInputChange}
           >
-            <MenuItem value={18}>{`18${menuWords.K[languageIdx]}`}</MenuItem>
-            <MenuItem value={17}>{`17${menuWords.K[languageIdx]}`}</MenuItem>
-            <MenuItem value={16}>{`16${menuWords.K[languageIdx]}`}</MenuItem>
-            <MenuItem value={15}>{`15${menuWords.K[languageIdx]}`}</MenuItem>
-            <MenuItem value={14}>{`14${menuWords.K[languageIdx]}`}</MenuItem>
-            <MenuItem value={13}>{`13${menuWords.K[languageIdx]}`}</MenuItem>
-            <MenuItem value={12}>{`12${menuWords.K[languageIdx]}`}</MenuItem>
-            <MenuItem value={11}>{`11${menuWords.K[languageIdx]}`}</MenuItem>
-            <MenuItem value={10}>{`10${menuWords.K[languageIdx]}`}</MenuItem>
-            <MenuItem value={9}>{`9${menuWords.K[languageIdx]}`}</MenuItem>
-            <MenuItem value={8}>{`8${menuWords.K[languageIdx]}`}</MenuItem>
-            <MenuItem value={7}>{`7${menuWords.K[languageIdx]}`}</MenuItem>
-            <MenuItem value={6}>{`6${menuWords.K[languageIdx]}`}</MenuItem>
-            <MenuItem value={5}>{`5${menuWords.K[languageIdx]}`}</MenuItem>
-            <MenuItem value={4}>{`4${menuWords.K[languageIdx]}`}</MenuItem>
-            <MenuItem value={3}>{`3${menuWords.K[languageIdx]}`}</MenuItem>
-            <MenuItem value={2}>{`2${menuWords.K[languageIdx]}`}</MenuItem>
-            <MenuItem value={1}>{`1${menuWords.K[languageIdx]}`}</MenuItem>
-            <MenuItem value={-1}>{`1${menuWords.D[languageIdx]}`}</MenuItem>
-            <MenuItem value={-2}>{`2${menuWords.D[languageIdx]}`}</MenuItem>
-            <MenuItem value={-3}>{`3${menuWords.D[languageIdx]}`}</MenuItem>
-            <MenuItem value={-4}>{`4${menuWords.D[languageIdx]}`}</MenuItem>
-            <MenuItem value={-5}>{`5${menuWords.D[languageIdx]}`}</MenuItem>
-            <MenuItem value={-6}>{`6${menuWords.D[languageIdx]}`}</MenuItem>
-            <MenuItem value={-7}>{`7${menuWords.D[languageIdx]}`}</MenuItem>
-            <MenuItem value={-8}>{`8${menuWords.D[languageIdx]}`}</MenuItem>
-            <MenuItem value={-9}>{`9${menuWords.D[languageIdx]}`}</MenuItem>
+            {levelArray.map(level => {
+              if (level < 0) {
+                return <MenuItem value={level}>{`${Math.abs(level)}${menuWords.D[languageIdx]}`}</MenuItem>
+              } else if (level > 0) {
+                return <MenuItem value={level}>{`${level}${menuWords.K[languageIdx]}`}</MenuItem>
+              } else {
+                return
+              }
+            })}
           </Select>
         </FormControl>
         <Button onClick={() => setLevel(Number(input))}>{menuWords.search[languageIdx]}</Button>

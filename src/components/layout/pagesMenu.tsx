@@ -1,17 +1,19 @@
-import { Box, MenuItem, Typography, useMediaQuery } from "@mui/material";
+import { Box, Typography, useMediaQuery } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import { NavButton } from "./NavButton";
-import { HOME, LOGIN_PATH, PROBLEM_PATH, CREATE_PATH, SIGNUP_PATH, LANGUAGE_IDX, USERNAME } from "../../util/constants";
+import { HOME, LOGIN_PATH, PROBLEM_PATH, CREATE_PATH, SIGNUP_PATH, LANGUAGE_IDX, USERINFO } from "../../util/constants";
 import Search from "../Search";
 import UserMenu from "../UserMenu";
 import { menuWords } from "../../util/menuWords";
 import Language from "../Language";
+import { BurgerMenu } from "../BurgerMenu";
 import { Test } from "../Test";
+
 
 export function PagesMenu() {
   const navigate = useNavigate();
   const languageIdx = Number(localStorage.getItem(LANGUAGE_IDX))
-  const isMobile = useMediaQuery("(max-width: 700px)")
+  const isMobile = useMediaQuery("(max-width: 800px)")
   
 
   const problems = 
@@ -47,12 +49,12 @@ export function PagesMenu() {
         GO-PROBLEM
       </Typography>
 
-      <Box sx={{ flexGrow: 1, display: { xs: 'none', sm: 'flex' } }}>
+      <Box sx={{ flexGrow: 1, display: isMobile? "none" : "flex" }}>
         {problems}
         <Search></Search>
         {create}
       </Box>
-      <Box sx={{ flexGrow: 0, display: { xs: 'none', sm: 'flex' } }}>
+      <Box sx={{ flexGrow: 0, display: isMobile? "none" : "flex" }}>
         <Language></Language>
         <NavButton
           key={"signup"}
@@ -60,7 +62,7 @@ export function PagesMenu() {
         >
           {menuWords.signup[languageIdx]}
         </NavButton>
-        {localStorage.getItem(USERNAME)?
+        {localStorage.getItem(USERINFO)?
           <UserMenu></UserMenu>
           :
           <NavButton
@@ -70,8 +72,8 @@ export function PagesMenu() {
             {menuWords.login[languageIdx]}
           </NavButton>}
       </Box>
-      <Box sx={{ flexGrow: 1, display: {xs: "flex", sm: "none"}, justifyContent: "flex-end"}}>
-        <Test></Test>
+      <Box sx={{ flexGrow: 1, display: isMobile? "flex" : "none", justifyContent: "flex-end"}}>
+        <BurgerMenu></BurgerMenu>
       </Box>
     </>
   )

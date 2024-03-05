@@ -6,3 +6,4 @@ memo.txt
 .firebaserc
 firebase.json
 src/components/Test.tsx
+.env

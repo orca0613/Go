@@ -1,40 +1,50 @@
 import { useState, useEffect } from 'react';
 import { convertFromStringToTwoD } from '../util/functions';
 import { Box } from '@mui/material';
-import { ProblemInfo } from '../util/types';
+import { ProblemInfo, UserInfo } from '../util/types';
 import SampleProblemBox from './problem/SampleProblemBox';
-import { useParams } from 'react-router-dom';
-import { SOLVED, TRIED } from '../util/constants';
 import { getProblemByIdList } from '../network/problem';
+import { useParams } from 'react-router-dom';
+import { CREATED, LIKED, SOLVED, UNRESOLVED, USERINFO, WITHQUESTIONS, initialUserInfo } from '../util/constants';
 
 export default function MyPageProblems() {
   const { part } = useParams()
+  let idList: string[] = []
   const [problems, setProblems] = useState<ProblemInfo[]>([]);
 
-
   useEffect(() => {
-    if (part) {
-      let idList = ""
-      if (part === "unresolved") {
-        const tried = localStorage.getItem(TRIED)?.split("&")?? []
-        const solved = localStorage.getItem(SOLVED)?.split("&")?? []
-        idList = tried.filter(element => !solved.includes(element)).join("&")
-      } else {
-        idList = localStorage.getItem(part)?? ""
-      }
-      const result = getProblemByIdList(idList)
-      const newProblems: ProblemInfo[] = []
-      result.then(r => {
-        r.map(p => {
-          const newProblem: ProblemInfo = {
-            ...p,
-            initialState: convertFromStringToTwoD(p.initialState)
-          }
-          newProblems.push(newProblem)
-        })
-        setProblems(newProblems)
-      })
+    const userInfo: UserInfo = JSON.parse(localStorage.getItem(USERINFO) || initialUserInfo)
+    switch (part) {
+      case (CREATED):
+        idList = userInfo.created
+        break
+      case (SOLVED):
+        idList = userInfo.solved
+        break
+      case (UNRESOLVED):
+        idList = userInfo.tried.filter(element => !userInfo.solved.includes(element))
+        break
+      case (LIKED):
+        idList = userInfo.liked
+        break
+      case (WITHQUESTIONS):
+        idList = userInfo.withQuestions
+        break
+      default:
+        break
     }
+    const result = getProblemByIdList(idList)
+    const newProblems: ProblemInfo[] = []
+    result.then(r => {
+      r.map(p => {
+        const newProblem: ProblemInfo = {
+          ...p,
+          initialState: convertFromStringToTwoD(p.initialState)
+        }
+        newProblems.push(newProblem)
+      })
+      setProblems(newProblems)
+    })
     }, [part])
     
   return (

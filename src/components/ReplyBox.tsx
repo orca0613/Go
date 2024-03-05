@@ -1,8 +1,8 @@
-import { Box, Button, Divider, TextField, Typography } from "@mui/material"
-import { ReplyForm } from "../util/types"
+import { Box, Button, TextField } from "@mui/material"
+import { ReplyForm, UserInfo } from "../util/types"
 import { useEffect, useState } from "react"
 import { Reply } from "./Reply"
-import { LANGUAGE_IDX, USERNAME } from "../util/constants"
+import { LANGUAGE_IDX, USERINFO, initialUserInfo } from "../util/constants"
 import { menuWords } from "../util/menuWords"
 import { addReply, getReply } from "../network/problemInformation"
 
@@ -11,10 +11,11 @@ interface ReplyBoxProps {
 }
 
 export function ReplyBox({ problemId }: ReplyBoxProps) {
+  const userInfo: UserInfo = JSON.parse(localStorage.getItem(USERINFO) || initialUserInfo)
   const [allReplies, setAllReplies] = useState<ReplyForm[]>([])
   const [reply, setReply] = useState("")
   const [inputValue, setInputValue] = useState("")
-  const username = localStorage.getItem(USERNAME)
+  const username = userInfo.name
   const languageIdx = Number(localStorage.getItem(LANGUAGE_IDX))
   
 
@@ -34,7 +35,6 @@ export function ReplyBox({ problemId }: ReplyBoxProps) {
 
   function registerReply() {
     if (!username) {
-      console.log("no name")
       return
     }
     setReply(inputValue)

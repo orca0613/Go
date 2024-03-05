@@ -1,12 +1,11 @@
-import { Box, Button, Pagination, Stack } from "@mui/material"
-import { LANGUAGE_IDX, TRIED, sampleBoardSize } from "../../util/constants"
+import { Box, Pagination, Stack } from "@mui/material"
+import { LANGUAGE_IDX, USERINFO, initialUserInfo } from "../../util/constants"
 import SampleProblem from "./SampleProblem"
 import { useNavigate } from "react-router-dom"
 import problemStore from "../../redux/problemStore"
 import { setProblemIndex, setProblemList } from "../../redux/actions"
-import { ProblemInfo } from "../../util/types"
-import { ChangeEvent, useState } from "react"
-import { isInLocalStorage } from "../../util/functions"
+import { ProblemInfo, UserInfo } from "../../util/types"
+import { ChangeEvent, useEffect, useState } from "react"
 import { menuWords } from "../../util/menuWords"
 
 interface SampleProblemBoxProps {
@@ -14,6 +13,7 @@ interface SampleProblemBoxProps {
 }
 
 export default function SampleProblemBox({ problems }: SampleProblemBoxProps) {
+  const userInfo: UserInfo = JSON.parse(localStorage.getItem(USERINFO) || initialUserInfo)
   const navigate = useNavigate()
   const languageIdx = Number(localStorage.getItem(LANGUAGE_IDX))
   const num = 30
@@ -22,8 +22,12 @@ export default function SampleProblemBox({ problems }: SampleProblemBoxProps) {
 		navigate(address)
   }
 
+  function scrollToTop() {
+    window.scrollTo({ top: 0, behavior: "auto" })
+  }
+
   function setIdexAndOpenProblem(index: number, problemId: string) {
-    if (Number(localStorage.getItem("userPoint")) <= 0 && !isInLocalStorage(TRIED, problemId)) {
+    if (userInfo.point <= 0 && !userInfo.tried.includes(problemId)) {
       alert(menuWords.pointWarning[languageIdx])
       return
     } else {
@@ -34,7 +38,12 @@ export default function SampleProblemBox({ problems }: SampleProblemBoxProps) {
 
   function handleChange(event:ChangeEvent<unknown>, val: number) {
     setStart(num * (val - 1))
+    scrollToTop()
   }
+
+  useEffect(() => {
+    setStart(0)
+  }, [problems])
 
   
   problemStore.dispatch(setProblemList(problems))
@@ -43,7 +52,7 @@ export default function SampleProblemBox({ problems }: SampleProblemBoxProps) {
 
   return (
     <Box>
-      <Box sx={{display: "flex", flexWrap: "wrap", maxWidth: 1000}}>
+      <Box sx={{display: "flex", flexWrap: "wrap"}}>
         {
           problems.slice(start, Math.min(start + num, problems.length)).map((problem, index) => {
             return (

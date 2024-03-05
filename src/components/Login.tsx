@@ -3,9 +3,9 @@ import React, { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { menuWords } from '../util/menuWords'
 import { getUserDetail } from '../network/userDetail'
-import { settingUserDetail } from '../util/functions'
 import { logIn } from '../network/user'
-import { LANGUAGE_IDX } from '../util/constants'
+import { LANGUAGE_IDX, USERINFO, initialUserInfo } from '../util/constants'
+import { UserInfo } from '../util/types'
 
 export function Login() {
 	const navigate = useNavigate()
@@ -28,11 +28,20 @@ export function Login() {
   useEffect(() => {
     if (name) {
       const detail = getUserDetail(name)
-      if (detail) {
-        detail.then(r => {
-          settingUserDetail(r)
-        })
-      }
+      .then(r => {
+        const userInfo: UserInfo = JSON.parse(localStorage.getItem(USERINFO) || initialUserInfo)
+        const newUserInfo: UserInfo = {
+          ...userInfo,
+          point: r.point,
+          created: r.created,
+          withQuestions: r.withQuestions,
+          tried: r.tried,
+          solved: r.solved,
+          liked: r.liked,
+          disliked: r.disliked,
+        }
+        localStorage.setItem(USERINFO, JSON.stringify(newUserInfo))
+      })
       movePage("/home")
     }
   }, [name])
@@ -72,7 +81,7 @@ export function Login() {
 
         <Box sx={{margin: 3}}>
           <Button onClick={logInAndSetting}>{menuWords.login[languageIdx]}</Button>
-          <Button onClick={() => movePage('signup')}>{menuWords.signup[languageIdx]}</Button>
+          <Button onClick={() => movePage('/signup')}>{menuWords.signup[languageIdx]}</Button>
         </Box>
       </Box>
     </>

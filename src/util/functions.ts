@@ -1,8 +1,7 @@
 import { getDeadGroup, handleMove } from "../gologic/logic"
-import problemStore from "../redux/problemStore"
-import { ASKED, CREATED, DISLIKED, FOLLOWLIST, LANGUAGE_IDX, LIKED, MYFOLLOWERS, SOLVED, TRIED, USERPOINT, WITHQUESTIONS } from "./constants"
+import { LANGUAGE_IDX } from "./constants"
 import { menuWords } from "./menuWords"
-import { Board, Coordinate, Variations, UserDetail } from "./types"
+import { Board, Coordinate, Variations } from "./types"
 import _ from 'lodash'
 
 const languageIdx = Number(localStorage.getItem(LANGUAGE_IDX))
@@ -107,8 +106,6 @@ export function removeCurrentVariation(currentKey: string, variations: Variation
       break
     }
   }
-  console.log(variations)
-  console.log(newVariations)
   return newVariations
 }
 
@@ -129,18 +126,6 @@ export function isLegalBoard(board: Board) {
   return true
 }
 
-export function removeFromKey(key: string) {
-  let newKey = key
-  for (let i = key.length - 1; i >= 0; i--) {
-    if (key[i] === '-') {
-      newKey = key.slice(0, i)
-      break
-    }
-  }
-  return newKey
-}
-
-
 export function addToKey(coord: Coordinate, lines: number, key: string) {
   const y = coord[0], x = coord[1]
   const k = String(y * lines + x)
@@ -151,37 +136,6 @@ export function logout() {
   const languageIdx = localStorage.getItem(LANGUAGE_IDX)?? "0"
   localStorage.clear()
   localStorage.setItem(LANGUAGE_IDX, languageIdx)
-}
-
-export function isInLocalStorage(where: string, val: string) {
-  const lst = localStorage.getItem(where)?.split("&")
-  if (!lst) {
-    return false
-  }
-  return lst.includes(val)
-}
-
-export function deleteElementFromLocalStorage(where: string, val: string) {
-  const storage = localStorage.getItem(where)?.split("&")
-  if (!storage) {
-    return
-  }
-  const newStorage = storage.filter(element => {
-    return element !== val
-  })
-  localStorage.setItem(where, newStorage.join("&"))
-}
-
-export function addElementToLocalStorage(where: string, val: string) {
-  const storage = localStorage.getItem(where)
-  if (!storage) {
-    return
-  }
-  if (storage.split("&").includes(val)) {
-    return
-  }
-  localStorage.setItem(where, storage + "&" + val)
-  return
 }
 
 export function getAverageLevel(total: number, divider:number): number {
@@ -202,15 +156,19 @@ export function getAverageLevel(total: number, divider:number): number {
   return -1
 }
 
-export function settingUserDetail(detail: UserDetail) {
-  localStorage.setItem(USERPOINT, String(detail.point))
-  localStorage.setItem(CREATED, detail.created.join("&"))
-  localStorage.setItem(TRIED, detail.tried.join("&"))
-  localStorage.setItem(SOLVED, detail.solved.join("&"))
-  localStorage.setItem(ASKED, detail.asked.join("&"))
-  localStorage.setItem(WITHQUESTIONS, detail.withQuestions.join("&"))
-  localStorage.setItem(LIKED, detail.liked.join("&"))
-  localStorage.setItem(DISLIKED, detail.disliked.join("&"))
-  localStorage.setItem(MYFOLLOWERS, detail.myFollowers.join("&"))
-  localStorage.setItem(FOLLOWLIST, detail.followList.join("&"))
+export function removeElement(list: string[], val: string) {
+  const idx = list.indexOf(val)
+  if (idx < 0) {
+    return list
+  } else {
+    list.splice(idx, 1)
+    return list
+  }
 }
+
+export function isValidEmail(email: string): boolean {
+  const emailRegex: RegExp = /^[\w\.-]+@[a-zA-Z\d\.-]+\.[a-zA-Z]{2,}$/;
+  return emailRegex.test(email);
+}
+
+

@@ -6,17 +6,16 @@ import ListItemText from '@mui/material/ListItemText';
 import IconButton from '@mui/material/IconButton';
 import MenuIcon from '@mui/icons-material/Menu';
 import { NavButton } from './layout/NavButton';
-import { CREATE_PATH, LANGUAGE_IDX, LOGIN_PATH, PROBLEM_PATH, SIGNUP_PATH, USERNAME } from '../util/constants';
+import { CREATED, CREATE_PATH, LANGUAGE_IDX, LIKED, LOGIN_PATH, PROBLEM_PATH, SIGNUP_PATH, SOLVED, UNRESOLVED, USERINFO, initialUserInfo } from '../util/constants';
 import { menuWords } from '../util/menuWords';
 import { useNavigate } from 'react-router-dom';
-import Search from './Search';
-import Language from './Language';
-import UserMenu from './UserMenu';
-import { Divider } from '@mui/material';
+import { Divider, Typography } from '@mui/material';
+import { UserInfo } from '../util/types';
 
 export function Test() {
   const [open, setOpen] = useState(false);
   const divider = <Divider orientation="horizontal" sx={{mt: 1, mb: 2, borderColor: "black" }} />
+  const userInfo: UserInfo = JSON.parse(localStorage.getItem(USERINFO) || initialUserInfo)
 
   const toggleDrawer = (open: boolean) => (event: any) => {
     if (
@@ -32,20 +31,34 @@ export function Test() {
   const navigate = useNavigate();
   const languageIdx = Number(localStorage.getItem(LANGUAGE_IDX))
 
-  const problems = 
+  const created = 
     <NavButton 
-      key="problems" 
-      onClick={() => navigate(PROBLEM_PATH)}
+      key="created" 
+      onClick={() => navigate(`/mypage/${CREATED}`)}
     >
-      {menuWords.problems[languageIdx]}
+      {menuWords.created[languageIdx]}: {userInfo.created.length}
     </NavButton>
 
-  const create = 
+  const solved = 
     <NavButton 
-      key="create" 
-      onClick={() => navigate(CREATE_PATH)}
+      key="solved" 
+      onClick={() => navigate(`/mypage/${SOLVED}`)}
     >
-      {menuWords.create[languageIdx]}
+      {menuWords.solved[languageIdx]} : {userInfo.solved.length}
+    </NavButton>
+  const unresolved = 
+    <NavButton 
+      key="unresolved" 
+      onClick={() => navigate(`/mypage/${UNRESOLVED}`)}
+    >
+      {menuWords.unresolved[languageIdx]} : {Math.max(userInfo.tried.length - userInfo.solved.length, 0)}
+    </NavButton>
+  const liked = 
+    <NavButton 
+      key="liked" 
+      onClick={() => navigate(`/mypage/${LIKED}`)}
+    >
+      {menuWords.liked[languageIdx]} : {userInfo.liked.length}
     </NavButton>
 
   return (
@@ -64,42 +77,24 @@ export function Test() {
       </IconButton>
       <Drawer anchor="right" open={open} onClose={toggleDrawer(false)}>
         <List>
-          <ListItem>
-            {problems}
-          </ListItem>
-          <ListItem>
-            <Search></Search>
-          </ListItem>
-          <ListItem>
-            {create}
-          </ListItem>
+          <Typography sx={{fontStyle: "bolder"}} textAlign="center">{userInfo.name}</Typography>
+          <Typography sx={{fontStyle: "bolder"}} textAlign="center">{userInfo.point} P </Typography>
+          <Typography sx={{fontStyle: "bolder"}} textAlign="center">{userInfo.level > 0? `${userInfo.level}${menuWords.K[languageIdx]}` : `${Math.abs(userInfo.level)}${menuWords.D[languageIdx]}`}</Typography>
           {divider}
           <ListItem>
-            <Language></Language>
+            {created}
           </ListItem>
           <ListItem>
-            <NavButton
-            key={"signup"}
-            onClick={() => navigate(SIGNUP_PATH)}
-            >
-              {menuWords.signup[languageIdx]}
-            </NavButton>
+            {solved}
           </ListItem>
           <ListItem>
-            {localStorage.getItem(USERNAME)?
-              <UserMenu></UserMenu> :
-              <NavButton
-              key={"login"}
-              onClick={() => navigate(LOGIN_PATH)}
-              >
-              {menuWords.login[languageIdx]}
-              </NavButton>
-            }
+            {unresolved}
+          </ListItem>
+          <ListItem>
+            {liked}
           </ListItem>
         </List>
-        
       </Drawer>
-      {/* 내용 */}
     </div>
   );
 }

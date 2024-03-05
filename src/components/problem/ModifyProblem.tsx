@@ -1,42 +1,41 @@
-import { useState } from "react"
-import { Coordinate, ProblemInfo } from "../../util/types"
-import { LANGUAGE_IDX } from "../../util/constants"
-import { Box, Button, Divider, FormControl, InputLabel, MenuItem, Select, SelectChangeEvent, TextField, useMediaQuery } from "@mui/material"
-import { isLegalBoard } from "../../util/functions"
+import { useEffect, useState } from "react"
+import { Coordinate, UserInfo } from "../../util/types"
+import { LANGUAGE_IDX, USERINFO, boardSizeArray, initialUserInfo, levelArray } from "../../util/constants"
+import { Box, Button, FormControl, Grid, InputLabel, MenuItem, Select, SelectChangeEvent, TextField, useMediaQuery } from "@mui/material"
+import { convertFromStringToTwoD, isLegalBoard, makingEmptyBoard } from "../../util/functions"
 import { isOutside } from "../../gologic/logic"
 import FinalBoard from "../board/FinalBoard"
-import { useNavigate } from "react-router-dom"
 import { menuWords } from "../../util/menuWords"
-import { modifyProblem } from "../../network/problem"
+import { createProblem, getProblemById, modifyProblem } from "../../network/problem"
+import { useWindowSize } from "react-use"
+import { useParams } from "react-router-dom"
 
-interface ModifyProblemProps {
-  problemInfo: ProblemInfo
-  boardWidth: number
-}
-
-export function ModifyProblem({ problemInfo, boardWidth }: ModifyProblemProps) {
-  const id = problemInfo._id
-  const [problem, setProblem] = useState(problemInfo.initialState)
-  const boardSize = problem.length
-  const divider = <Divider orientation="horizontal" sx={{mt: 1, mb: 2, borderColor: "whitesmoke" }} />
-  const isMobile = useMediaQuery("(max-width: 600px)")
-  const navigate = useNavigate()
+export function ModifyProblem() {
+  const { problemId } = useParams()
+  const userDetail: UserInfo = JSON.parse(localStorage.getItem(USERINFO) || initialUserInfo)
+  const creator = userDetail.name
+  const [boardSize, setBoardSize] = useState(9)
+  let emptyBoard = makingEmptyBoard(boardSize)
+  const [problem, setProblem] = useState(emptyBoard)
+  const {width, height} = useWindowSize()
+  const isMobile = height > width * 2 / 3 || width < 1000
+  const margin = 1
   const languageIdx = Number(localStorage.getItem(LANGUAGE_IDX))
   const [info, setInfo] = useState({
-    comment: problemInfo.comment,
-    turn: problemInfo.color,
+    creator: "",
+    comment: "",
+    turn: "b",
     color: "",
-    level: problemInfo.level
-  })
-
-  function changeInfo(where: string, val: any) {
+    level: 18,
+  })  
+  
+  function changeInfo(where: string, val:any) {
     setInfo({
       ...info,
       [where]: val
     })
   }
-
-
+  
   const commentChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     changeInfo("comment", e.target.value)
   }
@@ -57,130 +56,150 @@ export function ModifyProblem({ problemInfo, boardWidth }: ModifyProblemProps) {
     addMove(coord)
   }
 
-  function modify() {
-    if (info.comment.length > 50) {return}
-    if (!isLegalBoard(problem)) {
-      alert(menuWords.invalidBoardWarning[languageIdx])
-      return
-    }
-    modifyProblem(id, problem, info.comment, info.level, info.turn, problemInfo.creator)
-  }
-
   function handleTurnChange(e: SelectChangeEvent) {
     changeInfo("turn", e.target.value)
+  }
+
+  function handleBoardSizeChange(e: SelectChangeEvent) {
+    const newSize = Number(e.target.value)
+    if (newSize === boardSize) {
+      return
+    }
+    const newBoard = makingEmptyBoard(newSize)
+    setBoardSize(Number(newSize))
+    setProblem(newBoard)
   }
 
   function levelChange(e: SelectChangeEvent) {
     changeInfo("level", Number(e.target.value))
   }
 
-  return (
-    <>
-      <Box
-        sx={{
-          display: 'flex',
-          width: isMobile ? '100vw' : '800',
-          flexDirection: isMobile ? 'column' : 'row',
-          gap: isMobile ? '1ch' : 0,
-          textAlign: "center"
-        }}
-      >
-        <Box
-          sx={{
-            flex: '1',
-            ml: isMobile ? '0' : '1ch',
-          }}
-        >
-          <FinalBoard 
-          lines={problem.length}
-          board={problem}
-          boardWidth={boardWidth}
-          onClick={handleClick}
-          />
-        </Box>
-      <Box
-        sx={{
-          flex: isMobile ? undefined : `0 0 200px`,
-          // mr: isMobile ? '0' : '1ch',
-        }}
-      >
-        <TextField sx={{height: 150}}
-        error={info.comment.length > 50? true : false}
-        helperText={info.comment.length > 50? menuWords.commentLengthWarning[languageIdx] : ""}
-        name='comment'
-        label='comment' 
-        variant='standard' 
-        value={info.comment}
-        onChange={commentChange}
-        />
-        {divider}
-        <Box sx={{
-          textAlign: "left",
-          mb: 10
-        }}>
-          <FormControl variant="standard" sx={{width: 70}}>
-            <InputLabel id="turn-select-label">{menuWords.turn[languageIdx]}</InputLabel>
-            <Select
-              labelId="turn-select-label"
-              id="turn-select"
-              value={info.turn}
-              label="turn"
-              onChange={handleTurnChange}
-            >
-              <MenuItem value={"b"}>{menuWords.black[languageIdx]}</MenuItem>
-              <MenuItem value={"w"}>{menuWords.white[languageIdx]}</MenuItem>
-            </Select>
-          </FormControl>
-          <FormControl sx={{ml: 3, width:70}} variant="standard">
-            <InputLabel id="level-select-label">{menuWords.level[languageIdx]}</InputLabel>
-            <Select
-              labelId="level-select-label"
-              id="level-select"
-              value={String(info.level)}
-              label="level"
-              onChange={levelChange}
-            >
-              <MenuItem value={18}>{`18${menuWords.K[languageIdx]}`}</MenuItem>
-              <MenuItem value={17}>{`17${menuWords.K[languageIdx]}`}</MenuItem>
-              <MenuItem value={16}>{`16${menuWords.K[languageIdx]}`}</MenuItem>
-              <MenuItem value={15}>{`15${menuWords.K[languageIdx]}`}</MenuItem>
-              <MenuItem value={14}>{`14${menuWords.K[languageIdx]}`}</MenuItem>
-              <MenuItem value={13}>{`13${menuWords.K[languageIdx]}`}</MenuItem>
-              <MenuItem value={12}>{`12${menuWords.K[languageIdx]}`}</MenuItem>
-              <MenuItem value={11}>{`11${menuWords.K[languageIdx]}`}</MenuItem>
-              <MenuItem value={10}>{`10${menuWords.K[languageIdx]}`}</MenuItem>
-              <MenuItem value={9}>{`9${menuWords.K[languageIdx]}`}</MenuItem>
-              <MenuItem value={8}>{`8${menuWords.K[languageIdx]}`}</MenuItem>
-              <MenuItem value={7}>{`7${menuWords.K[languageIdx]}`}</MenuItem>
-              <MenuItem value={6}>{`6${menuWords.K[languageIdx]}`}</MenuItem>
-              <MenuItem value={5}>{`5${menuWords.K[languageIdx]}`}</MenuItem>
-              <MenuItem value={4}>{`4${menuWords.K[languageIdx]}`}</MenuItem>
-              <MenuItem value={3}>{`3${menuWords.K[languageIdx]}`}</MenuItem>
-              <MenuItem value={2}>{`2${menuWords.K[languageIdx]}`}</MenuItem>
-              <MenuItem value={1}>{`1${menuWords.K[languageIdx]}`}</MenuItem>
-              <MenuItem value={-1}>{`1${menuWords.D[languageIdx]}`}</MenuItem>
-              <MenuItem value={-2}>{`2${menuWords.D[languageIdx]}`}</MenuItem>
-              <MenuItem value={-3}>{`3${menuWords.D[languageIdx]}`}</MenuItem>
-              <MenuItem value={-4}>{`4${menuWords.D[languageIdx]}`}</MenuItem>
-              <MenuItem value={-5}>{`5${menuWords.D[languageIdx]}`}</MenuItem>
-              <MenuItem value={-6}>{`6${menuWords.D[languageIdx]}`}</MenuItem>
-              <MenuItem value={-7}>{`7${menuWords.D[languageIdx]}`}</MenuItem>
-              <MenuItem value={-8}>{`8${menuWords.D[languageIdx]}`}</MenuItem>
-              <MenuItem value={-9}>{`9${menuWords.D[languageIdx]}`}</MenuItem>
-            </Select>
-          </FormControl>
-        </Box>
-        
-        <Button sx={{color: info.color === "w"? "black" : ""}} onClick={() => changeInfo("color", "w")}>{menuWords.white[languageIdx]}</Button>
-          {divider}
-          <Button sx={{color: info.color === "b"? "black" : ""}} onClick={() => changeInfo("color", "b")}>{menuWords.black[languageIdx]}</Button>
-          {divider}
-          <Button sx={{color: info.color === "."? "black" : ""}} onClick={() => changeInfo("color", ".")}>{menuWords.remove[languageIdx]}</Button>
-          {divider}
-          <Button onClick={modify}>{menuWords.modify[languageIdx]}</Button>
-      </Box>
-      </Box>
-    </>
+  function resetBoard() {
+    setProblem(makingEmptyBoard(boardSize))
+  }
 
+  useEffect(() => {
+    if (problemId) {
+      const newProblemInfo = getProblemById(problemId)
+      .then(p => {
+        const initialState = convertFromStringToTwoD(p.initialState)
+        setProblem(initialState)
+        setInfo({
+          creator: p.creator,
+          comment: p.comment,
+          turn: p.color,
+          color: "",
+          level: p.level
+        })
+        setBoardSize(initialState.length)
+      })
+    }
+  }, [problemId])
+
+  const leftMenu = 
+  <Box textAlign="center" justifyContent="center" display={isMobile? "grid" : ""} sx={{width: isMobile? width : width / 5}}>
+    <TextField sx={{margin: margin, width: isMobile? width / 2 : width / 8, height: isMobile? "" : height / 5}}
+    error={info.comment.length > 50? true : false}
+    helperText={info.comment.length > 50? menuWords.commentLengthWarning[languageIdx] : ""}
+    name='level'
+    label={menuWords.explanation[languageIdx]} 
+    variant='standard' 
+    value={info.comment}
+    onChange={commentChange}
+    />
+    <FormControl sx={{margin: margin, width: isMobile? width / 2 : width / 8, height: isMobile? "" : height / 5}}>
+      <InputLabel id="size-select-label">{menuWords.boardSize[languageIdx]}</InputLabel>
+      <Select
+      labelId="size-select-label"
+      id="size-select"
+      value={String(boardSize)}
+      label={menuWords.boardSize[languageIdx]}
+      variant="standard"
+      onChange={handleBoardSizeChange}
+      >
+        {boardSizeArray.map(size => {
+          return (<MenuItem key={size} value={size}>{size}</MenuItem>)
+        })}
+      </Select>
+    </FormControl>
+    <FormControl variant="standard" sx={{margin: margin, width: isMobile? width / 2 : width / 16}}>
+      <InputLabel id="turn-select-label">{menuWords.turn[languageIdx]}</InputLabel>
+      <Select
+      labelId="turn-select-label"
+      id="turn-select"
+      value={info.turn}
+      label={menuWords.turn[languageIdx]}
+      onChange={handleTurnChange}
+      >
+        <MenuItem value={"b"}>{menuWords.black[languageIdx]}</MenuItem>
+        <MenuItem value={"w"}>{menuWords.white[languageIdx]}</MenuItem>
+      </Select>
+    </FormControl>
+    <FormControl sx={{margin: margin, width: isMobile? width / 2 : width / 16}} variant="standard">
+      <InputLabel id="level-select-label">{menuWords.level[languageIdx]}</InputLabel>
+      <Select
+        labelId="level-select-label"
+        id="level-select"
+        value={String(info.level)}
+        label={menuWords.level[languageIdx]}
+        onChange={levelChange}
+      >
+        {levelArray.map(level => {
+          if (level < 0) {
+            return <MenuItem key={level} value={level}>{`${Math.abs(level)}${menuWords.D[languageIdx]}`}</MenuItem>
+          } else if (level > 0) {
+            return <MenuItem key={level} value={level}>{`${level}${menuWords.K[languageIdx]}`}</MenuItem>
+          } else {
+            return
+          }
+        })}
+      </Select>
+    </FormControl>
+  </Box>
+
+  const rightMenu = 
+  <Box textAlign="center" display={isMobile? "flex" : "grid"} justifyContent={isMobile? "space-between" : "center"}>
+    <Button sx={{margin: margin, color: info.color === "b"? "inherit" : ""}} onClick={() => changeInfo("color", "b")}>
+      {menuWords.BLACK[languageIdx]}
+    </Button>
+    <Button sx={{margin: margin, color: info.color === "w"? "inherit" : ""}} onClick={() => changeInfo("color", "w")}>
+      {menuWords.WHITE[languageIdx]}
+    </Button>
+    <Button sx={{margin: margin, color: info.color === "."? "inherit" : ""}} onClick={() => changeInfo("color", ".")}>
+      {menuWords.remove[languageIdx]}
+    </Button>
+    <Button sx={{margin: margin, color: "red"}} onClick={resetBoard}>
+      {menuWords.reset[languageIdx]}
+    </Button>
+    <Button sx={{margin: margin, color: "green"}} onClick={() => modifyProblem(problemId || "", problem, info.comment, info.level, info.turn, info.creator)}>
+      {menuWords.modifyProblem[languageIdx]}
+    </Button>
+
+  </Box>
+
+
+
+  return (
+    <Grid container justifyContent="center">
+      <Grid item sx={{margin: margin, width: isMobile? width : width / 6}}>
+        {leftMenu}
+      </Grid>
+      <Grid justifyContent="center" item sx={{
+        width: isMobile? width : height - 100, 
+        height: isMobile? width : height - 100
+      }}>
+      <FinalBoard
+        lines={boardSize}
+        board={problem}
+        boardWidth={isMobile? width : height - 100}
+        onClick={handleClick}
+      >
+      </FinalBoard>
+      </Grid>
+      <Grid item sx={{margin: margin, width: isMobile? width : width / 6}}>
+        {rightMenu}
+      </Grid>
+    </Grid>
+    
   )
 }

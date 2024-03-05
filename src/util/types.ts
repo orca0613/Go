@@ -30,11 +30,6 @@ export type ProblemFromServer = {
   comment: string,
 }
 
-export interface Dropdown {
-  label?: string,
-  value?: string
-}
-
 export type CreatorInfo = {
   _id: string,
   name: string,
@@ -65,7 +60,21 @@ export type BoardInfo = {
   key: string,
 }
 
-export type UserDetail = {
+export type UserInfo = {
+  name: string,
+  token: string,
+  level: number,
+  point: number,
+  created: string[],
+  withQuestions: string[],
+  tried: string[],
+  solved: string[],
+  liked: string[],
+  disliked: string[],
+}
+
+export type UserDetailFromServer = {
+  _id: string,
   name: string,
   point: number,
   created: string[],

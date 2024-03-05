@@ -1,4 +1,4 @@
-import { Box, Divider, Typography } from "@mui/material";
+import { Box, Typography } from "@mui/material";
 
 
 interface ReplyProps {
@@ -7,7 +7,6 @@ interface ReplyProps {
   comment: string
 }
 export function Reply({ name, comment, date }: ReplyProps) {
-  const divider = <Divider orientation="horizontal" sx={{mt: 1, mb: 2, borderColor: "inherit" }} />
 
   return (
     <Box>
@@ -24,7 +23,6 @@ export function Reply({ name, comment, date }: ReplyProps) {
         fontSize: 20,
         fontWeight: 300,
       }}>{comment}</Typography>
-      {divider}
     </Box>
   )
 }

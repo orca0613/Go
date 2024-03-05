@@ -1,9 +1,9 @@
 import { useEffect, useState } from 'react'
-import { BoardInfo, Coordinate, ProblemInfo } from '../../util/types'
+import { BoardInfo, Coordinate, UserInfo } from '../../util/types'
 import _ from 'lodash'
-import { addCurrentVariation, convertFromStringToTwoD, removeCurrentVariation } from '../../util/functions'
-import { Box, Button, Divider, Grid, Typography, useMediaQuery } from '@mui/material'
-import { LANGUAGE_IDX, USERNAME, initialProblemInfo } from '../../util/constants'
+import { addCurrentVariation, convertFromStringToTwoD, removeCurrentVariation, removeElement } from '../../util/functions'
+import { Box, Button, Grid } from '@mui/material'
+import { ANSWERS, LANGUAGE_IDX, QUESTIONS, USERINFO, VARIATIONS, initialProblemInfo, initialUserInfo, initialVariations } from '../../util/constants'
 import FinalBoard from '../board/FinalBoard'
 import { menuWords } from '../../util/menuWords'
 import { deleteProblem, getProblemById, updateVariations } from '../../network/problem'
@@ -17,13 +17,12 @@ export function ModifyVariations() {
   const { problemId } = useParams()
   const [problemInfo, setProblemInfo] = useState(initialProblemInfo)
 
-  const [update, setUpdate] = useState(false)
-  const username = localStorage.getItem(USERNAME)?? ""
+  const userInfo: UserInfo = JSON.parse(localStorage.getItem(USERINFO) || initialUserInfo)
+  const username = userInfo.name
   const navigate = useNavigate()
-  const divider = <Divider orientation="horizontal" sx={{mt: "2vh", mb: 2, borderColor: "white"}} /> 
-  const isMobile = useMediaQuery("(max-width: 800px)")
-  const margin = 1
   const {width, height} = useWindowSize()
+  const isMobile = height > width * 2 / 3 || width < 1000
+  const margin = isMobile? 0 : 1
   const languageIdx = Number(localStorage.getItem(LANGUAGE_IDX))
   const initInfo: BoardInfo = {
     board: problemInfo.initialState,
@@ -59,8 +58,7 @@ export function ModifyVariations() {
       ...problemInfo,
       variations: newVariations
     })
-    setUpdate(false)
-    alert(menuWords.saved[languageIdx])
+    updateVariations(problemInfo._id, VARIATIONS, newVariations, username, problemInfo.creator)
   }
 
   function addAnswersAndSetAnswers() {
@@ -74,37 +72,37 @@ export function ModifyVariations() {
       ...problemInfo,
       answers: newAnswers
     })
-    setUpdate(false)
+    updateVariations(problemInfo._id, ANSWERS, newAnswers, username, problemInfo.creator)
     alert(menuWords.saved[languageIdx])
   }
 
-  function updateAll() {
-    updateVariations(problemInfo._id, problemInfo.variations, problemInfo.answers, problemInfo.questions, username, problemInfo.creator)
-    setUpdate(true)
-  }
-
-  function removeVariationsAndSetVariations() {
-    if (problemInfo.variations.hasOwnProperty(info.key) && problemInfo.variations[info.key].length === 0) {
-      const newVariations = removeCurrentVariation(info.key, problemInfo.variations)
+  function removeVariationsAndSetVariations(key: string) {
+    if (problemInfo.variations.hasOwnProperty(key) && problemInfo.variations[key].length === 0) {
+      const newVariations = removeCurrentVariation(key, problemInfo.variations)
       setProblemInfo({
         ...problemInfo,
         variations: newVariations
       })
-      setUpdate(false)
-    } else if (problemInfo.answers.hasOwnProperty(info.key) && problemInfo.answers[info.key].length === 0) {
-      const newAnswers = removeCurrentVariation(info.key, problemInfo.answers)
+      updateVariations(problemInfo._id, VARIATIONS, newVariations, username, problemInfo.creator)
+    } else if (problemInfo.answers.hasOwnProperty(key) && problemInfo.answers[key].length === 0) {
+      const newAnswers = removeCurrentVariation(key, problemInfo.answers)
       setProblemInfo({
         ...problemInfo,
         answers: newAnswers
       })
-      setUpdate(false)
-    } else if (problemInfo.questions.hasOwnProperty(info.key) && problemInfo.questions[info.key].length === 0) {
-      const newQuestions = removeCurrentVariation(info.key, problemInfo.questions)
+      updateVariations(problemInfo._id, ANSWERS, newAnswers, username, problemInfo.creator)
+    } else if (problemInfo.questions.hasOwnProperty(key) && problemInfo.questions[key].length === 0) {
+      const newQuestions = removeCurrentVariation(key, problemInfo.questions)
       setProblemInfo({
         ...problemInfo,
         questions: newQuestions
       })
-      setUpdate(false)
+      updateVariations(problemInfo._id, QUESTIONS, newQuestions, username, problemInfo.creator)
+      if (_.isEqual(newQuestions, initialVariations)) {
+        const newWithQuestions = removeElement(userInfo.withQuestions, problemInfo._id)
+        userInfo.withQuestions = newWithQuestions
+        localStorage.setItem(USERINFO, JSON.stringify(userInfo))
+      }
     } else {
       alert(menuWords.invalidConditionWarning[languageIdx])
       return
@@ -116,11 +114,7 @@ export function ModifyVariations() {
   function handleClick(coord: Coordinate) {
     const newInfo = game.playMove(info, coord)
     if (problemInfo.questions.hasOwnProperty(newInfo.key) && problemInfo.questions[newInfo.key].length === 0) {
-      const newQuestions = removeCurrentVariation(newInfo.key, problemInfo.questions)
-      setProblemInfo({
-        ...problemInfo,
-        questions: newQuestions
-      })
+      removeVariationsAndSetVariations(newInfo.key)
     }
     setInfo(newInfo)
   }
@@ -160,18 +154,15 @@ export function ModifyVariations() {
   }, [problemId])
 
   const leftMenu = 
-  <Box textAlign="center" display={isMobile? "flex" : "grid"} justifyContent="center">
+  <Box textAlign="center" display={isMobile? "flex" : "grid"} justifyContent={isMobile? "space-between" : "center"}>
     <Button sx={{margin: margin}} onClick={addVariationsAndSetVariations}>{menuWords.addVariation[languageIdx]}</Button>
     <Button sx={{margin: margin, color: "green"}} onClick={addAnswersAndSetAnswers}>{menuWords.addAnswers[languageIdx]}</Button>
-    <Button sx={{margin: margin, color: "red"}} onClick={removeVariationsAndSetVariations}>{menuWords.removeVariation[languageIdx]}</Button>
-    <Button sx={{margin: margin}} onClick={updateAll}>{menuWords.updateVariation[languageIdx]}</Button>
-    {update? 
-    <Typography sx={{ fontSize: isMobile? 30 : 10, color: "inherit" }}>{isMobile? "*" : menuWords.complete[languageIdx]}</Typography> : 
-    <Typography sx={{ fontSize: isMobile? 30 : 10, color: "red" }}>{isMobile? "*" : menuWords.incomplete[languageIdx]}</Typography>}
+    <Button sx={{margin: margin, color: "red"}} onClick={() => removeVariationsAndSetVariations(info.key)}>{menuWords.removeVariation[languageIdx]}</Button>
+    <Button sx={{margin: margin}} onClick={() => navigate(`/modify-problem/${problemId}`)}>{menuWords.modifyProblem[languageIdx]}</Button>
   </Box>
 
   const rightMenu = 
-  <Box textAlign="center" display={isMobile? "flex" : "grid"} justifyContent="center">
+  <Box textAlign="center" display={isMobile? "flex" : "grid"} justifyContent={isMobile? "space-between" : "center"}>
     <Button sx={{margin: margin}} onClick={goToPreviousMove}>{menuWords.previous[languageIdx]}</Button>
     <Button sx={{margin: margin}} onClick={goToNextMove}>{menuWords.next[languageIdx]}</Button>
     <Button sx={{margin: margin}} onClick={reset}>{menuWords.reset[languageIdx]}</Button>
@@ -192,13 +183,13 @@ export function ModifyVariations() {
       </Grid>
       <Grid item sx={{
         margin: margin, 
-        width: isMobile? width / 7 * 5 : Math.min(width / 2, height / 7 * 5), 
-        height: isMobile? width / 7 * 5 : Math.min(width / 2, height / 7 * 5)
+        width: isMobile? width : height - 100, 
+        height: isMobile? width : height - 100
       }}>
         <FinalBoard 
         lines={info.board.length}
         board={info.board}
-        boardWidth={isMobile? width / 7 * 5 : Math.min(width / 2, height / 7 * 5)}
+        boardWidth={isMobile? width : height - 100}
         moves={info.key}
         variations={problemInfo.variations[info.key]}
         answers={problemInfo.answers[info.key]}

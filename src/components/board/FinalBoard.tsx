@@ -1,10 +1,11 @@
 import { Box } from "@mui/system";
-import EmptyBoard from "./Board";
 import { Board, Coordinate } from "../../util/types";
-import Stones from "./Stones";
+import EmptyBoard from "./Board";
 import Background from "./Background";
+import Stones from "./Stones";
 
-interface FinalBoardProps {
+
+interface FinalBoardTestProps {
   lines: number
   boardWidth: number
   board: Board
@@ -15,20 +16,17 @@ interface FinalBoardProps {
   onClick?: (c: Coordinate) => void
 }
 
-function FinalBoard({lines, boardWidth, board, moves, variations, answers, questions, onClick}: FinalBoardProps) {
-  const cellSize = boardWidth < 200? boardWidth / lines : Math.round(boardWidth / lines) // size of 1 space (width = height)
-  const stoneSize = boardWidth < 200? cellSize / 2.1 : Math.round(cellSize / 2.1)
-  const offset = boardWidth < 200? stoneSize * 1.2 + 2 : Math.round(stoneSize * 1.2 + 2)
-  const lineWidth = boardWidth / 400
-  boardWidth += offset // total board size (width = height)
+function FinalBoardTest({lines, boardWidth, board, moves, variations, answers, questions, onClick}: FinalBoardTestProps) {
+  const offset = boardWidth / (lines * 1.8)
+  const cellSize = Math.max(boardWidth - offset * 2, 0) / (lines - 1)
+  const stoneSize = cellSize / 2.2
+  const lineWidth = boardWidth / 400  
 
     return (
       <Box sx={{position: "relative", width: boardWidth}}>
         <Background
           boardWidth={boardWidth}
           lines={lines}
-          cellSize={cellSize}
-          offset={offset}
           style={{position: "absolute", left:0, top: 0, zIndex: 0}}
         />
         <EmptyBoard
@@ -57,5 +55,5 @@ function FinalBoard({lines, boardWidth, board, moves, variations, answers, quest
       </Box>
     );
   }
-  
-  export default FinalBoard;
+
+export default FinalBoardTest

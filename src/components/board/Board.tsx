@@ -1,7 +1,7 @@
 
 import { CSSProperties, useEffect, useRef } from 'react';
 import { Coordinate } from '../../util/types';
-import { boardWidth, flowerPointPosition } from '../../util/constants';
+import { flowerPointPosition } from '../../util/constants';
 
 interface BoardProps {
   boardWidth: number
@@ -29,8 +29,8 @@ const EmptyBoard = ({ lines, cellSize, offset, lineWidth, style, boardWidth}: Bo
   }
 
   function drawCircle(ctx: CanvasRenderingContext2D, size: number, coordinate: Coordinate, color: string) {
-    const x = cellSize * (coordinate[0]) + 1 + offset;
-    const y = cellSize * (lines - 1 - coordinate[1]) + 1 + offset;
+    const x = cellSize * (coordinate[0]) + offset;
+    const y = cellSize * (lines - 1 - coordinate[1]) + offset;
 
     ctx.fillStyle = color === 'b'? 'black' : 'gray';
     ctx.beginPath();
@@ -44,14 +44,14 @@ const EmptyBoard = ({ lines, cellSize, offset, lineWidth, style, boardWidth}: Bo
 
     if (ctx && canvas) {
 
-      canvas.width = cellSize * (lines - 1) + offset * 2;
-      canvas.height = cellSize * (lines - 1) + offset * 2;
+      canvas.width = boardWidth;
+      canvas.height = boardWidth;
 
-      for (let i = 0; i < lines; i++) {
+      for (let i = offset; i < boardWidth; i += cellSize) {
         // Draw vertical line
-        drawLine(ctx, [cellSize * i + 1 + offset, offset], [cellSize * i + 1 + offset, canvas.height - offset + 2], 'black')
+        drawLine(ctx, [i, offset], [i, canvas.height - offset], 'black')
         // Draw horizontal line
-        drawLine(ctx, [offset, cellSize * i + 1 + offset], [canvas.width - offset + 2, cellSize * i + 1 + offset], 'black')
+        drawLine(ctx, [offset, i], [canvas.width - offset, i], 'black')
       }
 
       // Draw star points
