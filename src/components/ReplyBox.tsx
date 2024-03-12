@@ -11,7 +11,7 @@ interface ReplyBoxProps {
 }
 
 export function ReplyBox({ problemId }: ReplyBoxProps) {
-  const userInfo: UserInfo = JSON.parse(localStorage.getItem(USERINFO) || initialUserInfo)
+  const userInfo: UserInfo = JSON.parse(sessionStorage.getItem(USERINFO) || initialUserInfo)
   const [allReplies, setAllReplies] = useState<ReplyForm[]>([])
   const [reply, setReply] = useState("")
   const [inputValue, setInputValue] = useState("")

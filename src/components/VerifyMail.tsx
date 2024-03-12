@@ -3,10 +3,13 @@ import { Box } from '@mui/material';
 import { useNavigate, useParams } from 'react-router-dom';
 import { verifyMail } from '../network/user';
 import { HomeForm } from './HomeForm';
+import { menuWords } from '../util/menuWords';
+import { LANGUAGE_IDX } from '../util/constants';
 
 export default function VerifyMail() {
   const { userId } = useParams()
   const navigate = useNavigate()
+  const languageIdx = Number(localStorage.getItem(LANGUAGE_IDX))
 
 
   useEffect(() => {
@@ -14,10 +17,10 @@ export default function VerifyMail() {
       const result = verifyMail(userId)
       .then(r => {
         if (r) {
-          alert("인증 되었습니다")
+          alert(menuWords.verificationCompleteNotice[languageIdx])
           navigate("/login")
         } else {
-          alert("잘못된 접근입니다")
+          alert(menuWords.wrongApproachWarning)
           navigate("/home")
         }
       })

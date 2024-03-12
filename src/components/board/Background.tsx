@@ -1,5 +1,6 @@
 
 import { CSSProperties, useEffect, useRef } from 'react';
+import { resolution } from '../../util/constants';
 
 
 interface BackgroundProps {
@@ -18,8 +19,16 @@ const Background = ({ boardWidth, lines, style}: BackgroundProps) => {
   
     if (ctx && canvas) {
   
-      canvas.width = boardWidth;
-      canvas.height = boardWidth;
+      const canvasSize = boardWidth + "px"
+
+      canvas.style.width = canvasSize
+      canvas.style.height = canvasSize
+
+      canvas.width = boardWidth * resolution;
+      canvas.height = boardWidth * resolution;
+
+
+      ctx.scale(resolution, resolution)
   
       const img = new Image()
       img.src = "/images/wood4.jpg"

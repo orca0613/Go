@@ -1,10 +1,12 @@
-import { API_URL, USERDETAIL_DB_PATH, USERINFO, initialUserInfo, } from "../util/constants"
+import { API_URL, LANGUAGE_IDX, USERDETAIL_DB_PATH, USERINFO, initialUserInfo, } from "../util/constants"
+import { loginWarning } from "../util/functions"
+import { menuWords } from "../util/menuWords"
 import { CreatorInfo, UserDetailFromServer, UserInfo } from "../util/types"
 
 export async function addElement(element: string, name: string, where: string) {
-  const userInfo: UserInfo = JSON.parse(localStorage.getItem(USERINFO) || initialUserInfo)
+  const userInfo: UserInfo = JSON.parse(sessionStorage.getItem(USERINFO) || initialUserInfo)
   const token = userInfo.token
-  await fetch(`${API_URL}${USERDETAIL_DB_PATH}/add-element`, {
+  const response = await fetch(`${API_URL}${USERDETAIL_DB_PATH}/add-element`, {
     method: 'PATCH',
     headers: {
       'Content-Type': 'application/json',
@@ -12,14 +14,21 @@ export async function addElement(element: string, name: string, where: string) {
     },
     body: JSON.stringify({element, name, where}),
   })
-   .catch(error => console.error("Error: ", error))
+  if (response.ok) {
+    return
+  }
+  if (response.status === 401 || 403) {
+    return loginWarning()
+  }
+  throw new Error(`Error: ${response.status}`)
+
 }
 
 
 export async function deleteElement(element: string, name: string, where: string) {
-  const userInfo: UserInfo = JSON.parse(localStorage.getItem(USERINFO) || initialUserInfo)
+  const userInfo: UserInfo = JSON.parse(sessionStorage.getItem(USERINFO) || initialUserInfo)
   const token = userInfo.token
-  await fetch(`${API_URL}${USERDETAIL_DB_PATH}/delete-element`, {
+  const response = await fetch(`${API_URL}${USERDETAIL_DB_PATH}/delete-element`, {
     method: 'PATCH',
     headers: {
       'Content-Type': 'application/json',
@@ -27,7 +36,13 @@ export async function deleteElement(element: string, name: string, where: string
     },
     body: JSON.stringify({element, name, where}),
   })
-   .catch(error => console.error("Error: ", error))
+  if (response.ok) {
+    return
+  }
+  if (response.status === 401 || 403) {
+    return loginWarning()
+  }
+  throw new Error(`Error: ${response.status}`)
 }
 
 export async function getUserDetail(name: string): Promise<UserDetailFromServer> {
@@ -53,12 +68,12 @@ export async function getAllCreators(): Promise<string[]> {
 }
 
 export async function changeInfoAndPoint(problemId: string, where: string, point: number) {
-  const userInfo: UserInfo = JSON.parse(localStorage.getItem(USERINFO) || initialUserInfo)
+  const userInfo: UserInfo = JSON.parse(sessionStorage.getItem(USERINFO) || initialUserInfo)
   const name = userInfo.name
   const token = userInfo.token
   userInfo.point += point
-  localStorage.setItem(USERINFO, JSON.stringify(userInfo))
-  await fetch(`${API_URL}${USERDETAIL_DB_PATH}/change`, {
+  sessionStorage.setItem(USERINFO, JSON.stringify(userInfo))
+  const response = await fetch(`${API_URL}${USERDETAIL_DB_PATH}/change`, {
     method: "PATCH",
     headers: {
       "Content-Type": "application/json",
@@ -66,6 +81,12 @@ export async function changeInfoAndPoint(problemId: string, where: string, point
     },
     body: JSON.stringify({name, point, problemId, where})
   })
-    .catch(error => console.error("Error: ", error))
+  if (response.ok) {
+    return
+  }
+  if (response.status === 401 || 403) {
+    return loginWarning()
+  }
+  throw new Error(`Error: ${response.status}`)
 }
 

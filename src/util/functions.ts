@@ -1,3 +1,4 @@
+import { useNavigate } from "react-router-dom"
 import { getDeadGroup, handleMove } from "../gologic/logic"
 import { LANGUAGE_IDX } from "./constants"
 import { menuWords } from "./menuWords"
@@ -38,29 +39,6 @@ export function makingEmptyBoard(size: number): Board {
     }
   }
   return board
-}
-
-export function convertFromStringToTwoD(board: string): Board {
-  const boardSize = Math.round(board.length ** 0.5)
-  if (boardSize !== board.length ** 0.5) {
-    throw Error("bad board!")
-  }
-
-  const newBoard: Board = []
-  for (let i = 0; i < boardSize; i++) {
-    const line = board.slice(0, boardSize).split("")
-    newBoard.push(line)
-    board = board.slice(boardSize)
-  }
-  return newBoard
-}
-
-export function convertFromTwoDToString(board: Board): string {
-  let newBoard = ""
-  for (let i = 0; i < board.length; i++) {
-    newBoard += board[i].join("")
-  }
-  return newBoard
 }
 
 export function divmod(num1: number, num2: number): Coordinate {
@@ -132,12 +110,6 @@ export function addToKey(coord: Coordinate, lines: number, key: string) {
   return key + '-' + k
 }
 
-export function logout() {
-  const languageIdx = localStorage.getItem(LANGUAGE_IDX)?? "0"
-  localStorage.clear()
-  localStorage.setItem(LANGUAGE_IDX, languageIdx)
-}
-
 export function getAverageLevel(total: number, divider:number): number {
   if (divider === 0) {
     return 19
@@ -171,4 +143,8 @@ export function isValidEmail(email: string): boolean {
   return emailRegex.test(email);
 }
 
-
+export function loginWarning() {
+  const languageIdx = Number(localStorage.getItem(LANGUAGE_IDX))
+  sessionStorage.clear()
+  alert(menuWords.loginWarning[languageIdx])
+}

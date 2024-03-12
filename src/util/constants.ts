@@ -1,4 +1,4 @@
-import { Coordinate, ProblemInfo } from "./types"
+import { Coordinate, ProblemAndVariations } from "./types"
 
 export const sampleBoardSize: number = 200
 export const flowerPointPosition: Coordinate[][] = [
@@ -23,7 +23,7 @@ export const flowerPointPosition: Coordinate[][] = [
     [[3, 3], [3, 9], [3, 15], [9, 3], [9, 9], [9, 15], [15, 3], [15, 9], [15, 15]],
 ]
 
-export const initialProblemInfo: ProblemInfo = {
+export const initialProblemInfo: ProblemAndVariations = {
     _id: "",
     initialState: [["."]],
     variations: {},
@@ -33,6 +33,7 @@ export const initialProblemInfo: ProblemInfo = {
     level: 0,
     creator: "",
     comment: "",
+    time: new Date()
 }
 
 export const initialUserInfo = '{"name":"","token":"","level":0,"point":0,"created":[],"withQuestions":[],"tried":[],"solved":[],"liked":[],"disliked":[]}'
@@ -40,7 +41,7 @@ export const initialUserInfo = '{"name":"","token":"","level":0,"point":0,"creat
 export const initialVariations = {"0": []}
 export const API_URL = "http://localhost:3001"
 // export const API_URL = "https://go-problem-test.an.r.appspot.com"
-export const HOME = "/home"
+export const HOME = "/"
 export const PROBLEM_PATH = "/all-problems"
 export const CREATE_PATH = "/create"
 export const SIGNUP_PATH = "/signup"
@@ -67,4 +68,9 @@ export const VARIATIONS = "variations"
 export const ANSWERS = "answers"
 export const QUESTIONS = "questions"
 export const boardSizeArray = Array.from({length: 17}, (_, index) => index + 3)
-export const levelArray = Array.from({length: 28}, (_, index) => index - 9)
+export const levelArray = [-9, -8, -7, -6, -5, -4, -3, -2, -1, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18]
+export const resolution = 4
+export const MARGIN = 1
+export const COMMENT = "comment"
+export const TURN = "turn"
+export const LEVEL = "level"

@@ -86,7 +86,7 @@ export function BurgerMenu() {
             </NavButton>
           </ListItem>
           <ListItem>
-            {localStorage.getItem(USERINFO)?
+            {sessionStorage.getItem(USERINFO)?
               <UserMenu></UserMenu> :
               <NavButton
               key={"login"}

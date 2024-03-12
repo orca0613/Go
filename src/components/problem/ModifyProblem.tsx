@@ -1,25 +1,25 @@
 import { useEffect, useState } from "react"
 import { Coordinate, UserInfo } from "../../util/types"
-import { LANGUAGE_IDX, USERINFO, boardSizeArray, initialUserInfo, levelArray } from "../../util/constants"
-import { Box, Button, FormControl, Grid, InputLabel, MenuItem, Select, SelectChangeEvent, TextField, useMediaQuery } from "@mui/material"
-import { convertFromStringToTwoD, isLegalBoard, makingEmptyBoard } from "../../util/functions"
+import { COMMENT, LANGUAGE_IDX, LEVEL, MARGIN, TURN, USERINFO, boardSizeArray, initialUserInfo, levelArray } from "../../util/constants"
+import { Box, Button, FormControl, Grid, InputLabel, MenuItem, Select, SelectChangeEvent, TextField } from "@mui/material"
+import { isLegalBoard, makingEmptyBoard } from "../../util/functions"
 import { isOutside } from "../../gologic/logic"
 import FinalBoard from "../board/FinalBoard"
 import { menuWords } from "../../util/menuWords"
-import { createProblem, getProblemById, modifyProblem } from "../../network/problem"
+import { getProblemById, modifyProblem } from "../../network/problem"
 import { useWindowSize } from "react-use"
 import { useParams } from "react-router-dom"
 
 export function ModifyProblem() {
   const { problemId } = useParams()
-  const userDetail: UserInfo = JSON.parse(localStorage.getItem(USERINFO) || initialUserInfo)
+  const userDetail: UserInfo = JSON.parse(sessionStorage.getItem(USERINFO) || initialUserInfo)
   const creator = userDetail.name
   const [boardSize, setBoardSize] = useState(9)
   let emptyBoard = makingEmptyBoard(boardSize)
   const [problem, setProblem] = useState(emptyBoard)
   const {width, height} = useWindowSize()
   const isMobile = height > width * 2 / 3 || width < 1000
-  const margin = 1
+  const margin = MARGIN
   const languageIdx = Number(localStorage.getItem(LANGUAGE_IDX))
   const [info, setInfo] = useState({
     creator: "",
@@ -37,7 +37,7 @@ export function ModifyProblem() {
   }
   
   const commentChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    changeInfo("comment", e.target.value)
+    changeInfo(COMMENT, e.target.value)
   }
 
   function addMove(coord: Coordinate) {
@@ -57,7 +57,7 @@ export function ModifyProblem() {
   }
 
   function handleTurnChange(e: SelectChangeEvent) {
-    changeInfo("turn", e.target.value)
+    changeInfo(TURN, e.target.value)
   }
 
   function handleBoardSizeChange(e: SelectChangeEvent) {
@@ -71,18 +71,27 @@ export function ModifyProblem() {
   }
 
   function levelChange(e: SelectChangeEvent) {
-    changeInfo("level", Number(e.target.value))
+    changeInfo(LEVEL, Number(e.target.value))
   }
 
   function resetBoard() {
     setProblem(makingEmptyBoard(boardSize))
   }
 
+  function checkAndModify() {
+    if (info.comment.length > 50) {return}
+    if (!isLegalBoard(problem)) {
+      alert(menuWords.invalidBoardWarning[languageIdx])
+      return
+    }
+    modifyProblem(problemId || "", problem, info.comment, info.level, info.turn, info.creator)
+  }
+
   useEffect(() => {
     if (problemId) {
       const newProblemInfo = getProblemById(problemId)
       .then(p => {
-        const initialState = convertFromStringToTwoD(p.initialState)
+        const initialState = p.initialState
         setProblem(initialState)
         setInfo({
           creator: p.creator,
@@ -97,17 +106,17 @@ export function ModifyProblem() {
   }, [problemId])
 
   const leftMenu = 
-  <Box textAlign="center" justifyContent="center" display={isMobile? "grid" : ""} sx={{width: isMobile? width : width / 5}}>
-    <TextField sx={{margin: margin, width: isMobile? width / 2 : width / 8, height: isMobile? "" : height / 5}}
+  <Box textAlign="center" justifyContent={isMobile? "space-between" : "center"} display={isMobile? "flex" : "grid"}>
+    <TextField sx={{margin: margin, width: isMobile? "50%" : "100%"}}
     error={info.comment.length > 50? true : false}
     helperText={info.comment.length > 50? menuWords.commentLengthWarning[languageIdx] : ""}
-    name='level'
+    name={COMMENT}
     label={menuWords.explanation[languageIdx]} 
     variant='standard' 
     value={info.comment}
     onChange={commentChange}
     />
-    <FormControl sx={{margin: margin, width: isMobile? width / 2 : width / 8, height: isMobile? "" : height / 5}}>
+    <FormControl variant="standard" sx={{margin: margin, width: isMobile? "30%" : "100%"}}>
       <InputLabel id="size-select-label">{menuWords.boardSize[languageIdx]}</InputLabel>
       <Select
       labelId="size-select-label"
@@ -122,7 +131,7 @@ export function ModifyProblem() {
         })}
       </Select>
     </FormControl>
-    <FormControl variant="standard" sx={{margin: margin, width: isMobile? width / 2 : width / 16}}>
+    <FormControl variant="standard" sx={{margin: margin, width: isMobile? "30%" : "100%"}}>
       <InputLabel id="turn-select-label">{menuWords.turn[languageIdx]}</InputLabel>
       <Select
       labelId="turn-select-label"
@@ -131,11 +140,11 @@ export function ModifyProblem() {
       label={menuWords.turn[languageIdx]}
       onChange={handleTurnChange}
       >
-        <MenuItem value={"b"}>{menuWords.black[languageIdx]}</MenuItem>
-        <MenuItem value={"w"}>{menuWords.white[languageIdx]}</MenuItem>
+        <MenuItem value={"b"}>{menuWords.blackTurn[languageIdx]}</MenuItem>
+        <MenuItem value={"w"}>{menuWords.whiteTurn[languageIdx]}</MenuItem>
       </Select>
     </FormControl>
-    <FormControl sx={{margin: margin, width: isMobile? width / 2 : width / 16}} variant="standard">
+    <FormControl sx={{margin: margin, width: isMobile? "30%" : "100%"}} variant="standard">
       <InputLabel id="level-select-label">{menuWords.level[languageIdx]}</InputLabel>
       <Select
         labelId="level-select-label"
@@ -145,13 +154,7 @@ export function ModifyProblem() {
         onChange={levelChange}
       >
         {levelArray.map(level => {
-          if (level < 0) {
-            return <MenuItem key={level} value={level}>{`${Math.abs(level)}${menuWords.D[languageIdx]}`}</MenuItem>
-          } else if (level > 0) {
-            return <MenuItem key={level} value={level}>{`${level}${menuWords.K[languageIdx]}`}</MenuItem>
-          } else {
-            return
-          }
+          return <MenuItem key={level} value={level}>{Math.abs(level)}{level > 0? menuWords.K[languageIdx] : menuWords.D[languageIdx]}</MenuItem>
         })}
       </Select>
     </FormControl>
@@ -171,7 +174,7 @@ export function ModifyProblem() {
     <Button sx={{margin: margin, color: "red"}} onClick={resetBoard}>
       {menuWords.reset[languageIdx]}
     </Button>
-    <Button sx={{margin: margin, color: "green"}} onClick={() => modifyProblem(problemId || "", problem, info.comment, info.level, info.turn, info.creator)}>
+    <Button sx={{margin: margin, color: "green"}} onClick={checkAndModify}>
       {menuWords.modifyProblem[languageIdx]}
     </Button>
 
@@ -183,8 +186,10 @@ export function ModifyProblem() {
     <Grid container justifyContent="center">
       <Grid item sx={{margin: margin, width: isMobile? width : width / 6}}>
         {leftMenu}
+        {rightMenu}
       </Grid>
       <Grid justifyContent="center" item sx={{
+        margin: isMobile? 0 : margin,
         width: isMobile? width : height - 100, 
         height: isMobile? width : height - 100
       }}>
@@ -195,9 +200,6 @@ export function ModifyProblem() {
         onClick={handleClick}
       >
       </FinalBoard>
-      </Grid>
-      <Grid item sx={{margin: margin, width: isMobile? width : width / 6}}>
-        {rightMenu}
       </Grid>
     </Grid>
     

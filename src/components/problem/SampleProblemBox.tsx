@@ -1,23 +1,27 @@
-import { Box, Pagination, Stack } from "@mui/material"
-import { LANGUAGE_IDX, USERINFO, initialUserInfo } from "../../util/constants"
+import { Box, Pagination, Stack, useMediaQuery } from "@mui/material"
+import { LANGUAGE_IDX, MARGIN, USERINFO, initialUserInfo } from "../../util/constants"
 import SampleProblem from "./SampleProblem"
 import { useNavigate } from "react-router-dom"
 import problemStore from "../../redux/problemStore"
 import { setProblemIndex, setProblemList } from "../../redux/actions"
-import { ProblemInfo, UserInfo } from "../../util/types"
+import { ProblemInformation, UserInfo } from "../../util/types"
 import { ChangeEvent, useEffect, useState } from "react"
 import { menuWords } from "../../util/menuWords"
+import { useWindowSize } from "react-use"
 
 interface SampleProblemBoxProps {
-  problems: ProblemInfo[]
+  problems: ProblemInformation[]
 }
 
 export default function SampleProblemBox({ problems }: SampleProblemBoxProps) {
-  const userInfo: UserInfo = JSON.parse(localStorage.getItem(USERINFO) || initialUserInfo)
+  const userInfo: UserInfo = JSON.parse(sessionStorage.getItem(USERINFO) || initialUserInfo)
   const navigate = useNavigate()
   const languageIdx = Number(localStorage.getItem(LANGUAGE_IDX))
   const num = 30
   const [start, setStart] = useState(0)
+  const {width, height} = useWindowSize()
+  const isMobile = useMediaQuery("(max-width: 460px)")
+  const isTablet = useMediaQuery("(min-width: 461px) and (max-width: 680px)")
 	const movePage = (address: string) => {
 		navigate(address)
   }
@@ -28,7 +32,7 @@ export default function SampleProblemBox({ problems }: SampleProblemBoxProps) {
 
   function setIdexAndOpenProblem(index: number, problemId: string) {
     if (userInfo.point <= 0 && !userInfo.tried.includes(problemId)) {
-      alert(menuWords.pointWarning[languageIdx])
+      userInfo.name.length > 0? alert(menuWords.pointWarning[languageIdx]) : alert(menuWords.loginWarning[languageIdx])
       return
     } else {
       problemStore.dispatch(setProblemIndex(start + index))
@@ -51,16 +55,19 @@ export default function SampleProblemBox({ problems }: SampleProblemBoxProps) {
 
 
   return (
-    <Box>
+    <Box sx={{mt: MARGIN}}>
       <Box sx={{display: "flex", flexWrap: "wrap"}}>
         {
           problems.slice(start, Math.min(start + num, problems.length)).map((problem, index) => {
             return (
               <Box 
               key={index}
-              component="div"
-              onClick={() => setIdexAndOpenProblem(index, problem._id)}>
-                <SampleProblem sampleProblem={problem} key={index}></SampleProblem>
+              onClick={() => setIdexAndOpenProblem(index, problem.problemId)}>
+                <SampleProblem 
+                problem={problem.initialState} 
+                boxWidth={isMobile? (width - 20) / 2 : isTablet? (width - 20) / 3 : (width - 20) / 5} 
+                width={isMobile? (width - 20) / 2.2 : isTablet? (width - 20) / 3.3 : (width - 20) / 5.5}
+                key={index}></SampleProblem>
               </Box>
             )
           })

@@ -1,17 +1,15 @@
 import { useState, useEffect } from 'react';
-import { convertFromStringToTwoD } from '../util/functions';
 import { Box, Button, FormControl, InputLabel, MenuItem, Select, SelectChangeEvent } from '@mui/material';
-import { ProblemInfo } from '../util/types';
+import { ProblemInformation } from '../util/types';
 import SampleProblemBox from './problem/SampleProblemBox';
 import { menuWords } from '../util/menuWords';
 import { LANGUAGE_IDX, levelArray } from '../util/constants';
-import { getProblemByLevel } from '../network/problem';
-
+import { getProblemByLevel } from '../network/problemInformation';
 
 export default function SearchingByLevel() {
   const [level, setLevel] = useState(0);
   const [input, setInput] = useState("")
-  const [problems, setProblems] = useState<ProblemInfo[]>([]);
+  const [problems, setProblems] = useState<ProblemInformation[]>([]);
   const languageIdx = Number(localStorage.getItem(LANGUAGE_IDX))
 
   function handleInputChange(e: SelectChangeEvent) {
@@ -19,15 +17,12 @@ export default function SearchingByLevel() {
   }
   useEffect(() => {
     const result = getProblemByLevel(level)
-    const newProblems: ProblemInfo[] = []
+    const newProblems: ProblemInformation[] = []
     result.then(r => {
       r.map(p => {
-        const newProblem: ProblemInfo = {
-          ...p,
-          initialState: convertFromStringToTwoD(p.initialState)
-        }
-        newProblems.push(newProblem)
+        newProblems.push(p)
       })
+      newProblems.reverse()
       setProblems(newProblems)
     })
     }, [level])
@@ -45,13 +40,7 @@ export default function SearchingByLevel() {
             onChange={handleInputChange}
           >
             {levelArray.map(level => {
-              if (level < 0) {
-                return <MenuItem value={level}>{`${Math.abs(level)}${menuWords.D[languageIdx]}`}</MenuItem>
-              } else if (level > 0) {
-                return <MenuItem value={level}>{`${level}${menuWords.K[languageIdx]}`}</MenuItem>
-              } else {
-                return
-              }
+              return <MenuItem key={level} value={level}>{Math.abs(level)}{level > 0? menuWords.K[languageIdx] : menuWords.D[languageIdx]}</MenuItem>
             })}
           </Select>
         </FormControl>

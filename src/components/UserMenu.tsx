@@ -3,7 +3,6 @@ import Menu from '@mui/material/Menu';
 import MenuItem from '@mui/material/MenuItem';
 import { useNavigate } from 'react-router-dom';
 import { NavButton } from './layout/NavButton';
-import { logout } from '../util/functions';
 import { menuWords } from '../util/menuWords';
 import { LANGUAGE_IDX } from '../util/constants';
 import { Box } from '@mui/material';
@@ -22,8 +21,8 @@ export default function UserMenu() {
 
   function logoutAndMove() {
     setAnchorEl(null)
-    logout()
-    navigate("/")
+    sessionStorage.clear()
+    navigate("/login")
   }
 
   function moveToMyPage() {

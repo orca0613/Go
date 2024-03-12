@@ -3,6 +3,7 @@ import React, { CSSProperties, useEffect, useRef } from 'react';
 import { Board, Coordinate } from '../../util/types';
 import { divmod } from '../../util/functions';
 import _ from 'lodash';
+import { resolution } from '../../util/constants';
 
 interface StonesTestProps {
   boardWidth: number
@@ -67,13 +68,17 @@ const Stones = ({boardWidth, lines, cellSize, stoneSize, offset, lineWidth, boar
     const ctx = canvas?.getContext('2d');
 
     if (ctx && canvas) {
-
-      const scale = window.devicePixelRatio
-    
-      ctx.scale(scale, scale)
   
-      canvas.width = boardWidth
-      canvas.height = boardWidth
+      const canvasSize = boardWidth + "px"
+
+      canvas.style.width = canvasSize
+      canvas.style.height = canvasSize
+
+      canvas.width = boardWidth * resolution;
+      canvas.height = boardWidth * resolution;
+
+
+      ctx.scale(resolution, resolution)
 
       // Draw stones
       for (let i = 0; i < lines; i++) {
@@ -132,7 +137,9 @@ const Stones = ({boardWidth, lines, cellSize, stoneSize, offset, lineWidth, boar
   }, [board, moves, variations, answers, boardWidth, lines]);
   
   return (
-    <canvas id="stones" ref={canvasRef} style={style} onClick={handleClick}></canvas>
+    <div style={{width: boardWidth, height: boardWidth}}>
+      <canvas id="stones" ref={canvasRef} style={style} onClick={handleClick}></canvas>
+    </div>
   );
 };
 

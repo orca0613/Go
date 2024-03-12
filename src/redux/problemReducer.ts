@@ -1,8 +1,8 @@
-import { ProblemInfo } from "../util/types"
+import { ProblemInformation } from "../util/types"
 import { ProblemActionType, SET_PROBLEMS, SET_PROBLEM_INDEX } from "./problemActionType"
 
 interface ProblemListState {
-  problemList: ProblemInfo[]
+  problemList: ProblemInformation[]
   curIndex: number
 }
 

@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react'
 import { Coordinate, BoardInfo, UserInfo } from '../../util/types'
 import _ from 'lodash'
-import { addCurrentVariation, convertFromStringToTwoD } from '../../util/functions'
-import { ANSWER, LANGUAGE_IDX, QUESTIONS, SELF, SOLVED, TRIED, TRY, USERINFO, bonus, initialProblemInfo, initialUserInfo, initialVariations } from '../../util/constants'
+import { addCurrentVariation } from '../../util/functions'
+import { ANSWER, LANGUAGE_IDX, MARGIN, QUESTIONS, SELF, SOLVED, TRIED, TRY, USERINFO, bonus, initialProblemInfo, initialUserInfo, initialVariations } from '../../util/constants'
 import FinalBoard from '../board/FinalBoard'
 import { Box, Button, Grid, Typography } from '@mui/material'
 import { menuWords } from '../../util/menuWords'
@@ -35,7 +35,7 @@ export function ProblemBox() {
     problemInfo.variations,
     problemInfo.color
   ))
-  const userInfo: UserInfo = JSON.parse(localStorage.getItem(USERINFO) || initialUserInfo)
+  const userInfo: UserInfo = JSON.parse(sessionStorage.getItem(USERINFO) || initialUserInfo)
   const username = userInfo.name
   const userLevel = userInfo.level
   const creator = problemInfo.creator
@@ -44,11 +44,11 @@ export function ProblemBox() {
   const isMobile = height > width * 2 / 3 || width < 1000
   const languageIdx = Number(localStorage.getItem(LANGUAGE_IDX))
 
-  const [mode, setMode] = useState("try")
+  const [mode, setMode] = useState(TRY)
   const answerRegistered = !_.isEqual(problemInfo.answers, initialVariations)
   const navigate = useNavigate()
 
-  const margin = isMobile? 0 : 1
+  const margin = isMobile? 0 : MARGIN
   
   function modeChange(m: string) {
     if ([TRY, SELF, ANSWER].includes(m)) {
@@ -62,38 +62,33 @@ export function ProblemBox() {
   useEffect(() => {
     if (problemId && userInfo) {
       if (!userInfo.point && !userInfo.tried.includes(problemId)) {
-        alert(menuWords.pointWarning[languageIdx])
+        userInfo.name !== ""? alert(menuWords.pointWarning[languageIdx]) : alert(menuWords.loginWarning[languageIdx])
         return
       }
       changeCount(problemId, "view", username, 1)
       const newProblemInfo = getProblemById(problemId)
       .then(p => {
-        const initialState = convertFromStringToTwoD(p.initialState)
-        setProblemInfo({
-          ...p,
-          initialState: initialState
-        })
+        setProblemInfo(p)
         if (!_.isEqual(p.answers, initialVariations)) {
           if (!userInfo.tried.includes(problemId)) {
             changeInfoAndPoint(problemId, TRIED, -bonus)
-            userInfo.tried.push(problemId)
             userInfo.point -= bonus
-            localStorage.setItem(USERINFO, JSON.stringify(userInfo))
           }
         }
+        userInfo.tried.push(problemId)
+        sessionStorage.setItem(USERINFO, JSON.stringify(userInfo))
         setInfo({
-          board: initialState,
+          board: p.initialState,
           color: p.color,
           key: "0"
         })
         setGame(new Game(
-          initialState,
+          p.initialState,
           p.answers,
           p.variations,
           p.color
         ))
         setSolved(userInfo.solved.includes(problemId))
-
       })
     }
     modeChange(TRY)
@@ -168,7 +163,7 @@ export function ProblemBox() {
       ...problemInfo,
       questions: newQuestions
     })
-    updateVariations(problemInfo._id, QUESTIONS, newQuestions, username, problemInfo.creator)
+    updateVariations(problemInfo._id, QUESTIONS, newQuestions, username, problemInfo.creator, true)
   }
 
   function moveToAdjacentProblem(num: number) {
@@ -209,7 +204,7 @@ export function ProblemBox() {
   function addSolved(id: string) {
     if (!userInfo.solved.includes(id)) {
       userInfo.solved.push(id)
-      localStorage.setItem(USERINFO, JSON.stringify(userInfo))
+      sessionStorage.setItem(USERINFO, JSON.stringify(userInfo))
     }
   }
   function handleCorrect() {

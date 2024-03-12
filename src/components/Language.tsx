@@ -4,7 +4,7 @@ import MenuItem from '@mui/material/MenuItem';
 import { useNavigate } from 'react-router-dom';
 import { NavButton } from './layout/NavButton';
 import { menuWords } from '../util/menuWords';
-import { LANGUAGE_IDX } from '../util/constants';
+import { HOME, LANGUAGE_IDX } from '../util/constants';
 
 export default function Language() {
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
@@ -20,8 +20,8 @@ export default function Language() {
 
   function setLanguageAndMoveHome(idx: string) {
     setAnchorEl(null)
-    localStorage.setItem("languageIdx", idx)
-    navigate("/home")
+    localStorage.setItem(LANGUAGE_IDX, idx)
+    navigate(HOME)
   }
 
   return (

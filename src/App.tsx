@@ -14,13 +14,13 @@ import { ModifyVariations } from "./components/problem/ModifyVariations";
 import VerifyMail from "./components/VerifyMail";
 import MyPageProblems from "./components/MyPageProblems";
 import { ModifyProblem } from "./components/problem/ModifyProblem";
+import ChangePassword from "./components/ChangePassword";
 
 function App() {
   return (
     <BrowserRouter>
       <Routes>
         <Route element={<Layout />}>
-          <Route path="/home" element={<HomeForm/>} />
           <Route path="/login" element={<Login/>} />
           <Route path="" element={<HomeForm/>} />
           <Route path="/all-problems" element={<AllProblems />} />
@@ -35,6 +35,7 @@ function App() {
           <Route path="/modify/:problemId" element={<ModifyVariations />} />
           <Route path="/verify/:userId" element={<VerifyMail />} />
           <Route path="/modify-problem/:problemId" element={<ModifyProblem />} />
+          <Route path="/change-password/:userId" element={<ChangePassword />} />
         </Route>
       </Routes>
     </BrowserRouter>

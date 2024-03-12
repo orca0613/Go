@@ -6,7 +6,7 @@ export type Variations = {
   [key: string]: string[]
 };
 
-export type ProblemInfo = {
+export type ProblemAndVariations = {
   _id: string,
   initialState: Board,
   variations: Variations,
@@ -16,18 +16,7 @@ export type ProblemInfo = {
   level: number,
   creator: string,
   comment: string,
-}
-
-export type ProblemFromServer = {
-  _id: string,
-  initialState: string,
-  variations: Variations,
-  answers: Variations
-  questions: Variations,
-  color: string,
-  level: number,
-  creator: string,
-  comment: string,
+  time: Date,
 }
 
 export type CreatorInfo = {
@@ -44,6 +33,9 @@ export type ReplyForm = {
 export type ProblemInformation = {
   _id: string,
   problemId: string,
+  initialState: Board,
+  level: number,
+  creator: string,
   view: number,
   liked: string[],
   disliked: string[],
@@ -52,6 +44,7 @@ export type ProblemInformation = {
   reply?: object[]
   totalCorrectUserLevel: number,
   totalWrongUserLevel: number,
+  time: Date,
 }
 
 export type BoardInfo = {

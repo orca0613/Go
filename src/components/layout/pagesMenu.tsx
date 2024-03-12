@@ -7,7 +7,6 @@ import UserMenu from "../UserMenu";
 import { menuWords } from "../../util/menuWords";
 import Language from "../Language";
 import { BurgerMenu } from "../BurgerMenu";
-import { Test } from "../Test";
 
 
 export function PagesMenu() {
@@ -62,7 +61,7 @@ export function PagesMenu() {
         >
           {menuWords.signup[languageIdx]}
         </NavButton>
-        {localStorage.getItem(USERINFO)?
+        {sessionStorage.getItem(USERINFO)?
           <UserMenu></UserMenu>
           :
           <NavButton

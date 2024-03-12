@@ -1,7 +1,7 @@
 
 import { CSSProperties, useEffect, useRef } from 'react';
 import { Coordinate } from '../../util/types';
-import { flowerPointPosition } from '../../util/constants';
+import { flowerPointPosition, resolution } from '../../util/constants';
 
 interface BoardProps {
   boardWidth: number
@@ -44,14 +44,22 @@ const EmptyBoard = ({ lines, cellSize, offset, lineWidth, style, boardWidth}: Bo
 
     if (ctx && canvas) {
 
-      canvas.width = boardWidth;
-      canvas.height = boardWidth;
+      const canvasSize = boardWidth + "px"
+
+      canvas.style.width = canvasSize
+      canvas.style.height = canvasSize
+
+      canvas.width = boardWidth * resolution;
+      canvas.height = boardWidth * resolution;
+
+
+      ctx.scale(resolution, resolution)
 
       for (let i = offset; i < boardWidth; i += cellSize) {
         // Draw vertical line
-        drawLine(ctx, [i, offset], [i, canvas.height - offset], 'black')
+        drawLine(ctx, [i, offset], [i, boardWidth - offset], 'black')
         // Draw horizontal line
-        drawLine(ctx, [offset, i], [canvas.width - offset, i], 'black')
+        drawLine(ctx, [offset, i], [boardWidth - offset, i], 'black')
       }
 
       // Draw star points

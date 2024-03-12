@@ -15,7 +15,7 @@ import { UserInfo } from '../util/types';
 export function Test() {
   const [open, setOpen] = useState(false);
   const divider = <Divider orientation="horizontal" sx={{mt: 1, mb: 2, borderColor: "black" }} />
-  const userInfo: UserInfo = JSON.parse(localStorage.getItem(USERINFO) || initialUserInfo)
+  const userInfo: UserInfo = JSON.parse(sessionStorage.getItem(USERINFO) || initialUserInfo)
 
   const toggleDrawer = (open: boolean) => (event: any) => {
     if (
@@ -29,7 +29,7 @@ export function Test() {
   };
 
   const navigate = useNavigate();
-  const languageIdx = Number(localStorage.getItem(LANGUAGE_IDX))
+  const languageIdx = Number(sessionStorage.getItem(LANGUAGE_IDX))
 
   const created = 
     <NavButton 

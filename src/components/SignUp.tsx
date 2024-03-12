@@ -25,11 +25,9 @@ export function Signup() {
   const navigate = useNavigate()
   const [form, setForm] = useState(initialForm)
   const [level, setLevel] = useState(18)
-  const divider = <Divider orientation="horizontal" sx={{mt: 1, mb: 2, borderColor: "white" }} />
   const [emailErrorMessage, setEmailErrorMessage] = useState("")
   const [passwordErrorMessage, setPasswordErrorMessage] = useState("")
   const [nameErrorMessage, setNameErrorMessage] = useState("")
-  const [validEMail, setValidEmail] = useState(true)
   const languageIdx = Number(localStorage.getItem(LANGUAGE_IDX))
   
 
@@ -48,12 +46,11 @@ export function Signup() {
     // 이메일 중복여부 확인. 문자열이 이메일의 포맷에 맞는지 확인하는 기능은 아직 없음.
     const email = form.email
     if (!isValidEmail(email)) {
-      setValidEmail(false)
-      setEmailErrorMessage("not valid email form")
+      setEmailErrorMessage(menuWords.invalidEmailFormWarning[languageIdx])
       return false
     }
-    const isValid = await checkMail(email)
-    if (isValid === true) {
+    const duplicated = await checkMail(email)
+    if (!duplicated) {
       setEmailErrorMessage("")
       return true
     } else {
@@ -80,10 +77,13 @@ export function Signup() {
   }
 
   async function checkUserNameAndSetNameError() {
-    // 유저 네임의 중복여부 확인. 이 역시 네임의 포맷이 적합한지 여부는 확인하지 않음.
     const name = form.name
-    const isValid = await checkUserName(name)
-    if (isValid === true) {
+    if (name.includes(" ")) {
+      setNameErrorMessage(menuWords.nameFormWarning[languageIdx])
+      return
+    }
+    const duplicated = await checkUserName(name)
+    if (!duplicated) {
       setNameErrorMessage("")
       return true 
     } else {
@@ -92,7 +92,7 @@ export function Signup() {
     }
   }
 
-  function create() {
+  async function create() {
     const email = form.email
     const password = form.password
     const name = form.name
@@ -172,13 +172,7 @@ export function Signup() {
           variant={variant}
         >
           {levelArray.map(level => {
-            if (level < 0) {
-              return <MenuItem value={level}>{`${Math.abs(level)}${menuWords.D[languageIdx]}`}</MenuItem>
-            } else if (level > 0) {
-              return <MenuItem value={level}>{`${level}${menuWords.K[languageIdx]}`}</MenuItem>
-            } else {
-              return
-            }
+            return <MenuItem key={level} value={level}>{Math.abs(level)}{level > 0? menuWords.K[languageIdx] : menuWords.D[languageIdx]}</MenuItem>
           })}
         </Select>
       </FormControl>

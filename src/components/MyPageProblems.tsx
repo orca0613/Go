@@ -1,19 +1,18 @@
 import { useState, useEffect } from 'react';
-import { convertFromStringToTwoD } from '../util/functions';
 import { Box } from '@mui/material';
-import { ProblemInfo, UserInfo } from '../util/types';
+import { ProblemInformation, UserInfo } from '../util/types';
 import SampleProblemBox from './problem/SampleProblemBox';
-import { getProblemByIdList } from '../network/problem';
 import { useParams } from 'react-router-dom';
 import { CREATED, LIKED, SOLVED, UNRESOLVED, USERINFO, WITHQUESTIONS, initialUserInfo } from '../util/constants';
+import { getProblemByIdList } from '../network/problemInformation';
 
 export default function MyPageProblems() {
   const { part } = useParams()
   let idList: string[] = []
-  const [problems, setProblems] = useState<ProblemInfo[]>([]);
+  const [problems, setProblems] = useState<ProblemInformation[]>([]);
 
   useEffect(() => {
-    const userInfo: UserInfo = JSON.parse(localStorage.getItem(USERINFO) || initialUserInfo)
+    const userInfo: UserInfo = JSON.parse(sessionStorage.getItem(USERINFO) || initialUserInfo)
     switch (part) {
       case (CREATED):
         idList = userInfo.created
@@ -34,15 +33,12 @@ export default function MyPageProblems() {
         break
     }
     const result = getProblemByIdList(idList)
-    const newProblems: ProblemInfo[] = []
+    const newProblems: ProblemInformation[] = []
     result.then(r => {
       r.map(p => {
-        const newProblem: ProblemInfo = {
-          ...p,
-          initialState: convertFromStringToTwoD(p.initialState)
-        }
-        newProblems.push(newProblem)
+        newProblems.push(p)
       })
+      newProblems.reverse()
       setProblems(newProblems)
     })
     }, [part])

@@ -1,25 +1,20 @@
-import { ProblemInfo } from '../../util/types'
+import { ProblemInformation } from '../../util/types'
 import { useEffect, useState } from 'react'
-import { convertFromStringToTwoD } from '../../util/functions'
 import SampleProblemBox from './SampleProblemBox'
-import { getAllProblems } from '../../network/problem'
-
+import { getAllProblems } from '../../network/problemInformation'
 
 export default function AllProblems() {
 
-  const [allProblem, setAllProblem] = useState<ProblemInfo[]>([])
+  const [allProblem, setAllProblem] = useState<ProblemInformation[]>([])
 
   useEffect(() => {
     const result = getAllProblems()
-    const all: ProblemInfo[] = []
+    const all: ProblemInformation[] = []
     result.then(r => {
       r.map(p => {
-        const newProblem: ProblemInfo = {
-          ...p,
-          initialState: convertFromStringToTwoD(p.initialState)
-        }
-        all.push(newProblem)
+        all.push(p)
       })
+      all.reverse()
       setAllProblem(all)
     })
   }, [])

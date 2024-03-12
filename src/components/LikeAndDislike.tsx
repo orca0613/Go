@@ -13,7 +13,7 @@ interface LADProps {
 
 export function LikeAndDislike({ problemId, username }: LADProps) {
   const languageIdx = Number(localStorage.getItem(LANGUAGE_IDX))
-  const userInfo: UserInfo = JSON.parse(localStorage.getItem(USERINFO) || initialUserInfo)
+  const userInfo: UserInfo = JSON.parse(sessionStorage.getItem(USERINFO) || initialUserInfo)
   const [info, setInfo] = useState({
     like: false,
     dislike: false,
@@ -47,7 +47,7 @@ export function LikeAndDislike({ problemId, username }: LADProps) {
         userInfo.liked.push(problemId)
       }
     }
-    localStorage.setItem(USERINFO, JSON.stringify(userInfo))
+    sessionStorage.setItem(USERINFO, JSON.stringify(userInfo))
   }
 
   function handleDislike() {
@@ -76,7 +76,7 @@ export function LikeAndDislike({ problemId, username }: LADProps) {
         userInfo.disliked.push(problemId)
       }
     }
-    localStorage.setItem(USERINFO, JSON.stringify(userInfo))
+    sessionStorage.setItem(USERINFO, JSON.stringify(userInfo))
   }
 
   useEffect(() => {

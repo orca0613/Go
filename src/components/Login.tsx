@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom'
 import { menuWords } from '../util/menuWords'
 import { getUserDetail } from '../network/userDetail'
 import { logIn } from '../network/user'
-import { LANGUAGE_IDX, USERINFO, initialUserInfo } from '../util/constants'
+import { HOME, LANGUAGE_IDX, USERINFO, initialUserInfo } from '../util/constants'
 import { UserInfo } from '../util/types'
 
 export function Login() {
@@ -29,7 +29,7 @@ export function Login() {
     if (name) {
       const detail = getUserDetail(name)
       .then(r => {
-        const userInfo: UserInfo = JSON.parse(localStorage.getItem(USERINFO) || initialUserInfo)
+        const userInfo: UserInfo = JSON.parse(sessionStorage.getItem(USERINFO) || initialUserInfo)
         const newUserInfo: UserInfo = {
           ...userInfo,
           point: r.point,
@@ -40,9 +40,12 @@ export function Login() {
           liked: r.liked,
           disliked: r.disliked,
         }
-        localStorage.setItem(USERINFO, JSON.stringify(newUserInfo))
+        sessionStorage.setItem(USERINFO, JSON.stringify(newUserInfo))
+        if (r.withQuestions.length) {
+          alert(menuWords.requestWarning[languageIdx])
+        }
       })
-      movePage("/home")
+      movePage(HOME)
     }
   }, [name])
 

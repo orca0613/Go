@@ -1,7 +1,7 @@
-import { ProblemInfo } from "../util/types";
+import { ProblemInformation } from "../util/types";
 import { SET_PROBLEMS, SET_PROBLEM_INDEX, SetProblemIndexAction, SetProblemListAction } from "./problemActionType";
 
-export function setProblemList(problemList: ProblemInfo[]): SetProblemListAction {
+export function setProblemList(problemList: ProblemInformation[]): SetProblemListAction {
   return {
     type: SET_PROBLEMS,
     payload: problemList,

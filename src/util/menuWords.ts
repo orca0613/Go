@@ -81,8 +81,6 @@ export const menuWords = {
   correctRate: ["CORRECT RATE", "정답률", "正确率", "正解率"],
   requestVariation: ["Request variation", "변화도 요청", "请求变化", "変化図要請"],
   requestsReceived: ["Requests received", "받은 요청들", "收到的请求", "受け取ったリクエスト"],
-  complete: ["Complete", "수정 완료", "修改完成", "修正完了"],
-  incomplete: ["Incomplete", "수정 미완료", "修改未完成", "修正未完了"],
   liked: ["Liked", "좋아하는 문제", "喜欢的问题", "好きな問題"],
   pointWarning: ["Not enough points", "포인트가 부족합니다.", "积分不够", "ポイントが足りません"],
   registered: ["A problem has been registered", "문제가 등록 되었습니다", "已登记问题。", "問題が登録されました"],
@@ -104,4 +102,29 @@ export const menuWords = {
     "验证电子邮件已发送。认证后即可登录。", 
     "確認メールが送信されました。認証後ログイン可能となります。"
   ],
+  requestWarning: [
+    "There are unprocessed requests. Please check on My Page.",
+    "처리하지 않은 요청이 있습니다. 마이페이지에서 확인해 주세요.",
+    "有未处理的请求。请查看我的页面。",
+    "未処理のリクエストがあります。マイページよりご確認ください。"
+  ],
+  loginWarning: ["Login is required.", "로그인이 필요합니다.", "需要登录。", "ログインが必要です。"],
+  confirmRequest: ["Confirm request", "요청 확인", "确认请求", "確認リクエスト"],
+  deleteProblemWarning: [
+    "Once deleted, it cannot be recovered. Are you sure you want to delete?",
+    "삭제하면 복구 할 수 없습니다. 정말 삭제하시겠습니까?",
+    "一旦删除，就无法恢复。你确定你要删除？",
+    "削除すると回復できません。本当に削除しますか？"
+  ],
+  confirm: ["confirm", "확인", "确认", "確認"],
+  cancel: ["cancel", "취소", "取消", "取消"],
+  deletedNotice: ["Deleted", "삭제 되었습니다", "已删除", "削除されました"],
+  modifiedNotice: ["Modified", "수정 완료", "修改完成", "修正完了"],
+  noMailWarning: ["This email is not registered", "등록되지 않은 이메일입니다", "该电子邮件未注册", "このメールは登録されていません"],
+  verifyWarning: ["Authentication has not been completed", "인증이 완료되지 않았습니다", "身份验证尚未完成", "認証が完了していません"],
+  incorrectPasswordWarning: ["Password is incorrect", "비밀번호가 틀렸습니다", "密码不正确", "パスワードが正しくありません"],
+  invalidEmailFormWarning: ["Invalid email format", "잘못된 이메일 양식", "电子邮件格式无效", "無効な電子メール形式"],
+  verificationCompleteNotice: ["Verification completed", "인증 완료", "验证完成", "認証完了"],
+  wrongApproachWarning: ["The wrong approach", "잘못된 접근입니다", "错误的做法", "間違ったアプローチです"],
+
 }
