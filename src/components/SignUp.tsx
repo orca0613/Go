@@ -1,41 +1,66 @@
 import { Button, TextField, FormControl, InputLabel, Select, MenuItem, Box, SelectChangeEvent, Divider } from '@mui/material'
 import React, { useState } from 'react'
-import { LANGUAGE_IDX, levelArray } from '../util/constants'
+import { LANGUAGE_IDX, languageList, levelArray } from '../util/constants'
 import { useNavigate } from 'react-router-dom'
 import { menuWords } from '../util/menuWords'
 import { checkMail, checkUserName, createUser } from '../network/user'
 import { isValidEmail } from '../util/functions'
 import { useWindowSize } from 'react-use'
 
-interface SignupFormInput {
-    email: string,
-    password: string,
-    repeatPassword: string,
-    name: string,
-}
-const initialForm: SignupFormInput = {
-    email: '',
-    password: '',
-    repeatPassword: '',
-    name: '',
-}
-
 export function Signup() {
 
   const navigate = useNavigate()
-  const [form, setForm] = useState(initialForm)
   const [level, setLevel] = useState(18)
+  const [email, setEmail] = useState("")
+  const [name, setName] = useState("")
+  const [password, setPassword] = useState("")
+  const [repeatPassword, setRepeatPassword] = useState("")
   const [emailErrorMessage, setEmailErrorMessage] = useState("")
   const [passwordErrorMessage, setPasswordErrorMessage] = useState("")
+  const [repeatPasswordErrorMessage, setRepeatPasswordErrorMessage] = useState("")
   const [nameErrorMessage, setNameErrorMessage] = useState("")
-  const languageIdx = Number(localStorage.getItem(LANGUAGE_IDX))
+  const [language, setLanguage] = useState(Number(localStorage.getItem(LANGUAGE_IDX)))
   
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setForm({
-      ...form,
-      [e.target.name]: e.target.value
-    })
+  const handleEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newEmail = e.target.value
+    setEmail(newEmail)
+    if (newEmail.includes(" ")) {
+      setEmailErrorMessage(menuWords.spaceWarning[language])
+    } else {
+      setEmailErrorMessage("")
+    }
+  }
+  const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newName = e.target.value
+    setName(newName)
+    if (newName.includes(" ")) {
+      setNameErrorMessage(menuWords.spaceWarning[language])
+    } else {
+      setNameErrorMessage("")
+    }
+  }
+  const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newPassword = e.target.value
+    setPassword(newPassword)
+    if (newPassword.length < 8) {
+      setPasswordErrorMessage(menuWords.passwordWarning[language])
+      return
+    }
+    if (newPassword.includes(" ")) {
+      setPasswordErrorMessage(menuWords.spaceWarning[language])
+    } else {
+      setPasswordErrorMessage("")
+    }
+  }
+  const handleRepeatPasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newRepeat = e.target.value
+    setRepeatPassword(newRepeat)
+    if (newRepeat !== password) {
+      setRepeatPasswordErrorMessage(menuWords.repeatPasswordWarning[language])
+    } else {
+      setRepeatPasswordErrorMessage("")
+    }
   }
 
   const levelChange = (e: SelectChangeEvent) => {
@@ -44,9 +69,8 @@ export function Signup() {
 
   async function checkMailAndSetEmailError() {
     // 이메일 중복여부 확인. 문자열이 이메일의 포맷에 맞는지 확인하는 기능은 아직 없음.
-    const email = form.email
     if (!isValidEmail(email)) {
-      setEmailErrorMessage(menuWords.invalidEmailFormWarning[languageIdx])
+      setEmailErrorMessage(menuWords.invalidEmailFormWarning[language])
       return false
     }
     const duplicated = await checkMail(email)
@@ -54,58 +78,31 @@ export function Signup() {
       setEmailErrorMessage("")
       return true
     } else {
-      setEmailErrorMessage(menuWords.emailWarning[languageIdx])
+      setEmailErrorMessage(menuWords.emailWarning[language])
       return false
-    }
-  }
-
-
-  function checkPasswordAndSetPasswordError() {
-    // 패스워드가 적합한 형태인지 확인. 길이가 8이상, repeat-password와 일치하는지 공백문자가 있는지 여부만 확인.
-    if (form.password.length < 8) {
-      setPasswordErrorMessage(menuWords.passwordWarning[languageIdx])
-      return false
-    } else {
-      if (form.password !== form.repeatPassword) {
-        setPasswordErrorMessage(menuWords.repeatPasswordWarning[languageIdx])
-        return false
-      } else {
-        setPasswordErrorMessage("")
-        return true
-      }
     }
   }
 
   async function checkUserNameAndSetNameError() {
-    const name = form.name
-    if (name.includes(" ")) {
-      setNameErrorMessage(menuWords.nameFormWarning[languageIdx])
-      return
-    }
     const duplicated = await checkUserName(name)
     if (!duplicated) {
       setNameErrorMessage("")
       return true 
     } else {
-      setNameErrorMessage(menuWords.nameWarning[languageIdx])
+      setNameErrorMessage(menuWords.nameWarning[language])
       return false
     }
   }
 
-  async function create() {
-    const email = form.email
-    const password = form.password
-    const name = form.name
-    createUser(email, password, name, level)
-  }
-
   async function checkInformationAndregister() {
-    const email = await checkMailAndSetEmailError()
-    const password = checkPasswordAndSetPasswordError()
-    const name = await checkUserNameAndSetNameError()
+    if (emailErrorMessage || nameErrorMessage || passwordErrorMessage || repeatPasswordErrorMessage) {
+      return
+    }
+    const isValidEmail = await checkMailAndSetEmailError()
+    const isValidName = await checkUserNameAndSetNameError()
 
-    if (email && password && name) {
-      create()
+    if (isValidEmail && isValidName) {
+      createUser(email, password, name, level, language)
       navigate("/")
       
     } else {
@@ -117,66 +114,86 @@ export function Signup() {
   const {width, height} = useWindowSize()
   const variant = "standard"
   
+  function changeLanguage(e: SelectChangeEvent) {
+    const l = Number(e.target.value)
+    setLanguage(l)
+  }
+
   return (
     <Box sx={{margin: "3%"}} textAlign="center" display="grid" justifyContent="center">
+      <FormControl  sx={{height: height / 7, width: Math.min(width, 300)}}>
+        <InputLabel id="language-select-label">{menuWords.language[language]}</InputLabel>
+        <Select
+          labelId="language-select-label"
+          id="language-select"
+          value={String(language)}
+          label={languageList[language]}
+          onChange={changeLanguage}
+          variant={variant}
+        >
+          {languageList.map((l, idx) => {
+            return <MenuItem key={l} value={idx}>{l}</MenuItem>
+          })}
+        </Select>
+      </FormControl>
       <TextField
-        error={emailErrorMessage.length > 0? true : false}
+        error={emailErrorMessage.length > 0}
         helperText={emailErrorMessage}
         sx={{height: height / 7, width: Math.min(width, 300)}}
         name='email'
-        label={menuWords.eMail[languageIdx]} 
+        label={menuWords.eMail[language]} 
         variant={variant}
-        value={form.email}
-        onChange={handleInputChange}
+        value={email}
+        onChange={handleEmailChange}
       />
       <TextField 
-        error={nameErrorMessage.length > 0? true : false}
+        error={nameErrorMessage.length > 0}
         helperText={nameErrorMessage}
         sx={{height: height / 7, width: Math.min(width, 300)}}
         name='name'
-        label={menuWords.name[languageIdx]} 
+        label={menuWords.name[language]} 
         variant={variant}
-        value={form.name}
-        onChange={handleInputChange}
+        value={name}
+        onChange={handleNameChange}
       />
       <TextField 
-        error={passwordErrorMessage.length > 0? true : false}
+        error={passwordErrorMessage.length > 0}
         helperText={passwordErrorMessage}
         sx={{height: height / 7, width: Math.min(width, 300)}}
         name='password'
         type='password'
-        label={menuWords.password[languageIdx]}
+        label={menuWords.password[language]}
         variant={variant}
-        value={form.password}
-        onChange={handleInputChange}
+        value={password}
+        onChange={handlePasswordChange}
       />
       <TextField
-        error={passwordErrorMessage.length > 0? true : false}
-        helperText={passwordErrorMessage}
+        error={repeatPasswordErrorMessage.length > 0}
+        helperText={repeatPasswordErrorMessage}
         sx={{height: height / 7, width: Math.min(width, 300)}}
         name='repeatPassword'
         type='password'
-        label={menuWords.repeatPassword[languageIdx]} 
+        label={menuWords.repeatPassword[language]} 
         variant={variant}
-        value={form.repeatPassword}
-        onChange={handleInputChange}
+        value={repeatPassword}
+        onChange={handleRepeatPasswordChange}
       />
       <FormControl  sx={{height: height / 7, width: Math.min(width, 300)}}>
-        <InputLabel id="level-select-label">{menuWords.level[languageIdx]}</InputLabel>
+        <InputLabel id="level-select-label">{menuWords.level[language]}</InputLabel>
         <Select
           labelId="level-select-label"
           id="level-select"
           value={String(level)}
-          label={menuWords.level[languageIdx][languageIdx]}
+          label={menuWords.level[language]}
           onChange={levelChange}
           variant={variant}
         >
           {levelArray.map(level => {
-            return <MenuItem key={level} value={level}>{Math.abs(level)}{level > 0? menuWords.K[languageIdx] : menuWords.D[languageIdx]}</MenuItem>
+            return <MenuItem key={level} value={level}>{Math.abs(level)}{level > 0? menuWords.K[language] : menuWords.D[language]}</MenuItem>
           })}
         </Select>
       </FormControl>
-      <Button variant="contained" color="info" sx={{height: height / 15, width: Math.min(width, 300)}} onClick={checkInformationAndregister}>{menuWords.create[languageIdx]}</Button>
+      <Button variant="contained" color="info" sx={{height: height / 15, width: Math.min(width, 300)}} onClick={checkInformationAndregister}>{menuWords.create[language]}</Button>
     </Box>
   )
 }

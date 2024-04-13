@@ -1,10 +1,10 @@
-import { useEffect, useState } from 'react';
-import { Box, Button, TextField } from '@mui/material';
+import { useState } from 'react';
+import { Box, Button, TextField, Typography } from '@mui/material';
 import { useNavigate, useParams } from 'react-router-dom';
 import { changePassword } from '../network/user';
 import { menuWords } from '../util/menuWords';
 import { useWindowSize } from 'react-use';
-import { HOME, LANGUAGE_IDX } from '../util/constants';
+import { LANGUAGE_IDX, LOGIN_PATH } from '../util/constants';
 
 export default function ChangePassword() {
   const { userId } = useParams()
@@ -23,7 +23,7 @@ export default function ChangePassword() {
     setRepeat(e.target.value)
   }
 
-  function change() {
+  async function change() {
     if (password.length < 8) {
       setErrorMessage(menuWords.passwordWarning[languageIdx])
       return
@@ -31,14 +31,19 @@ export default function ChangePassword() {
       setErrorMessage(menuWords.repeatPasswordWarning[languageIdx])
       return
     } else {
-      changePassword(userId || "", password)
-      navigate(HOME)
+      const result = await changePassword(userId || "", password)
+      if (result) {
+        sessionStorage.clear()
+        navigate(LOGIN_PATH)
+      }
     }
   }
 
   return (
-    <Box>
-        <TextField 
+    <Box sx={{margin: "3%"}} textAlign="center" display="grid" justifyContent="center">
+
+      <Typography sx={{height: height / 7, width: Math.min(width, 300)}}>{menuWords.changePassword[languageIdx]}</Typography>
+      <TextField 
         error={errorMessage.length > 0? true : false}
         helperText={errorMessage}
         sx={{height: height / 7, width: Math.min(width, 300)}}
@@ -60,7 +65,7 @@ export default function ChangePassword() {
         value={repeat}
         onChange={handleRepeatChange}
       />
-      <Button variant="contained" color="info" sx={{height: height / 15, width: Math.min(width, 300)}} onClick={change}>{menuWords.create[languageIdx]}</Button>
+      <Button variant="contained" color="info" sx={{height: height / 15, width: Math.min(width, 300)}} onClick={change}>{menuWords.change[languageIdx]}</Button>
     </Box>
   );
 }

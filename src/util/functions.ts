@@ -1,11 +1,8 @@
-import { useNavigate } from "react-router-dom"
 import { getDeadGroup, handleMove } from "../gologic/logic"
-import { LANGUAGE_IDX } from "./constants"
+import { LANGUAGE_IDX, PAGE, PROBLEM_INDICES, SORTING_IDX } from "./constants"
 import { menuWords } from "./menuWords"
-import { Board, Coordinate, Variations } from "./types"
+import { Board, Coordinate, Filter, ProblemInformation, Variations } from "./types"
 import _ from 'lodash'
-
-const languageIdx = Number(localStorage.getItem(LANGUAGE_IDX))
 
 export function playMoveAndReturnNewBoard(board: Board, coord: Coordinate, color: string) {
     let newBoard = _.cloneDeep(board)
@@ -49,7 +46,6 @@ export function divmod(num1: number, num2: number): Coordinate {
 
 export function addCurrentVariation(currentKey: string, variations: Variations, l: string[]) {
   if (currentKey in variations) {
-    console.log(menuWords.duplicateVariationWarning[languageIdx])
     return variations
   }
   const newVariations = _.cloneDeep(variations)
@@ -115,7 +111,6 @@ export function getAverageLevel(total: number, divider:number): number {
     return 19
   }
   const average = total / divider
-  console.log(average)
   if (average <= 18 && average <= 1) {
     return Math.round(average)
   }
@@ -148,3 +143,141 @@ export function loginWarning() {
   sessionStorage.clear()
   alert(menuWords.loginWarning[languageIdx])
 }
+
+export function getTier(level: number) {
+  if (level < -9 || level > 18) {return 0}
+  if (level < -4) {return 1}
+  if (level < 0) {return 2}
+  if (level < 7) {return 3}
+  if (level < 13) {return 4}
+  return 5
+}
+
+export function getRangeByTier(tier: number): number[] {
+  switch (tier) {
+    case 1:
+      return [-10, -4]
+    case 2:
+      return [-5, 0]
+    case 3:
+      return [0, 7]
+    case 4:
+      return [6, 13]
+    case 5:
+      return [12, 19]
+    default:
+      return [-10, 19]
+  }
+}
+
+export function ownStringify(filter: Filter) {
+  let r = ""
+  const entries = Object.entries(filter)
+  entries.forEach(([key, value]) => {
+    r += key + "=" + value + "&"
+  })
+  return r
+}
+
+export function ownParse(param: string) {
+  interface myObject {
+    [key: string]: number | string
+  }
+  const filter: myObject = {}
+  const parts = param.split("&")
+  for (let i = 0; i < parts.length; i++) {
+    const part = parts[i]
+    if (!part) {
+      continue
+    }
+    const [key, value] = part.split("=")
+    filter[key] = value
+  }
+  return filter
+}
+
+export function sortingProblemList(problemList: ProblemInformation[], option: number) {
+  const newProblemList = problemList
+  switch (option) {
+    case 0:
+      newProblemList.sort((a, b) => b.problemIndex - a.problemIndex)
+      break
+    case 1:
+      newProblemList.sort((a, b) => a.problemIndex - b.problemIndex)
+      break
+    case 2:
+      newProblemList.sort((a, b) => {
+        if (a.level === b.level) {
+          return b.problemIndex - a.problemIndex
+        } else {
+          return a.level - b.level
+        }
+      })
+      break
+    case 3:
+      newProblemList.sort((a, b) => {
+        if (a.level === b.level) {
+          return b.problemIndex - a.problemIndex
+        } else {
+          return b.level - a.level
+        }
+      })
+      break
+    case 4:
+      newProblemList.sort((a, b) => {
+        if (a.liked.length === b.liked.length) {
+          return b.problemIndex - a.problemIndex
+        } else {
+          return b.liked.length - a.liked.length
+        }
+      })
+      break
+    case 5:
+      newProblemList.sort((a, b) => {
+        if (a.view === b.view) {
+          return b.problemIndex - a.problemIndex
+        } else {
+          return b.view - a.view
+        }
+      })
+      break
+    case 6:
+      newProblemList.sort((a, b) => {
+        if (a.view === b.view) {
+          return b.problemIndex - a.problemIndex
+        } else {
+          return a.view - b.view
+        }
+      })
+      break
+    default:
+      break
+  }
+  return newProblemList
+}
+
+export function resetSortingForm(page: number, sortingIdx: number) {
+  sessionStorage.setItem(PAGE, String(page))
+  sessionStorage.setItem(SORTING_IDX, String(sortingIdx))
+}
+
+export function setProblemIndicies(problemList: ProblemInformation[]) {
+  const indices: number[] = []
+  problemList.map(p => {
+    indices.push(p.problemIndex)
+  })
+  sessionStorage.setItem(PROBLEM_INDICES, JSON.stringify(indices))
+}
+
+export function getPositions(board: Board, color: string) {
+  const group: Coordinate[] = []
+  for (let i = 0; i < board.length; i++) {
+    for (let j = 0; j < board[i].length; j++) {
+      if (board[i][j] === color) {
+        group.push([i, j])
+      }
+    }
+  }
+  return group
+}
+

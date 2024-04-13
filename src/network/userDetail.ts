@@ -3,7 +3,7 @@ import { loginWarning } from "../util/functions"
 import { menuWords } from "../util/menuWords"
 import { CreatorInfo, UserDetailFromServer, UserInfo } from "../util/types"
 
-export async function addElement(element: string, name: string, where: string) {
+export async function addElement(element: number, name: string, where: string) {
   const userInfo: UserInfo = JSON.parse(sessionStorage.getItem(USERINFO) || initialUserInfo)
   const token = userInfo.token
   const response = await fetch(`${API_URL}${USERDETAIL_DB_PATH}/add-element`, {
@@ -25,7 +25,7 @@ export async function addElement(element: string, name: string, where: string) {
 }
 
 
-export async function deleteElement(element: string, name: string, where: string) {
+export async function deleteElement(element: number, name: string, where: string) {
   const userInfo: UserInfo = JSON.parse(sessionStorage.getItem(USERINFO) || initialUserInfo)
   const token = userInfo.token
   const response = await fetch(`${API_URL}${USERDETAIL_DB_PATH}/delete-element`, {
@@ -67,26 +67,26 @@ export async function getAllCreators(): Promise<string[]> {
   return result 
 }
 
-export async function changeInfoAndPoint(problemId: string, where: string, point: number) {
+export async function settingChange(language: number, level: number, auto: boolean) {
   const userInfo: UserInfo = JSON.parse(sessionStorage.getItem(USERINFO) || initialUserInfo)
-  const name = userInfo.name
+  const username = userInfo.name
   const token = userInfo.token
-  userInfo.point += point
-  sessionStorage.setItem(USERINFO, JSON.stringify(userInfo))
-  const response = await fetch(`${API_URL}${USERDETAIL_DB_PATH}/change`, {
+  const update = await fetch(`${API_URL}${USERDETAIL_DB_PATH}/setting`, {
     method: "PATCH",
     headers: {
       "Content-Type": "application/json",
       'authorization': `Bearer ${token}`
     },
-    body: JSON.stringify({name, point, problemId, where})
+    body: JSON.stringify({username, language, level, auto})
   })
-  if (response.ok) {
-    return
+  if (update.ok) {
+    localStorage.setItem(LANGUAGE_IDX, String(language))
+    userInfo.auto = auto
+    userInfo.level = level
+    userInfo.language = language
+    sessionStorage.setItem(USERINFO, JSON.stringify(userInfo))
+    return true
   }
-  if (response.status === 401 || 403) {
-    return loginWarning()
-  }
-  throw new Error(`Error: ${response.status}`)
+  throw new Error(`Error: ${update.status}`)
 }
 

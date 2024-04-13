@@ -4,7 +4,6 @@ import { menuWords } from '../util/menuWords'
 import { LANGUAGE_IDX, USERINFO, initialUserInfo } from '../util/constants'
 import { UserInfo } from '../util/types'
 
-
 export function HomeForm() {
 
   const userInfo: UserInfo = JSON.parse(sessionStorage.getItem(USERINFO) || initialUserInfo)

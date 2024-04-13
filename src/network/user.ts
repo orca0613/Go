@@ -20,14 +20,14 @@ export async function checkUserName(name: string) {
   return duplicated
 }
 
-export async function createUser(email: string, password: string, name: string, level: number) {
+export async function createUser(email: string, password: string, name: string, level: number, language: number) {
   const languageIdx = Number(localStorage.getItem(LANGUAGE_IDX))
   const response = await fetch(`${API_URL}${USER_DB_PATH}/create`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
     },
-    body: JSON.stringify({email, password, name, level}),
+    body: JSON.stringify({email, password, name, level, language}),
   })
   if (response.ok) {
     return alert(menuWords.checkMailWarning[languageIdx])
@@ -64,7 +64,9 @@ export async function logIn(email: string, password: string): Promise<string> {
     name: userData.name,
     level: userData.level,
     token: userData.token,
+    language: userData.language
   }
+  localStorage.setItem(LANGUAGE_IDX, userData.language)
   sessionStorage.setItem(USERINFO, JSON.stringify(newUserInfo))
   return userData.name
 }
@@ -81,14 +83,42 @@ export async function verifyMail(userId: string): Promise<boolean> {
 }
 
 export async function changePassword(id: string, password: string) {
+  const languageIdx = Number(localStorage.getItem(LANGUAGE_IDX))
   const response = await fetch(`${API_URL}${USER_DB_PATH}/change-password`, {
-    method: 'POST',
+    method: 'PATCH',
     headers: {
       'Content-Type': 'application/json',
     },
     body: JSON.stringify({ id, password }),
   })
   if (response.ok) {
-    console.log(response)
+    alert(menuWords.modifiedNotice[languageIdx])
+    return true
   }
+  return false
 }
+
+export async function checkPassword(name: string, password: string) {
+  const info = name + " " + password
+  const response = await fetch(`${API_URL}${USER_DB_PATH}/check-password/${info}`)
+  if (response.ok) {
+    const data = await response.json()
+    return data.id
+  }
+  if (response.status === 401 || response.status === 403 || response.status === 404) {
+    return undefined
+  }
+  throw new Error(`Error: ${response.status}`)
+}
+
+export async function checkMailAndSendUrl(email: string) {
+  const response = await fetch(`${API_URL}${USER_DB_PATH}/check-mail/${email}`)
+  if (response.ok) {
+    return true
+  } 
+  if (response.status === 404) {
+    return false
+  }
+  throw new Error(`Error: ${response.status}`)
+}
+

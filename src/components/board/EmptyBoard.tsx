@@ -3,7 +3,7 @@ import { CSSProperties, useEffect, useRef } from 'react';
 import { Coordinate } from '../../util/types';
 import { flowerPointPosition, resolution } from '../../util/constants';
 
-interface BoardProps {
+interface EmptyBoardProps {
   boardWidth: number
   lines: number
   cellSize: number
@@ -12,11 +12,12 @@ interface BoardProps {
   style?: CSSProperties
 }
 
-const EmptyBoard = ({ lines, cellSize, offset, lineWidth, style, boardWidth}: BoardProps) => {
+const EmptyBoard = ({ lines, cellSize, offset, lineWidth, style, boardWidth}: EmptyBoardProps) => {
 
   const starPoints = flowerPointPosition[lines - 1]
   const starPointSize = Math.min(5, cellSize / 10)
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const gap = offset + cellSize / 2
 
   function drawLine(ctx: CanvasRenderingContext2D, c1: Coordinate, c2: Coordinate, color: string) {
 
@@ -29,8 +30,8 @@ const EmptyBoard = ({ lines, cellSize, offset, lineWidth, style, boardWidth}: Bo
   }
 
   function drawCircle(ctx: CanvasRenderingContext2D, size: number, coordinate: Coordinate, color: string) {
-    const x = cellSize * (coordinate[0]) + offset;
-    const y = cellSize * (lines - 1 - coordinate[1]) + offset;
+    const x = cellSize * (coordinate[0]) + gap;
+    const y = cellSize * (lines - 1 - coordinate[1]) + gap;
 
     ctx.fillStyle = color === 'b'? 'black' : 'gray';
     ctx.beginPath();
@@ -55,11 +56,11 @@ const EmptyBoard = ({ lines, cellSize, offset, lineWidth, style, boardWidth}: Bo
 
       ctx.scale(resolution, resolution)
 
-      for (let i = offset; i < boardWidth; i += cellSize) {
+      for (let i = gap; i < boardWidth; i += cellSize) {
         // Draw vertical line
-        drawLine(ctx, [i, offset], [i, boardWidth - offset], 'black')
+        drawLine(ctx, [i, gap], [i, boardWidth - gap], 'black')
         // Draw horizontal line
-        drawLine(ctx, [offset, i], [boardWidth - offset, i], 'black')
+        drawLine(ctx, [gap, i], [boardWidth - gap, i], 'black')
       }
 
       // Draw star points

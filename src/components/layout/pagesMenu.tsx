@@ -1,24 +1,40 @@
 import { Box, Typography, useMediaQuery } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import { NavButton } from "./NavButton";
-import { HOME, LOGIN_PATH, PROBLEM_PATH, CREATE_PATH, SIGNUP_PATH, LANGUAGE_IDX, USERINFO } from "../../util/constants";
-import Search from "../Search";
-import UserMenu from "../UserMenu";
+import { HOME, LOGIN_PATH, PROBLEM_PATH, CREATE_PATH, LANGUAGE_IDX, USERINFO, SITE_NAME, mobileFontSize, initialUserInfo, PAGE, SORTING_IDX, SIGNUP_PATH } from "../../util/constants";
 import { menuWords } from "../../util/menuWords";
 import Language from "../Language";
-import { BurgerMenu } from "../BurgerMenu";
+import { Menu } from "../Menu";
+import { Filter, UserInfo } from "../../util/types";
+import { getRangeByTier, getTier, ownStringify, resetSortingForm } from "../../util/functions";
 
 
 export function PagesMenu() {
   const navigate = useNavigate();
   const languageIdx = Number(localStorage.getItem(LANGUAGE_IDX))
-  const isMobile = useMediaQuery("(max-width: 800px)")
+  const isMobile = useMediaQuery("(max-width: 400px)")
+  const userInfo: UserInfo = JSON.parse(sessionStorage.getItem(USERINFO) || initialUserInfo)
+
+  function resetPageAndMove() {
+    const tier = getTier(userInfo.level)
+    const [low, high] = getRangeByTier(tier)
+    const filter: Filter = {
+      tier: tier,
+      low: low,
+      high: high,
+      creator: ""
+    }
+    const F = ownStringify(filter)
+    resetSortingForm(1, 0)
+    navigate(`${PROBLEM_PATH}/${F}`)
+  }
   
 
   const problems = 
     <NavButton 
+      sx={{fontSize: isMobile? mobileFontSize : "", display: sessionStorage.getItem(USERINFO)? "" : "none"}}
       key="problems" 
-      onClick={() => navigate(`${PROBLEM_PATH}`)}
+      onClick={resetPageAndMove}
     >
       {menuWords.problems[languageIdx]}
     </NavButton>
@@ -27,6 +43,7 @@ export function PagesMenu() {
     <NavButton 
       key="create" 
       onClick={() => navigate(`${CREATE_PATH}`)}
+      sx={{display: sessionStorage.getItem(USERINFO)? "" : "none", fontSize: isMobile? mobileFontSize : ""}}
     >
       {menuWords.create[languageIdx]}
     </NavButton>
@@ -35,45 +52,36 @@ export function PagesMenu() {
     <>
       <Typography sx={{
         fontWeight: 700,
-        fontSize: isMobile? 20 : 30,
+        fontSize: isMobile? 15 : 20,
         textDecoration: "none",
         color: "inherit",
-        mr: 5
+        mr: "2%"
       }}
       component="a"
       href={HOME}
       noWrap
       
       >
-        GO-PROBLEM
+        {SITE_NAME}
       </Typography>
 
-      <Box sx={{ flexGrow: 1, display: isMobile? "none" : "flex" }}>
+      <Box sx={{ flexGrow: 1, display: "flex" }}>
         {problems}
-        <Search></Search>
         {create}
       </Box>
-      <Box sx={{ flexGrow: 0, display: isMobile? "none" : "flex" }}>
-        <Language></Language>
-        <NavButton
-          key={"signup"}
-          onClick={() => navigate(`${SIGNUP_PATH}`)}
-        >
-          {menuWords.signup[languageIdx]}
-        </NavButton>
-        {sessionStorage.getItem(USERINFO)?
-          <UserMenu></UserMenu>
-          :
+      {sessionStorage.getItem(USERINFO)?
+        <Menu ></Menu> : 
+        <Box sx={{ flexGrow: 0, display: "flex" }}>
+          <Language></Language>
           <NavButton
             key={"login"}
             onClick={() => navigate(`${LOGIN_PATH}`)}
+            sx={{fontSize: isMobile? mobileFontSize : ""}}
           >
             {menuWords.login[languageIdx]}
-          </NavButton>}
-      </Box>
-      <Box sx={{ flexGrow: 1, display: isMobile? "flex" : "none", justifyContent: "flex-end"}}>
-        <BurgerMenu></BurgerMenu>
-      </Box>
+          </NavButton>
+        </Box>
+      }
     </>
   )
 }

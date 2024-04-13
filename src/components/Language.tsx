@@ -1,14 +1,16 @@
-import * as React from 'react';
 import Menu from '@mui/material/Menu';
 import MenuItem from '@mui/material/MenuItem';
 import { useNavigate } from 'react-router-dom';
 import { NavButton } from './layout/NavButton';
 import { menuWords } from '../util/menuWords';
-import { HOME, LANGUAGE_IDX } from '../util/constants';
+import { HOME, LANGUAGE_IDX, mobileFontSize } from '../util/constants';
+import { useMediaQuery } from '@mui/material';
+import { useState } from 'react';
 
 export default function Language() {
-  const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
+  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const open = Boolean(anchorEl);
+  const isMobile = useMediaQuery("(max-width: 400px)")
   const languageIdx = Number(localStorage.getItem(LANGUAGE_IDX))
   const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
     setAnchorEl(event.currentTarget);
@@ -32,6 +34,7 @@ export default function Language() {
         aria-haspopup="true"
         aria-expanded={open ? 'true' : undefined}
         onClick={handleClick}
+        sx={{fontSize: isMobile? mobileFontSize : ""}}
       >
         {menuWords.language[languageIdx]}
       </NavButton>

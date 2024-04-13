@@ -1,4 +1,4 @@
-import { Button } from '@mui/material'
+import { Button, Typography } from '@mui/material'
 import { useNavigate } from 'react-router-dom'
 import { menuWords } from '../util/menuWords'
 import { LANGUAGE_IDX } from '../util/constants'
@@ -14,7 +14,7 @@ export function NotFound() {
 
   return (
     <>
-      <h1>{menuWords.notFoundWarning[languageIdx]}</h1>
+      <Typography variant='h3'>{menuWords.notFoundWarning[languageIdx]}</Typography>
       <Button onClick={() => movePage('/')}>{menuWords.return[languageIdx]}</Button>
     </>
   )

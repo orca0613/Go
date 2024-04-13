@@ -1,29 +1,30 @@
 
-import React, { CSSProperties, useEffect, useRef } from 'react';
-import { Board, Coordinate } from '../../util/types';
-import { divmod } from '../../util/functions';
+import { CSSProperties, useEffect, useRef } from 'react';
+import { Board, Coordinate, Variations } from '../../util/types';
 import _ from 'lodash';
 import { resolution } from '../../util/constants';
+import { divmod } from '../../util/functions';
+
 
 interface StonesTestProps {
   boardWidth: number
+  board: Board
   lines: number
   cellSize: number
   stoneSize: number
   offset: number
   lineWidth: number
-  board: Board
   style?: CSSProperties
-  moves?: string // A value that links the positions of the moves played ex)"0-28-47-38"
+  moves?: string
   variations?: string[]
   answers?: string[]
   questions?: string[]
   onClick?: (c: Coordinate) => void
 }
 
-const Stones = ({boardWidth, lines, cellSize, stoneSize, offset, lineWidth, board, style, moves, variations, answers, questions, onClick}: StonesTestProps) => {
-  const numberSize = stoneSize
+const Stones = ({boardWidth, board, lines, cellSize, stoneSize, offset, lineWidth, style, moves, variations, answers, questions, onClick}: StonesTestProps) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const gap = offset + cellSize / 2
   const answerColor = "green"
   const wrongColor = "red"
   const questionColor = "blue"
@@ -39,8 +40,8 @@ const Stones = ({boardWidth, lines, cellSize, stoneSize, offset, lineWidth, boar
   }
 
   function drawCircle(ctx: CanvasRenderingContext2D, size: number, coordinate: Coordinate, color: string) {
-    const y = cellSize * (coordinate[0]) + offset;
-    const x = cellSize * (coordinate[1]) + offset;
+    const y = cellSize * (coordinate[0]) + gap;
+    const x = cellSize * (coordinate[1]) + gap;
 
     ctx.fillStyle = color;
     ctx.lineWidth = lineWidth
@@ -52,16 +53,15 @@ const Stones = ({boardWidth, lines, cellSize, stoneSize, offset, lineWidth, boar
   }
 
   function drawMoveNumber(ctx: CanvasRenderingContext2D, coord: Coordinate, color: string, moveNumber: string) {
-    const x = cellSize * (coord[1]) + offset;
-    const y = cellSize * (coord[0]) + offset + numberSize / 3;
+    const x = cellSize * coord[1] + gap;
+    const y = cellSize * coord[0] + gap + stoneSize / 3;
 
     ctx.font = `normal normal bolder ${stoneSize}px sans-serif`;
     ctx.fillStyle = color === 'b'? 'white' : 'black';
     ctx.textAlign = "center";
     ctx.fillText(moveNumber, x, y)
-
-
   }
+
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -90,6 +90,7 @@ const Stones = ({boardWidth, lines, cellSize, stoneSize, offset, lineWidth, boar
           }
         }
       }
+
       // Draw move numbers
       if (moves) {
         const positions = moves.split('-').splice(1).reverse()
@@ -132,9 +133,10 @@ const Stones = ({boardWidth, lines, cellSize, stoneSize, offset, lineWidth, boar
           drawCircle(ctx, stoneSize / 3, coord, questionColor)
         })
       }
+
       ctx.stroke()
     }
-  }, [board, moves, variations, answers, boardWidth, lines]);
+  }, [board, boardWidth, lines, variations, answers, questions, moves]);
   
   return (
     <div style={{width: boardWidth, height: boardWidth}}>

@@ -2,9 +2,10 @@ import { Box, Button, TextField } from "@mui/material"
 import { ReplyForm, UserInfo } from "../util/types"
 import { useEffect, useState } from "react"
 import { Reply } from "./Reply"
-import { LANGUAGE_IDX, USERINFO, initialUserInfo } from "../util/constants"
+import { LANGUAGE_IDX, LOGIN_PATH, USERINFO, initialUserInfo } from "../util/constants"
 import { menuWords } from "../util/menuWords"
-import { addReply, getReply } from "../network/problemInformation"
+import { useNavigate } from "react-router-dom"
+import { addReply, getReplies } from "../network/reply"
 
 interface ReplyBoxProps {
   problemId: string
@@ -17,11 +18,12 @@ export function ReplyBox({ problemId }: ReplyBoxProps) {
   const [inputValue, setInputValue] = useState("")
   const username = userInfo.name
   const languageIdx = Number(localStorage.getItem(LANGUAGE_IDX))
+  const navigate = useNavigate()
   
 
   useEffect(() => {
     if (problemId) {
-      const newAllReplies = getReply(problemId)
+      const newAllReplies = getReplies(problemId)
       newAllReplies.then(r => {
         setAllReplies(r)
       })
@@ -35,31 +37,25 @@ export function ReplyBox({ problemId }: ReplyBoxProps) {
 
   function registerReply() {
     if (!username) {
-      return
+      alert(menuWords.loginWarning[languageIdx])
+      navigate(LOGIN_PATH)
     }
     setReply(inputValue)
-    const newReplyForm: ReplyForm = {
-      name: username,
-      date: new Date(),
-      comment: inputValue
-    }
-    addReply(problemId, newReplyForm, username)
+
+    addReply(problemId, inputValue, username)
   }
 
   return (
     <Box>
       {allReplies.map((r, idx) => {
         return (
-          <Reply 
-            name={r.name}
-            date={String(r.date).slice(0, 19)}
-            comment={r.comment}
-            key={idx}
-          />
+          <Reply replyForm={r} key={idx}/>
         )
       })}
       <TextField fullWidth onChange={handleInputValueChange} variant="standard" label={menuWords.comment[languageIdx]} value={inputValue}></TextField>
-      <Button onClick={registerReply}>{menuWords.register[languageIdx]}</Button>
+      <Box sx={{textAlign: "right"}}>
+        <Button onClick={registerReply}>{menuWords.register[languageIdx]}</Button>
+      </Box>
     </Box>
   )
 }

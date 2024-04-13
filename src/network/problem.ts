@@ -1,4 +1,5 @@
-import { API_URL, LANGUAGE_IDX, PROBLEM_DB_PATH, USERINFO, initialUserInfo, initialVariations } from "../util/constants";
+import _ from "lodash";
+import { API_URL, LANGUAGE_IDX, PROBLEM_DB_PATH, QUESTIONS, USERINFO, initialUserInfo, initialVariations } from "../util/constants";
 import { loginWarning } from "../util/functions";
 import { menuWords } from "../util/menuWords";
 import { Board, ProblemAndVariations, UserInfo } from "../util/types";
@@ -30,7 +31,7 @@ export async function createProblem(comment: string, problem: Board, creator: st
   throw new Error(`Error: ${response.status}`)
 }
 
-export async function deleteProblem(problemId: string, creator: string) {
+export async function deleteProblem(problemIdx: number, creator: string) {
   const languageIdx = Number(localStorage.getItem(LANGUAGE_IDX))
   const userInfo: UserInfo = JSON.parse(sessionStorage.getItem(USERINFO) || initialUserInfo)
   const token = userInfo.token
@@ -40,7 +41,7 @@ export async function deleteProblem(problemId: string, creator: string) {
       'Content-Type': 'application/json',
       'authorization': `Bearer ${token}`
     },
-    body: JSON.stringify({problemId, creator}),
+    body: JSON.stringify({problemIdx, creator}),
   })
   if (response.ok) {
     return alert(menuWords.deletedProblemWarning[languageIdx])
@@ -51,8 +52,8 @@ export async function deleteProblem(problemId: string, creator: string) {
   throw new Error(`Error: ${response.status}`)
 }
 
-export async function getProblemById(problemId: string): Promise<ProblemAndVariations> {
-  const response = await fetch(`${API_URL}${PROBLEM_DB_PATH}/get-by-id/${problemId}`)
+export async function getProblemByIdx(problemIdx: number): Promise<ProblemAndVariations> {
+  const response = await fetch(`${API_URL}${PROBLEM_DB_PATH}/get-by-idx/${problemIdx}`)
   if (!response.ok) {
     throw new Error(`Error: ${response.status}`)
   }
@@ -60,7 +61,7 @@ export async function getProblemById(problemId: string): Promise<ProblemAndVaria
   return problem
 }
 
-export async function updateVariations(problemId: string, where: string, variations: object, name: string, creator: string, save: boolean) {
+export async function updateVariations(problemIdx: number, where: string, variations: object, name: string, creator: string, save: boolean) {
   const languageIdx = Number(localStorage.getItem(LANGUAGE_IDX))
   const userInfo: UserInfo = JSON.parse(sessionStorage.getItem(USERINFO) || initialUserInfo)
   const token = userInfo.token
@@ -70,13 +71,16 @@ export async function updateVariations(problemId: string, where: string, variati
       'Content-Type': 'application/json',
       'authorization': `Bearer ${token}`
     },
-    body: JSON.stringify({problemId, where, variations, name, creator}),
+    body: JSON.stringify({problemIdx, where, variations, name, creator}),
   })
   if (response.ok) {
     if (save) {
       return alert(menuWords.saved[languageIdx])
     } else {
-      return alert(menuWords.deletedNotice[languageIdx])
+      if (!_.isEqual(where, QUESTIONS)) {
+        alert(menuWords.deletedNotice[languageIdx])
+      }
+      return
     }
   }
   if (response.status === 401 || 403) {
@@ -85,7 +89,7 @@ export async function updateVariations(problemId: string, where: string, variati
   throw new Error(`Error: ${response.status}`)
 }
 
-export async function modifyProblem(problemId: string, problem: Board, comment: string, level: number, color: string, creator: string) {
+export async function modifyProblem(problemIdx: number, problem: Board, comment: string, level: number, color: string, creator: string) {
   const languageIdx = Number(localStorage.getItem(LANGUAGE_IDX))
   const initialState = problem
   const userInfo: UserInfo = JSON.parse(sessionStorage.getItem(USERINFO) || initialUserInfo)
@@ -96,7 +100,7 @@ export async function modifyProblem(problemId: string, problem: Board, comment: 
       'Content-Type': 'application/json',
       'authorization': `Bearer ${token}`
     },
-    body: JSON.stringify({problemId, initialState, comment, level, color, creator}),
+    body: JSON.stringify({problemIdx, initialState, comment, level, color, creator}),
   })
   if (response.ok) {
     return alert(menuWords.modifiedNotice[languageIdx])

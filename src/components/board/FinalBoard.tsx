@@ -1,11 +1,10 @@
 import { Box } from "@mui/system";
 import { Board, Coordinate } from "../../util/types";
-import EmptyBoard from "./Board";
 import Background from "./Background";
 import Stones from "./Stones";
+import EmptyBoard from "./EmptyBoard";
 
-
-interface FinalBoardTestProps {
+interface FinalBoardProps {
   lines: number
   boardWidth: number
   board: Board
@@ -13,17 +12,19 @@ interface FinalBoardTestProps {
   variations?: string[]
   answers?: string[]
   questions?: string[]
-  onClick?: (c: Coordinate) => void
+  onClick?: (c: Coordinate) => void,
 }
 
-function FinalBoardTest({lines, boardWidth, board, moves, variations, answers, questions, onClick}: FinalBoardTestProps) {
-  const offset = boardWidth / (lines * 1.8)
-  const cellSize = Math.max(boardWidth - offset * 2, 0) / (lines - 1)
-  const stoneSize = cellSize / 2.2
-  const lineWidth = boardWidth / 400  
+function FinalBoard({lines, boardWidth, board, moves, variations, answers, questions, onClick}: FinalBoardProps) {
+
+  const offset = boardWidth / 200
+  const cellSize = (boardWidth - (offset * 2)) / lines
+  const lineWidth = boardWidth / 400
+  const stoneSize = cellSize / 2.1
+
 
     return (
-      <Box sx={{position: "relative", width: boardWidth}}>
+      <Box sx={{position: "relative", width: boardWidth, height: boardWidth}}>
         <Background
           boardWidth={boardWidth}
           lines={lines}
@@ -35,16 +36,17 @@ function FinalBoardTest({lines, boardWidth, board, moves, variations, answers, q
           cellSize={cellSize}
           offset={offset}
           lineWidth={lineWidth}
-          style={{position: "absolute", left: 0, top: 0, zIndex: 1}}
-        />
+          style={{position: "absolute", left:0, top: 0, zIndex: 1}}
+        >
+        </EmptyBoard>
         <Stones
           boardWidth={boardWidth}
+          board={board}
           lines={lines}
           cellSize={cellSize}
           stoneSize={stoneSize}
           offset={offset}
           lineWidth={lineWidth}
-          board={board}
           style={{position: "absolute", left: 0, top: 0, zIndex: 2}}
           moves={moves}
           variations={variations}
@@ -56,4 +58,4 @@ function FinalBoardTest({lines, boardWidth, board, moves, variations, answers, q
     );
   }
 
-export default FinalBoardTest
+export default FinalBoard

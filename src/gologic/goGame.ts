@@ -38,6 +38,21 @@ export class Game {
     this.idx = 0
   }
 
+  private getResponseList(key: string): string[] {
+    let responseList: string[] = []
+    if (this.variations.hasOwnProperty(key)) {
+      responseList = this.variations[key]
+    }
+    if (this.answers.hasOwnProperty(key)) {
+      this.answers[key].map(move => {
+        if (!responseList.includes(move)) {
+          responseList.push(move)
+        }
+      })
+    }
+    return responseList
+  }
+
   public playMove(info: BoardInfo, currentMove: Coordinate): BoardInfo {
     const color = info.color
     const key = info.key
@@ -80,23 +95,16 @@ export class Game {
 
   private response(info: BoardInfo): BoardInfo {
     const key = info.key
-    if (this.variations.hasOwnProperty(key)) {
-      const random = makeRandomNumber(this.variations[key].length)
-      const nextMove = Number(this.variations[key][random])
+    const responseList:  string[] = this.getResponseList(key)
+    if (responseList.length) {
+      const random = makeRandomNumber(responseList.length)
+      const nextMove = Number(responseList[random])
       const y = Math.floor(nextMove / this.lines), x = nextMove % this.lines
       const coord: Coordinate = [y, x]
       return this.playMove(info, coord)
     } else {
-      if (this.answers[key].length === 0) {
-        this.addHistory(info)
-        return info
-      } else {
-        const random = makeRandomNumber(this.answers[key].length)
-        const nextMove = Number(this.answers[key][random])
-        const y = Math.floor(nextMove / this.lines), x = nextMove % this.lines
-        const coord: Coordinate = [y, x]
-        return this.playMove(info, coord)
-      }
+      this.addHistory(info)
+      return info
     }
   }
 
@@ -121,7 +129,18 @@ export class Game {
       this.idx += 1
     }
     const newState = this.history[this.idx]
-    this.state
+    return newState
+  }
+
+  public goToLast(): BoardInfo {
+    this.idx = this.history.length - 1
+    const newState = this.history[this.idx]
+    return newState
+  }
+
+  public goToInit(): BoardInfo {
+    this.idx = 0
+    const newState = this.history[0]
     return newState
   }
 }

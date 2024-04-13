@@ -1,9 +1,8 @@
-import { API_URL, LANGUAGE_IDX, PROBLEMINFO_DB_PATH, USERINFO, initialUserInfo } from "../util/constants"
+import { API_URL, PROBLEMINFO_DB_PATH, USERINFO, initialUserInfo } from "../util/constants"
 import { loginWarning } from "../util/functions"
-import { menuWords } from "../util/menuWords"
-import { ProblemInformation, ReplyForm, UserInfo } from "../util/types"
+import { ProblemInformation, UserInfo } from "../util/types"
 
-export async function changeCount(problemId:string, where: string, name: string, count: number) {
+export async function changeCount(problemIdx: number, where: string, name: string, count: number) {
   const userInfo: UserInfo = JSON.parse(sessionStorage.getItem(USERINFO) || initialUserInfo)
   const token = userInfo.token
   const response = await fetch(`${API_URL}${PROBLEMINFO_DB_PATH}/change-count`, {
@@ -12,7 +11,7 @@ export async function changeCount(problemId:string, where: string, name: string,
       'Content-Type': 'application/json',
       'authorization': `Bearer ${token}`
     },
-    body: JSON.stringify({problemId, where, name, count}),
+    body: JSON.stringify({problemIdx, where, name, count}),
   })
   if (response.ok) {
     return
@@ -23,28 +22,8 @@ export async function changeCount(problemId:string, where: string, name: string,
   throw new Error(`Error: ${response.status}`)
 }
 
-export async function addReply(problemId: string, reply: ReplyForm, name: string) {
-  const userInfo: UserInfo = JSON.parse(sessionStorage.getItem(USERINFO) || initialUserInfo)
-  const token = userInfo.token
-  const response = await fetch(`${API_URL}${PROBLEMINFO_DB_PATH}/add-reply`, {
-    method: 'PATCH',
-    headers: {
-      'Content-Type': 'application/json',
-      'authorization': `Bearer ${token}`
-    },
-    body: JSON.stringify({problemId, reply, name}),
-  })
-  if (response.ok) {
-    return
-  }
-  if (response.status === 401 || 403) {
-    return loginWarning()
-  }
-  throw new Error(`Error: ${response.status}`)
-}
-
-export async function getProblemInformations(problemId: string): Promise<ProblemInformation> {
-  const response = await fetch(`${API_URL}${PROBLEMINFO_DB_PATH}/get/${problemId}`)
+export async function getProblemInformations(problemIdx: number): Promise<ProblemInformation> {
+  const response = await fetch(`${API_URL}${PROBLEMINFO_DB_PATH}/get/${problemIdx}`)
   if (!response.ok) {
     throw new Error(`Error: ${response.status}`)
   }
@@ -52,16 +31,7 @@ export async function getProblemInformations(problemId: string): Promise<Problem
   return informations
 }
 
-export async function getReply(problemId: string): Promise<ReplyForm[]> {
-  const response = await fetch(`${API_URL}${PROBLEMINFO_DB_PATH}/get-reply/${problemId}`)
-  if (!response.ok) {
-    throw new Error(`Error: ${response.status}`)
-  }
-  const replies: ReplyForm[] = await response.json()
-  return replies
-}
-
-export async function addUsername(username: string, problemId: string, where: string) {
+export async function addUsername(username: string, problemIdx: number, where: string) {
   const userInfo: UserInfo = JSON.parse(sessionStorage.getItem(USERINFO) || initialUserInfo)
   const token = userInfo.token
   const response = await fetch(`${API_URL}${PROBLEMINFO_DB_PATH}/add-name`, {
@@ -70,7 +40,7 @@ export async function addUsername(username: string, problemId: string, where: st
       'Content-Type': 'application/json',
       'authorization': `Bearer ${token}`
     },
-    body: JSON.stringify({username, problemId, where}),
+    body: JSON.stringify({username, problemIdx, where}),
   })
   if (response.ok) {
     return
@@ -82,7 +52,7 @@ export async function addUsername(username: string, problemId: string, where: st
 
 }
 
-export async function deleteUsername(username: string, problemId: string, where: string) {
+export async function deleteUsername(username: string, problemIdx: number, where: string) {
   const userInfo: UserInfo = JSON.parse(sessionStorage.getItem(USERINFO) || initialUserInfo)
   const token = userInfo.token
   const response = await fetch(`${API_URL}${PROBLEMINFO_DB_PATH}/delete-name`, {
@@ -91,7 +61,7 @@ export async function deleteUsername(username: string, problemId: string, where:
       'Content-Type': 'application/json',
       'authorization': `Bearer ${token}`
     },
-    body: JSON.stringify({username, problemId, where}),
+    body: JSON.stringify({username, problemIdx, where}),
   })
   if (response.ok) {
     return
@@ -151,37 +121,18 @@ export async function getRecommended() {
   return recommended
 }
 
-export async function getAllProblems(): Promise<ProblemInformation[]> {
-  const response = await fetch(`${API_URL}${PROBLEMINFO_DB_PATH}/get-all`)
+export async function getProblemByIndexList(problemIndexList: number[]): Promise<ProblemInformation[]> {
+  const stringify = JSON.stringify(problemIndexList)
+  const response = await fetch(`${API_URL}${PROBLEMINFO_DB_PATH}/get-by-idx-list/${stringify}`)
   if (!response.ok) {
     throw new Error(`Error: ${response.status}`)
   }
-  const problems = await response.json()
-  return problems 
+  const problem = await response.json()
+  return problem
 }
 
-export async function getProblemByCreator(creator: string | null): Promise<ProblemInformation[]> {
-  const response = await fetch(`${API_URL}${PROBLEMINFO_DB_PATH}/get-by-creator/${creator}`)
-  if (!response.ok) {
-    throw new Error(`Error: ${response.status}`)
-  }
-  const problems = await response.json()
-  return problems
-}
-
-
-export async function getProblemByLevel(level: number): Promise<ProblemInformation[]> {
-  const response = await fetch(`${API_URL}${PROBLEMINFO_DB_PATH}/get-by-level/${level}`)
-  if (!response.ok) {
-    throw new Error(`Error: ${response.status}`)
-  }
-  const problems = await response.json()
-  return problems
-}
-
-export async function getProblemByIdList(problemIdList: string[]): Promise<ProblemInformation[]> {
-  const stringify = JSON.stringify(problemIdList)
-  const response = await fetch(`${API_URL}${PROBLEMINFO_DB_PATH}/get-by-id-list/${stringify}`)
+export async function getProblemByFilter(filter: string): Promise<ProblemInformation[]> {
+  const response = await fetch(`${API_URL}${PROBLEMINFO_DB_PATH}/get-by-filter/${filter}`)
   if (!response.ok) {
     throw new Error(`Error: ${response.status}`)
   }

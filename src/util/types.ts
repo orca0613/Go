@@ -8,6 +8,7 @@ export type Variations = {
 
 export type ProblemAndVariations = {
   _id: string,
+  problemIdx: number,
   initialState: Board,
   variations: Variations,
   answers: Variations,
@@ -24,15 +25,10 @@ export type CreatorInfo = {
   name: string,
 }
 
-export type ReplyForm = {
-  name: string,
-  comment: string,
-  date: Date,
-}
-
 export type ProblemInformation = {
   _id: string,
   problemId: string,
+  problemIndex: number,
   initialState: Board,
   level: number,
   creator: string,
@@ -58,26 +54,65 @@ export type UserInfo = {
   token: string,
   level: number,
   point: number,
-  created: string[],
-  withQuestions: string[],
-  tried: string[],
-  solved: string[],
-  liked: string[],
-  disliked: string[],
+  created: number[],
+  withQuestions: number[],
+  tried: number[],
+  solved: number[],
+  liked: number[],
+  disliked: number[],
+  asked: number[],
+  language: number,
+  auto: boolean,
 }
 
 export type UserDetailFromServer = {
   _id: string,
   name: string,
   point: number,
-  created: string[],
-  withQuestions: string[],
-  tried: string[],
-  solved: string[],
-  liked: string[],
-  disliked: string[],
-  asked: string[],
+  created: number[],
+  withQuestions: number[],
+  tried: number[],
+  solved: number[],
+  liked: number[],
+  disliked: number[],
+  asked: number[],
   myFollowers: string[],
   followList: string[],
   loginTime: Date,
+  language: number,
+  auto: boolean,
+}
+
+export type Filter = {
+  tier: number,
+  low: number,
+  high: number,
+  creator: string,
+}
+
+export type ReplyForm = {
+  _id: string,
+  problemId: string,
+  name: string,
+  comment: string,
+  time: Date,
+  deleted: boolean,
+  deletedTime?: Date,
+  modified: boolean,
+  modifiedTime?: Date,
+}
+
+export type MessageForm = {
+  _id: string,
+  sender: string,
+  receiver: string,
+  title: string,
+  contents: string,
+  quotation: string,
+  time: Date,
+  checked: boolean,
+  hideToReceiver: boolean,
+  hideToSender: boolean,
+  includeUrl: boolean,
+  url?: string,
 }

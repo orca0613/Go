@@ -1,19 +1,18 @@
 import { useEffect, useState } from "react"
-import { Coordinate, UserInfo } from "../../util/types"
-import { COMMENT, LANGUAGE_IDX, LEVEL, MARGIN, TURN, USERINFO, boardSizeArray, initialUserInfo, levelArray } from "../../util/constants"
-import { Box, Button, FormControl, Grid, InputLabel, MenuItem, Select, SelectChangeEvent, TextField } from "@mui/material"
+import { Coordinate } from "../../util/types"
+import { COMMENT, LANGUAGE_IDX, LEVEL, MARGIN, TURN, boardSizeArray, initialUserInfo, levelArray } from "../../util/constants"
+import { Box, Button, ButtonGroup, FormControl, Grid, InputLabel, MenuItem, Select, SelectChangeEvent, TextField } from "@mui/material"
 import { isLegalBoard, makingEmptyBoard } from "../../util/functions"
 import { isOutside } from "../../gologic/logic"
 import FinalBoard from "../board/FinalBoard"
 import { menuWords } from "../../util/menuWords"
-import { getProblemById, modifyProblem } from "../../network/problem"
+import { getProblemByIdx, modifyProblem } from "../../network/problem"
 import { useWindowSize } from "react-use"
 import { useParams } from "react-router-dom"
 
 export function ModifyProblem() {
-  const { problemId } = useParams()
-  const userDetail: UserInfo = JSON.parse(sessionStorage.getItem(USERINFO) || initialUserInfo)
-  const creator = userDetail.name
+  const { param } = useParams()
+  const problemIdx = Number(param)
   const [boardSize, setBoardSize] = useState(9)
   let emptyBoard = makingEmptyBoard(boardSize)
   const [problem, setProblem] = useState(emptyBoard)
@@ -40,11 +39,16 @@ export function ModifyProblem() {
     changeInfo(COMMENT, e.target.value)
   }
 
+  const blackStone = 
+  <img src="/images/black.svg.png" alt="black" width={width / 20} height={width / 20}/>
+  const whiteStone = 
+  <img src="/images/white.svg.png" alt="white" width={width / 20} height={width / 20}/>
+  const eraserIcon = 
+  <img src="/images/eraser.png" alt="eraser" width={width / 20} height={width / 20}/>
+  const resetIcon = 
+  <img src="/images/reset.svg" alt="reset"  width={width / 20} height={width / 20}/>
+
   function addMove(coord: Coordinate) {
-    if (info.color === "") {
-      alert(menuWords.chooseColorWarning[languageIdx])
-      return
-    }
     const y = coord[0], x = coord[1]
     const newProblem = [...problem]
     newProblem[y][x] = info.color
@@ -84,12 +88,12 @@ export function ModifyProblem() {
       alert(menuWords.invalidBoardWarning[languageIdx])
       return
     }
-    modifyProblem(problemId || "", problem, info.comment, info.level, info.turn, info.creator)
+    modifyProblem(problemIdx, problem, info.comment, info.level, info.turn, info.creator)
   }
 
   useEffect(() => {
-    if (problemId) {
-      const newProblemInfo = getProblemById(problemId)
+    if (problemIdx >= 0) {
+      const newProblemInfo = getProblemByIdx(problemIdx)
       .then(p => {
         const initialState = p.initialState
         setProblem(initialState)
@@ -103,11 +107,11 @@ export function ModifyProblem() {
         setBoardSize(initialState.length)
       })
     }
-  }, [problemId])
+  }, [problemIdx])
 
-  const leftMenu = 
-  <Box textAlign="center" justifyContent={isMobile? "space-between" : "center"} display={isMobile? "flex" : "grid"}>
-    <TextField sx={{margin: margin, width: isMobile? "50%" : "100%"}}
+  const topMenu = 
+  <Box mt="5%" textAlign="center" justifyContent={isMobile? "space-evenly" : "center"} display={isMobile? "flex" : ""}>
+    <TextField sx={{margin: margin, width: isMobile? "20%" : "80%"}}
     error={info.comment.length > 50? true : false}
     helperText={info.comment.length > 50? menuWords.commentLengthWarning[languageIdx] : ""}
     name={COMMENT}
@@ -116,11 +120,9 @@ export function ModifyProblem() {
     value={info.comment}
     onChange={commentChange}
     />
-    <FormControl variant="standard" sx={{margin: margin, width: isMobile? "30%" : "100%"}}>
-      <InputLabel id="size-select-label">{menuWords.boardSize[languageIdx]}</InputLabel>
+    <FormControl variant="standard" sx={{margin: margin, width: isMobile? "20%" : "80%"}}>
+      <InputLabel>{menuWords.boardSize[languageIdx]}</InputLabel>
       <Select
-      labelId="size-select-label"
-      id="size-select"
       value={String(boardSize)}
       label={menuWords.boardSize[languageIdx]}
       variant="standard"
@@ -131,11 +133,9 @@ export function ModifyProblem() {
         })}
       </Select>
     </FormControl>
-    <FormControl variant="standard" sx={{margin: margin, width: isMobile? "30%" : "100%"}}>
-      <InputLabel id="turn-select-label">{menuWords.turn[languageIdx]}</InputLabel>
+    <FormControl variant="standard" sx={{margin: margin, width: isMobile? "20%" : "80%"}}>
+      <InputLabel>{menuWords.turn[languageIdx]}</InputLabel>
       <Select
-      labelId="turn-select-label"
-      id="turn-select"
       value={info.turn}
       label={menuWords.turn[languageIdx]}
       onChange={handleTurnChange}
@@ -144,11 +144,9 @@ export function ModifyProblem() {
         <MenuItem value={"w"}>{menuWords.whiteTurn[languageIdx]}</MenuItem>
       </Select>
     </FormControl>
-    <FormControl sx={{margin: margin, width: isMobile? "30%" : "100%"}} variant="standard">
-      <InputLabel id="level-select-label">{menuWords.level[languageIdx]}</InputLabel>
+    <FormControl sx={{margin: margin, width: isMobile? "20%" : "80%"}} variant="standard">
+      <InputLabel>{menuWords.level[languageIdx]}</InputLabel>
       <Select
-        labelId="level-select-label"
-        id="level-select"
         value={String(info.level)}
         label={menuWords.level[languageIdx]}
         onChange={levelChange}
@@ -160,48 +158,60 @@ export function ModifyProblem() {
     </FormControl>
   </Box>
 
-  const rightMenu = 
-  <Box textAlign="center" display={isMobile? "flex" : "grid"} justifyContent={isMobile? "space-between" : "center"}>
-    <Button sx={{margin: margin, color: info.color === "b"? "inherit" : ""}} onClick={() => changeInfo("color", "b")}>
-      {menuWords.BLACK[languageIdx]}
+  const mobileBottomMenu = 
+  <Box display="flex" justifyContent="space-around" alignItems="center">
+    <Button onClick={resetBoard}>
+      {resetIcon}
     </Button>
-    <Button sx={{margin: margin, color: info.color === "w"? "inherit" : ""}} onClick={() => changeInfo("color", "w")}>
-      {menuWords.WHITE[languageIdx]}
-    </Button>
-    <Button sx={{margin: margin, color: info.color === "."? "inherit" : ""}} onClick={() => changeInfo("color", ".")}>
-      {menuWords.remove[languageIdx]}
-    </Button>
-    <Button sx={{margin: margin, color: "red"}} onClick={resetBoard}>
-      {menuWords.reset[languageIdx]}
-    </Button>
-    <Button sx={{margin: margin, color: "green"}} onClick={checkAndModify}>
+    <ButtonGroup size='small' variant='text' color="inherit" sx={{justifyContent: "center"}}>
+      <Button variant={info.color === "b"? "contained" : "text"} onClick={() => changeInfo("color", "b")}>{blackStone}</Button>
+      <Button variant={info.color === "w"? "contained" : "text"} onClick={() => changeInfo("color", "w")}>{whiteStone}</Button>
+      <Button variant={info.color === "."? "contained" : "text"} onClick={() => changeInfo("color", ".")}>{eraserIcon}</Button>
+    </ButtonGroup>
+    <Button sx={{textTransform: "none"}} onClick={checkAndModify}>
       {menuWords.modifyProblem[languageIdx]}
     </Button>
-
   </Box>
 
+const wideMenu = 
+<Box my="30%" display="grid" justifyContent="center" alignItems="center">
+  <ButtonGroup size='small' variant='text' color="inherit" sx={{justifyContent: "center"}}>
+    <Button variant={info.color === "b"? "contained" : "text"} onClick={() => changeInfo("color", "b")}>{blackStone}</Button>
+    <Button variant={info.color === "w"? "contained" : "text"} onClick={() => changeInfo("color", "w")}>{whiteStone}</Button>
+    <Button variant={info.color === "."? "contained" : "text"} onClick={() => changeInfo("color", ".")}>{eraserIcon}</Button>
+  </ButtonGroup>
+  <Button sx={{my: "20%"}} onClick={resetBoard}>
+    {resetIcon}
+  </Button>
+  <Button sx={{textTransform: "none"}} onClick={checkAndModify}>
+    {menuWords.modifyProblem[languageIdx]}
+  </Button>
+</Box>
 
 
-  return (
-    <Grid container justifyContent="center">
-      <Grid item sx={{margin: margin, width: isMobile? width : width / 6}}>
-        {leftMenu}
-        {rightMenu}
-      </Grid>
-      <Grid justifyContent="center" item sx={{
-        margin: isMobile? 0 : margin,
-        width: isMobile? width : height - 100, 
-        height: isMobile? width : height - 100
-      }}>
-      <FinalBoard
-        lines={boardSize}
-        board={problem}
-        boardWidth={isMobile? width : height - 100}
-        onClick={handleClick}
-      >
-      </FinalBoard>
-      </Grid>
+
+return (
+  <Grid container >
+    <Grid item sx={{margin: margin, width: isMobile? width - 16 : width / 5}}>
+      {topMenu}
+      {isMobile? <></> : wideMenu}
     </Grid>
-    
+    <Grid justifyContent="center" item sx={{
+      my: 3,
+      width: isMobile? width - 16 : height - 100, 
+      height: isMobile? width - 16 : height - 100
+    }}>
+    <FinalBoard
+      lines={boardSize}
+      board={problem}
+      boardWidth={isMobile? width - 16 : height - 100}
+      onClick={handleClick}
+    >
+    </FinalBoard>
+    </Grid>
+    <Grid item xs={12}>
+      {isMobile? mobileBottomMenu : <></>}
+    </Grid>
+  </Grid>
   )
 }
