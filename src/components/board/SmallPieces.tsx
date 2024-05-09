@@ -126,9 +126,7 @@
 //   }, [board, moves, variations, answers, boardWidth, lines]);
   
 //   return (
-//     <div style={{width: boardWidth, height: boardWidth}}>
-//       <canvas id="stones" ref={canvasRef} style={style} onClick={handleClick}></canvas>
-//     </div>
+//     <canvas style={{...style, width: boardWidth, height: boardWidth}} id="stones" ref={canvasRef} onClick={handleClick}></canvas>
 //   );
 // };
 

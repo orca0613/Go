@@ -3,7 +3,6 @@
 // import { Board } from '../../util/types';
 // import { getPositions } from '../../util/functions';
 // import _ from 'lodash';
-// import { Box } from '@mui/material';
 
 // interface StoneImagesProps {
 //   boardWidth: number
@@ -20,29 +19,24 @@
 //   const stoneSize = cellSize / 2.1
 //   const gap = offset + cellSize / 2
 
-//   const blackStoneImg = 
-//   <img src="/images/black.svg.png" alt="black" width={stoneSize * 2} height={stoneSize * 2}/>
-//   const whiteStoneImg = 
-//   <img src="/images/white.svg.png" alt="white" width={stoneSize * 2} height={stoneSize * 2}/>
-
 //   return (
 //     <div style={{width: boardWidth, height: boardWidth}}>
 //       {blackStoneList.map((b, idx) => {
 //         const y = b[0] * cellSize + gap - stoneSize
 //         const x = b[1] * cellSize + gap - stoneSize
 //         return (
-//           <Box key={idx} position="absolute" top={y} left={x}>
-//             {blackStoneImg}
-//           </Box>
+//           <img src="/images/black.svg.png"
+//           key={idx}style={{position: "absolute", top: y, left:x}}
+//           alt="black" width={stoneSize * 2} height={stoneSize * 2}/>
 //         )
 //       })}
 //       {whiteStoneList.map((w, idx) => {
 //         const y = w[0] * cellSize + gap - stoneSize
 //         const x = w[1] * cellSize + gap - stoneSize
 //         return (
-//         <Box key={idx} position="absolute" top={y} left={x}>
-//           {whiteStoneImg}
-//         </Box>
+//           <img src="/images/white.svg.png"
+//           key={idx}style={{position: "absolute", top: y, left:x}}
+//           alt="black" width={stoneSize * 2} height={stoneSize * 2}/>
 //         )
 //       })}
 //     </div>

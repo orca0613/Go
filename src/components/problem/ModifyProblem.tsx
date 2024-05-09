@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react"
 import { Coordinate } from "../../util/types"
-import { COMMENT, LANGUAGE_IDX, LEVEL, MARGIN, TURN, boardSizeArray, initialUserInfo, levelArray } from "../../util/constants"
-import { Box, Button, ButtonGroup, FormControl, Grid, InputLabel, MenuItem, Select, SelectChangeEvent, TextField } from "@mui/material"
+import { COMMENT, LANGUAGE_IDX, LEVEL, MARGIN, TURN } from "../../util/constants"
+import { Box, Button, ButtonGroup, FormControl, InputLabel, MenuItem, Select, SelectChangeEvent, TextField } from "@mui/material"
 import { isLegalBoard, makingEmptyBoard } from "../../util/functions"
 import { isOutside } from "../../gologic/logic"
 import FinalBoard from "../board/FinalBoard"
@@ -9,6 +9,8 @@ import { menuWords } from "../../util/menuWords"
 import { getProblemByIdx, modifyProblem } from "../../network/problem"
 import { useWindowSize } from "react-use"
 import { useParams } from "react-router-dom"
+import { boardSizeArray, levelArray } from "../../util/initialForms"
+import { mobileButtonStyle } from "../../util/styles"
 
 export function ModifyProblem() {
   const { param } = useParams()
@@ -160,7 +162,7 @@ export function ModifyProblem() {
 
   const mobileBottomMenu = 
   <Box display="flex" justifyContent="space-around" alignItems="center">
-    <Button onClick={resetBoard}>
+    <Button onClick={resetBoard} sx={mobileButtonStyle}>
       {resetIcon}
     </Button>
     <ButtonGroup size='small' variant='text' color="inherit" sx={{justifyContent: "center"}}>
@@ -168,7 +170,7 @@ export function ModifyProblem() {
       <Button variant={info.color === "w"? "contained" : "text"} onClick={() => changeInfo("color", "w")}>{whiteStone}</Button>
       <Button variant={info.color === "."? "contained" : "text"} onClick={() => changeInfo("color", ".")}>{eraserIcon}</Button>
     </ButtonGroup>
-    <Button sx={{textTransform: "none"}} onClick={checkAndModify}>
+    <Button sx={mobileButtonStyle} onClick={checkAndModify}>
       {menuWords.modifyProblem[languageIdx]}
     </Button>
   </Box>
@@ -191,27 +193,22 @@ const wideMenu =
 
 
 return (
-  <Grid container >
-    <Grid item sx={{margin: margin, width: isMobile? width - 16 : width / 5}}>
+  <Box display={isMobile? "grid" : "flex"} justifyContent="center">
+    <Box display="grid" margin={margin}>
       {topMenu}
       {isMobile? <></> : wideMenu}
-    </Grid>
-    <Grid justifyContent="center" item sx={{
-      my: 3,
-      width: isMobile? width - 16 : height - 100, 
-      height: isMobile? width - 16 : height - 100
-    }}>
-    <FinalBoard
-      lines={boardSize}
-      board={problem}
-      boardWidth={isMobile? width - 16 : height - 100}
-      onClick={handleClick}
-    >
-    </FinalBoard>
-    </Grid>
-    <Grid item xs={12}>
+    </Box>
+    <Box my={3} mx={margin}>
+      <FinalBoard
+        lines={boardSize}
+        board={problem}
+        boardWidth={isMobile? width - 16 : height - 100}
+        onClick={handleClick}
+      />
+    </Box>
+    <Box>
       {isMobile? mobileBottomMenu : <></>}
-    </Grid>
-  </Grid>
+    </Box>
+  </Box>
   )
 }

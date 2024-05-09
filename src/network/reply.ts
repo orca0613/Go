@@ -1,5 +1,7 @@
-import { API_URL, REPLY_DB_PATH, USERINFO, initialUserInfo } from "../util/constants"
+import { API_URL, USERINFO } from "../util/constants"
 import { loginWarning } from "../util/functions"
+import { initialUserInfo } from "../util/initialForms"
+import { REPLY_DB_PATH } from "../util/paths"
 import { ReplyForm, UserInfo } from "../util/types"
 
 export async function addReply(problemId: string, comment: string, name: string) {
@@ -14,10 +16,11 @@ export async function addReply(problemId: string, comment: string, name: string)
     body: JSON.stringify({problemId, comment, name}),
   })
   if (response.ok) {
-    return
+    return true
   }
   if (response.status === 401 || 403) {
-    return loginWarning()
+    loginWarning()
+    return false
   }
   throw new Error(`Error: ${response.status}`)
 }

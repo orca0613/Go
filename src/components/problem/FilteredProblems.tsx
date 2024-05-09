@@ -1,14 +1,15 @@
 import { Filter, ProblemInformation, UserInfo } from '../../util/types'
-import { ChangeEvent, ReactNode, useEffect, useState } from 'react'
+import { ChangeEvent, useEffect, useState } from 'react'
 import SampleProblemBox from './SampleProblemBox'
 import { getProblemByFilter } from '../../network/problemInformation'
 import { Autocomplete, Box, Button, Divider, FormControl, FormControlLabel, InputLabel, MenuItem, Pagination, Select, SelectChangeEvent, Stack, Switch, TextField, useMediaQuery } from '@mui/material'
-import { LANGUAGE_IDX, PAGE, PROBLEM_INDICES, SORTING_IDX, USERINFO, detailLevel, initFilter, initialUserInfo, problemsPerPage, sortingMethods, tiersList } from '../../util/constants'
+import { LANGUAGE_IDX, PAGE, PROBLEM_INDICES, SORTING_IDX, USERINFO, problemsPerPage } from '../../util/constants'
 import { menuWords } from '../../util/menuWords'
 import { getAllCreators } from '../../network/userDetail'
 import { useWindowSize } from 'react-use'
 import { getRangeByTier, ownParse, ownStringify, resetSortingForm, setProblemIndicies, sortingProblemList } from '../../util/functions'
 import { useNavigate, useParams } from 'react-router-dom'
+import { detailLevel, initFilter, initialUserInfo, sortingMethods, tiersList } from '../../util/initialForms'
 
 export default function FilteredProblems() {
 
@@ -20,7 +21,7 @@ export default function FilteredProblems() {
   const tiers = tiersList[languageIdx]
   const navigate = useNavigate()
   const {width, height} = useWindowSize()
-  const isMobile = useMediaQuery("(max-width: 600px)")
+  const isMobile = useMediaQuery("(max-width: 800px)")
   const [form, setForm] = useState<Filter>({
     tier: Number(filter.tier),
     low: Number(filter.low),
@@ -42,7 +43,7 @@ export default function FilteredProblems() {
   const searchIcon = 
   <img src="/images/search.svg" alt="pre" width={isMobile? mobileIconSize : IconSize} height={isMobile? mobileIconSize : IconSize}/>
   const divider = <Divider orientation="horizontal" sx={{borderColor: "black", my: "5%", border: "0.5px solid black"}} />
-
+  const dropDownStyle = {margin: 1, minWidth: "20%"}
 
   useEffect(() => {
     if (params) {
@@ -53,7 +54,7 @@ export default function FilteredProblems() {
       const newIndices: number[] = []
       result.then(r => {
         r.map(p => {
-          if (p.correctUser.includes(userInfo.name)) {
+          if (userInfo.solved.includes(p.problemIndex)) {
             newSolved.push(p)
           } else {
             newUnsolved.push(p)
@@ -156,12 +157,62 @@ export default function FilteredProblems() {
 
   }
 
+  const mobileFilterBox = 
+  <Box 
+    sx={{border: "1px solid black", borderRadius: 2, my: "3%", bgcolor: "whitesmoke"}} 
+    justifyContent="space-around"
+  >
+    <Box display="flex" justifyContent="space-between">
+      <FormControl variant="standard" sx={dropDownStyle}>
+        <InputLabel>{menuWords.difficulty[languageIdx]}</InputLabel>
+        <Select
+          value={String(form.tier)}
+          label={tiers[form.tier]}
+          onChange={changeTier}
+        >
+          {tiers.map((t, idx) => {
+            return <MenuItem key={idx} value={idx}>{t}</MenuItem>
+          })}
+        </Select>
+      </FormControl>
+      <FormControl variant="standard" sx={dropDownStyle}>
+        <InputLabel>{menuWords.level[languageIdx]}</InputLabel>
+        <Select
+          value={String(levelIdx)}
+          label={detail[levelIdx]}
+          onChange={changeLevel}
+        >
+          {detail.map((t, idx) => {
+            return (
+              <MenuItem key={idx} value={idx}>
+                {t === 0? menuWords.allLevel[languageIdx] : t > 0? `${t}${menuWords.K[languageIdx]}` : `${Math.abs(t)}${menuWords.D[languageIdx]}`}
+              </MenuItem>
+            ) 
+          })}
+        </Select>
+      </FormControl>
+    </Box>
+    <Box display="flex" justifyContent="space-between">
+      <Autocomplete
+        freeSolo
+        sx={{...dropDownStyle, width: "60%"}}
+        options={options}
+        value={form.creator}
+        onChange={(event, newValue) => changeCreator(newValue)}
+        renderInput={(params) => (
+          <TextField {...params} label={menuWords.creator[languageIdx]} variant="standard" />
+        )}
+      />
+      <Button onClick={changeFilter}>{searchIcon}</Button>
+    </Box>
+  </Box>
+
   const filterBox = 
   <Box 
-    sx={{border: "1px solid black", borderRadius: 2, width: isMobile? width / 1.1 : width / 2, my: "3%", bgcolor: "whitesmoke"}} 
+    sx={{border: "1px solid black", borderRadius: 2, width: width / 2, my: "3%", bgcolor: "whitesmoke"}} 
     display="flex" 
     justifyContent="space-around">
-    <FormControl variant="standard" sx={{margin: 1, minWidth: "20%"}}>
+    <FormControl variant="standard" sx={dropDownStyle}>
       <InputLabel>{menuWords.difficulty[languageIdx]}</InputLabel>
       <Select
         value={String(form.tier)}
@@ -173,7 +224,7 @@ export default function FilteredProblems() {
         })}
       </Select>
     </FormControl>
-    <FormControl variant="standard" sx={{margin: 1, minWidth: "20%"}}>
+    <FormControl variant="standard" sx={dropDownStyle}>
       <InputLabel>{menuWords.level[languageIdx]}</InputLabel>
       <Select
         value={String(levelIdx)}
@@ -190,7 +241,8 @@ export default function FilteredProblems() {
       </Select>
     </FormControl>
     <Autocomplete
-      sx={{margin: 1, minWidth: "20%"}}
+      freeSolo
+      sx={dropDownStyle}
       options={options}
       value={form.creator}
       onChange={(event, newValue) => changeCreator(newValue)}
@@ -243,7 +295,7 @@ export default function FilteredProblems() {
   return (
     <Box display="grid">
       <Box display="grid" justifyContent="center">
-        {filterBox}
+        {isMobile? mobileFilterBox : filterBox}
         {methodBox}
       </Box>
       {divider}

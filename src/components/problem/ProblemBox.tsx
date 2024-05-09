@@ -2,19 +2,22 @@ import { useEffect, useState } from 'react'
 import { Coordinate, BoardInfo, UserInfo } from '../../util/types'
 import _ from 'lodash'
 import { addCurrentVariation } from '../../util/functions'
-import { ANSWER, ASKED, LANGUAGE_IDX, MARGIN, PROBLEM_INDEX, PROBLEM_INDICES, QUESTIONS, SELF, SOLVED, TRIED, TRY, USERINFO, initIndices, initialProblemInfo, initialUserInfo, initialVariations } from '../../util/constants'
+import { ANSWER, LANGUAGE_IDX, MARGIN, PROBLEM_INDEX, PROBLEM_INDICES, QUESTIONS, SELF, SOLVED, TRIED, TRY, USERINFO } from '../../util/constants'
 import FinalBoard from '../board/FinalBoard'
-import { Alert, Box, Button, ButtonGroup, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, Divider, Grid, Snackbar, Typography } from '@mui/material'
+import { Alert, Box, Button, ButtonGroup, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, Divider, Snackbar, Typography } from '@mui/material'
 import { menuWords } from '../../util/menuWords'
 import { addCorrectUser, addWrong, changeCount } from '../../network/problemInformation'
 import { addElement } from '../../network/userDetail'
 import { getProblemByIdx, updateVariations } from '../../network/problem'
 import { useNavigate, useParams } from 'react-router-dom'
 import { ProblemInformation } from '../problem/ProblemInformation'
-import { LikeAndDislike } from '../LikeAndDislike'
+import { Like } from '../Like'
 import { Game } from '../../gologic/goGame'
 import { useWindowSize } from 'react-use'
 import { sendRequest } from '../../network/requests'
+import { ReplyBox } from '../ReplyBox'
+import { initIndices, initialProblemInfo, initialUserInfo, initialVariations } from '../../util/initialForms'
+import { mobileButtonStyle, wideButtonStyle } from '../../util/styles'
 
 export function ProblemBox() {
 
@@ -79,6 +82,7 @@ export function ProblemBox() {
     autoHideDuration={1500}
     onClose={handleAlertOpen}
     anchorOrigin={{vertical: "bottom", horizontal: "center"}}
+    sx={{bottom: height / 2}}
   >
     <Alert
       severity={alertInfo.answer? "success" : "error"}
@@ -141,7 +145,7 @@ export function ProblemBox() {
           board: p.initialState,
           color: p.color,
           key: "0"
-        })
+        }) 
         setGame(new Game(
           p.initialState,
           p.answers,
@@ -235,8 +239,10 @@ export function ProblemBox() {
     })
     updateVariations(problemIdx, QUESTIONS, newQuestions, username, problemInfo.creator, true)
     sendRequest(problemIdx, problemInfo.creator, username, info.key)
-    addElement(problemIdx, username, ASKED)
-    handleDialogOpen()
+    setDialogInfo({
+      ...dialogInfo,
+      open: false
+    })
   }
 
   function handleAlertOpen() {
@@ -331,13 +337,13 @@ export function ProblemBox() {
   const mobileTopMenu = 
   <Box display="flex" justifyContent={"space-around"}>
     <Button sx={{width: "40%",  textTransform: "none"}} onClick={() => moveToAdjacentProblem(-1)}>{menuWords.previousProblem[languageIdx]}</Button>
-    <LikeAndDislike problemIdx={problemInfo.problemIdx} username={username}></LikeAndDislike>
+    <Like problemIdx={problemInfo.problemIdx} username={username} creator={problemInfo.creator}></Like>
     <Button sx={{width: "40%",  textTransform: "none"}} onClick={() => moveToAdjacentProblem(1)}>{menuWords.nextProblem[languageIdx]}</Button>
   </Box>
 
   const mobileBottomMenu = 
   <Box display="flex" justifyContent="space-around" alignItems="center">
-    <Button sx={{width: "25%", color: mode === TRY? "" : "red", textTransform: "none"}} onClick={() => mode === TRY? modeChange(SELF) : modeChange(TRY)}>
+    <Button sx={{...mobileButtonStyle, color: mode === TRY? "" : "red"}} onClick={() => mode === TRY? modeChange(SELF) : modeChange(TRY)}>
       {mode === TRY? menuWords.practice[languageIdx] : menuWords.try[languageIdx]}
     </Button>
     <ButtonGroup size='small' variant='text' color='inherit' sx={{width: "50%", justifyContent: "center", maxHeight: 30}}>
@@ -348,66 +354,67 @@ export function ProblemBox() {
     </ButtonGroup>
     {
       username === creator? 
-      <Button sx={{width: "25%", textTransform: "none"}} onClick={() => navigate(`/modify/${problemIdx}`)}>{menuWords.enterVariations[languageIdx]}</Button> : 
-      <Button sx={{width: "25%", display: mode === TRY? "" : "none", textTransform: "none"}} onClick={setAnswerModeAndsetSolved}>
-        {mode === ANSWER? menuWords.returnProblem[languageIdx] : menuWords.showAnswer[languageIdx]}
-      </Button>
+      <Button sx={mobileButtonStyle} onClick={() => navigate(`/modify/${problemIdx}`)}>{menuWords.enterVariations[languageIdx]}</Button> 
+      : mode === TRY? 
+      <Button sx={mobileButtonStyle} onClick={setAnswerModeAndsetSolved}>{menuWords.showAnswer[languageIdx]}</Button>
+      :
+      <Button sx={mobileButtonStyle} onClick={request}>{menuWords.requestVariation[languageIdx]}</Button>
     }
   </Box>
 
   const wideMenu = 
-  <Box display="grid" justifyContent="center" my="10%">
+  <Box display="grid" justifyContent="center" my="15%">
     <Box display="flex">
-      <Button sx={{margin: margin, textTransform: "none"}} onClick={() => moveToAdjacentProblem(-1)}>{menuWords.previousProblem[languageIdx]}</Button>
-      <Button sx={{margin: margin, textTransform: "none"}} onClick={() => moveToAdjacentProblem(1)}>{menuWords.nextProblem[languageIdx]}</Button>
+      <Button sx={wideButtonStyle} onClick={() => moveToAdjacentProblem(-1)}>{menuWords.previousProblem[languageIdx]}</Button>
+      <Button sx={wideButtonStyle} onClick={() => moveToAdjacentProblem(1)}>{menuWords.nextProblem[languageIdx]}</Button>
     </Box>
-    <ButtonGroup size='small' variant='text' color='inherit' sx={{justifyContent: "center", my: "10%"}}>
+    <ButtonGroup size='small' variant='text' color='inherit' sx={{justifyContent: "center", margin: margin, maxHeight: 30}}>
       <Button onClick={goToInit}>{firstIcon}</Button>
       <Button onClick={goToPreviousMove}>{leftArrowIcon}</Button>
       <Button onClick={goToNextMove}>{rightArrowIcon}</Button>
       <Button onClick={goToLast}>{lastIcon}</Button>
     </ButtonGroup>
-    <Button sx={{margin: margin, color: mode === TRY? "" : "red", textTransform: "none"}} onClick={() => mode === TRY? modeChange(SELF) : modeChange(TRY)}>
+    <Button sx={{...wideButtonStyle, color: mode === TRY? "" : "red"}} onClick={() => mode === TRY? modeChange(SELF) : modeChange(TRY)}>
       {mode === TRY? menuWords.practice[languageIdx] : menuWords.try[languageIdx]}
     </Button>
     {
       username === creator? 
-      <Button sx={{margin: margin, textTransform: "none"}} onClick={() => navigate(`/modify/${problemIdx}`)}>{menuWords.enterVariations[languageIdx]}</Button> : 
-      <Button sx={{margin: margin, display: mode === TRY? "" : "none", textTransform: "none"}} onClick={setAnswerModeAndsetSolved}>
-        {mode === ANSWER? menuWords.returnProblem[languageIdx] : menuWords.showAnswer[languageIdx]}
-      </Button>
+      <Button sx={wideButtonStyle} onClick={() => navigate(`/modify/${problemIdx}`)}>{menuWords.enterVariations[languageIdx]}</Button> 
+      : mode === TRY? 
+      <Button sx={wideButtonStyle} onClick={setAnswerModeAndsetSolved}>{menuWords.showAnswer[languageIdx]}</Button>
+      :
+      <Button sx={wideButtonStyle} onClick={request}>{menuWords.requestVariation[languageIdx]}</Button>
     }
-    <LikeAndDislike problemIdx={problemInfo.problemIdx} username={username}></LikeAndDislike>
+    <Like problemIdx={problemInfo.problemIdx} username={username} creator={problemInfo.creator}></Like>
   </Box>
   
   return (
-    <Grid container >
-      <Grid item sx={{margin: margin, width: isMobile? width - 16 : width / 5}}>
+    <Box display={isMobile? "grid" : "flex"} justifyContent="center">
+      <Box display="grid" margin={margin} alignContent="start">
         <ProblemInformation problemInfo={problemInfo}></ProblemInformation>
-        {answerRegistered? <></> : <Typography sx={{color: "red", margin: margin, textAlign: "center"}}>{menuWords.noAnswerWarning[languageIdx]}</Typography>}    
+        <Typography sx={{color: "red", margin: margin, textAlign: "center", display: answerRegistered? "none" : ""}}>{menuWords.noAnswerWarning[languageIdx]}</Typography>
         {isMobile? mobileTopMenu : wideMenu}   
-      </Grid>
-      <Grid justifyContent="center" item sx={{
-        my: 3, 
-        width: isMobile? width - 16 : height - 100, 
-        height: isMobile? width - 16 : height - 100
-      }}>
+      </Box>
+      <Box my={3} mx={margin}>
         <FinalBoard
-        lines={info.board.length}
-        board={info.board}
-        boardWidth={isMobile? width - 16 : height - 100}
-        moves={info.key}
-        variations={(mode === ANSWER)? problemInfo.variations[info.key] : []}
-        answers={(mode === ANSWER)? problemInfo.answers[info.key] : []}
-        onClick={handleClick}
+          lines={info.board.length}
+          board={info.board}
+          boardWidth={isMobile? width - 16 : height - 100}
+          moves={info.key}
+          variations={(mode === ANSWER)? problemInfo.variations[info.key] : []}
+          answers={(mode === ANSWER)? problemInfo.answers[info.key] : []}
+          onClick={handleClick}
         />
-      </Grid>
-      <Grid item xs={12}>
-        {isMobile? mobileBottomMenu : <></>}
-      </Grid>
+      </Box>
+      <Box margin={margin} alignItems="center">
+        {isMobile? mobileBottomMenu : <ReplyBox problemId={problemInfo._id}></ReplyBox>}
+      </Box>
+      <Box>
+        {isMobile? <ReplyBox problemId={problemInfo._id}></ReplyBox> : <></>}
+      </Box>
       {alertComponenet}
       {dialogComponent}
-    </Grid>
+    </Box>
   )
 }
 

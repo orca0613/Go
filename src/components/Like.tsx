@@ -1,18 +1,19 @@
 import { useEffect, useState } from "react"
-import { LANGUAGE_IDX, LIKED, USERINFO, initialUserInfo } from "../util/constants"
+import { LIKED, USERINFO } from "../util/constants"
 import { Box, Checkbox, Typography } from "@mui/material"
-import { addUsername, deleteUsername, getProblemInformations } from "../network/problemInformation"
+import { getProblemInformations, handleLiked } from "../network/problemInformation"
 import { addElement, deleteElement } from "../network/userDetail"
 import { UserInfo } from "../util/types"
 import { Favorite, FavoriteBorder } from "@mui/icons-material"
+import { initialUserInfo } from "../util/initialForms"
 
 interface LADProps {
   problemIdx: number,
   username: string,
+  creator: string
 }
 
-export function LikeAndDislike({ problemIdx, username }: LADProps) {
-  const languageIdx = Number(localStorage.getItem(LANGUAGE_IDX))
+export function Like({ problemIdx, username, creator }: LADProps) {
   const userInfo: UserInfo = JSON.parse(sessionStorage.getItem(USERINFO) || initialUserInfo)
   const [info, setInfo] = useState({
     like: false,
@@ -23,7 +24,7 @@ export function LikeAndDislike({ problemIdx, username }: LADProps) {
     const c = info.likeCount
     const idx = userInfo.liked.indexOf(problemIdx)
     if (info.like) {
-      deleteUsername(username, problemIdx, LIKED)
+      handleLiked(username, problemIdx, creator, false)
       deleteElement(problemIdx, username, LIKED)
       setInfo({
         ...info,
@@ -35,7 +36,7 @@ export function LikeAndDislike({ problemIdx, username }: LADProps) {
       }
     } else {
       addElement(problemIdx, username, LIKED)
-      addUsername(username, problemIdx, LIKED)
+      handleLiked(username, problemIdx, creator, true)
       setInfo({
         ...info,
         like: true,
@@ -54,7 +55,7 @@ export function LikeAndDislike({ problemIdx, username }: LADProps) {
       .then(information => {
         setInfo({
           like: userInfo.liked.includes(problemIdx),
-          likeCount: information.liked.length,
+          likeCount: Number(information.liked)
         })
       })
 

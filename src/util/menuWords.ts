@@ -99,7 +99,12 @@ export const menuWords = {
   deletedNotice: ["Deleted", "삭제 되었습니다", "已删除", "削除されました"],
   modifiedNotice: ["Modified", "수정 완료", "修改完成", "修正完了"],
   noMailWarning: ["This email is not registered", "등록되지 않은 이메일입니다", "该电子邮件未注册", "このメールは登録されていません"],
-  verifyWarning: ["Authentication has not been completed", "인증이 완료되지 않았습니다", "身份验证尚未完成", "認証が完了していません"],
+  verifyWarning: [
+    "Email verification has not been completed. Please complete verification through the verification link sent to your email.", 
+    "이메일 인증이 완료되지 않았습니다. 이메일로 발송된 인증링크를 통해 인증을 완료해 주세요.", 
+    "电子邮件验证尚未完成。请通过发送至您邮箱的验证链接完成验证。", 
+    "メール認証が完了していません。メールに送信された確認リンクを通じて確認を完了してください。"
+  ],
   incorrectPasswordWarning: ["Password is incorrect", "비밀번호가 틀렸습니다", "密码不正确", "パスワードが正しくありません"],
   invalidEmailFormWarning: ["Invalid email format", "잘못된 이메일 양식", "电子邮件格式无效", "無効な電子メール形式"],
   verificationCompleteNotice: ["Verification completed", "인증 완료", "验证完成", "認証完了"],
@@ -137,5 +142,9 @@ export const menuWords = {
   receivedMessage: ["Received", "받은 메시지", "收到消息", "受信メッセージ"],
   saveInformations: ["Save login information", "로그인 정보 저장하기", "保存登录信息", "ログイン情報を保存する"],
   difficulty: ["Difficulty", "난이도", "难点", "難易度"],
-  all: ["All", "전부", "全部", "全部"],
+  deletedComment: ["This comment has been deleted.", "삭제된 댓글입니다.", "此评论已被删除。", "削除されたコメントです。"],
+  createdProblem: ["Created", "만든 문제", "注册的问题", "登録の問題"],
+  newestProblem: ["Newest problems", "최신 문제", "最新问题", "最新の問題"],
+  seeAll: ["See all", "모두 보기", "查看全部", "全て見る"],
+  like: ["Like", "좋아요", "喜欢", "好き"],
 }

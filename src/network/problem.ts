@@ -1,8 +1,10 @@
 import _ from "lodash";
-import { API_URL, LANGUAGE_IDX, PROBLEM_DB_PATH, QUESTIONS, USERINFO, initialUserInfo, initialVariations } from "../util/constants";
+import { API_URL, LANGUAGE_IDX, QUESTIONS, USERINFO } from "../util/constants";
 import { loginWarning } from "../util/functions";
 import { menuWords } from "../util/menuWords";
 import { Board, ProblemAndVariations, UserInfo } from "../util/types";
+import { PROBLEM_DB_PATH } from "../util/paths";
+import { initialUserInfo, initialVariations } from "../util/initialForms";
 
 export async function createProblem(comment: string, problem: Board, creator: string | null, level: number, color: string) {
   const languageIdx = Number(localStorage.getItem(LANGUAGE_IDX))

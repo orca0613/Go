@@ -4,7 +4,8 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { changePassword } from '../network/user';
 import { menuWords } from '../util/menuWords';
 import { useWindowSize } from 'react-use';
-import { LANGUAGE_IDX, LOGIN_PATH } from '../util/constants';
+import { LANGUAGE_IDX } from '../util/constants';
+import { LOGIN_PATH } from '../util/paths';
 
 export default function ChangePassword() {
   const { userId } = useParams()

@@ -5,7 +5,7 @@ import ListItem from '@mui/material/ListItem';
 import IconButton from '@mui/material/IconButton';
 import MenuIcon from '@mui/icons-material/Menu';
 import { NavButton } from './layout/NavButton';
-import { CREATED, LANGUAGE_IDX, LIKED, LOGIN_PATH, MYPAGE_PATH, PAGE, SOLVED, UNRESOLVED, USERINFO, WITHQUESTIONS, initialUserInfo, mobileFontSize } from '../util/constants';
+import { CREATED, LANGUAGE_IDX, LIKED, SOLVED, UNRESOLVED, USERINFO, WITHQUESTIONS, mobileFontSize } from '../util/constants';
 import { menuWords } from '../util/menuWords';
 import { useNavigate } from 'react-router-dom';
 import { UserInfo } from '../util/types';
@@ -13,6 +13,8 @@ import { getUserDetail } from '../network/userDetail';
 import { Badge, Divider, Typography } from '@mui/material';
 import { getNumberUnchecked } from '../network/message';
 import { resetSortingForm } from '../util/functions';
+import { LOGIN_PATH, MYPAGE_PATH } from '../util/paths';
+import { initialUserInfo } from '../util/initialForms';
 
 export function Menu() {
   const [open, setOpen] = useState(false);
@@ -21,7 +23,7 @@ export function Menu() {
   const [info, setInfo] = useState<UserInfo>(userInfo)
   const [unsolved, setUnsolved] = useState<number[]>([])
   const [unchecked, setUnchecked] = useState(0)
-  const divider = <Divider orientation="horizontal" sx={{borderColor: "black" }} />
+  const divider = <Divider orientation="horizontal" sx={{borderColor: "gray"}} />
 
   useEffect(() => {
     const detail = getUserDetail(userInfo.name)
@@ -34,8 +36,6 @@ export function Menu() {
         tried: r.tried,
         solved: r.solved,
         liked: r.liked,
-        disliked: r.disliked,
-        asked: r.asked,
         language:r.language,
         auto: r.auto
       }
@@ -194,10 +194,10 @@ export function Menu() {
       <Drawer anchor="right" open={open} onClose={toggleDrawer(false)}>
         <List>
           <ListItem sx={{justifyContent: "center"}}>
-            <Typography>{userInfo.name}</Typography>
+            <Typography variant='button' sx={{textTransform: "none", color: "gray"}}>{userInfo.name}</Typography>
           </ListItem>
           <ListItem sx={{justifyContent: "center"}}>
-            <Typography>{`${Math.abs(level)}${level > 0? menuWords.K[languageIdx] : menuWords.D[languageIdx]} / ${userInfo.point} P`}</Typography>
+            <Typography variant='button' sx={{textTransform: "none", color: "gray"}}>{`${Math.abs(level)}${level > 0? menuWords.K[languageIdx] : menuWords.D[languageIdx]} / ${userInfo.point} P`}</Typography>
           </ListItem>
           <ListItem sx={{justifyContent: "center"}}>
             {message}

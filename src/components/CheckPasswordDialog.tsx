@@ -6,11 +6,12 @@ import DialogContent from '@mui/material/DialogContent';
 import DialogContentText from '@mui/material/DialogContentText';
 import { useState } from 'react';
 import { checkPassword } from '../network/user';
-import { LANGUAGE_IDX, USERINFO, initialUserInfo } from '../util/constants';
+import { LANGUAGE_IDX, USERINFO } from '../util/constants';
 import { UserInfo } from '../util/types';
 import { useNavigate } from 'react-router-dom';
 import { menuWords } from '../util/menuWords';
 import React from 'react';
+import { initialUserInfo } from '../util/initialForms';
 
 export default function CheckPasswordDialog() {
   const userInfo: UserInfo = JSON.parse(sessionStorage.getItem(USERINFO) || initialUserInfo)

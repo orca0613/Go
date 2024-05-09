@@ -1,11 +1,12 @@
 import { Button, TextField, FormControl, InputLabel, Select, MenuItem, Box, SelectChangeEvent, Divider } from '@mui/material'
 import React, { useState } from 'react'
-import { LANGUAGE_IDX, languageList, levelArray } from '../util/constants'
+import { LANGUAGE_IDX, languageList } from '../util/constants'
 import { useNavigate } from 'react-router-dom'
 import { menuWords } from '../util/menuWords'
 import { checkMail, checkUserName, createUser } from '../network/user'
 import { isValidEmail } from '../util/functions'
 import { useWindowSize } from 'react-use'
+import { levelArray } from '../util/initialForms'
 
 export function Signup() {
 

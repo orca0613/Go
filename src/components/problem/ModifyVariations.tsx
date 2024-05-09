@@ -2,8 +2,8 @@ import { useEffect, useState } from 'react'
 import { BoardInfo, Coordinate, UserInfo } from '../../util/types'
 import _ from 'lodash'
 import { addCurrentVariation, removeCurrentVariation } from '../../util/functions'
-import { Box, Button, ButtonGroup, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, Grid } from '@mui/material'
-import { ANSWERS, HOME, LANGUAGE_IDX, MARGIN, QUESTIONS, USERINFO, VARIATIONS, initialProblemInfo, initialUserInfo, initialVariations } from '../../util/constants'
+import { Box, Button, ButtonGroup, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle } from '@mui/material'
+import { ANSWERS, HOME, LANGUAGE_IDX, MARGIN, QUESTIONS, USERINFO, VARIATIONS } from '../../util/constants'
 import FinalBoard from '../board/FinalBoard'
 import { menuWords } from '../../util/menuWords'
 import { deleteProblem, getProblemByIdx, updateVariations } from '../../network/problem'
@@ -12,6 +12,8 @@ import { ProblemInformation } from '../problem/ProblemInformation'
 import { useNavigate, useParams } from 'react-router-dom'
 import { useWindowSize } from 'react-use'
 import { checkRequest } from '../../network/requests'
+import { initialProblemInfo, initialUserInfo } from '../../util/initialForms'
+import { mobileButtonStyle, wideButtonStyle } from '../../util/styles'
 
 export function ModifyVariations() {
 
@@ -185,14 +187,14 @@ export function ModifyVariations() {
 
   const mobileBottomMenu = 
   <Box display="flex" justifyContent="space-around" alignItems="center">
-    <Button color='warning' sx={{margin: margin, mt: isMobile? 0 : 5, textTransform: "none"}} onClick={() => navigate(`/modify-problem/${problemIdx}`)}>{menuWords.modifyProblem[languageIdx]}</Button>
+    <Button color='warning' sx={mobileButtonStyle} onClick={() => navigate(`/modify-problem/${problemIdx}`)}>{menuWords.modifyProblem[languageIdx]}</Button>
     <ButtonGroup size='small' variant='text' color='inherit' sx={{justifyContent: "center", maxHeight: 30}}>
       <Button onClick={goToInit}>{firstIcon}</Button>
       <Button onClick={goToPreviousMove}>{leftArrowIcon}</Button>
       <Button onClick={goToNextMove}>{rightArrowIcon}</Button>
       <Button onClick={goToLast}>{lastIcon}</Button>
     </ButtonGroup>
-    <Button sx={{color: "red"}} onClick={() => setOpen(true)}>{menuWords.deleteProblem[languageIdx]}</Button>
+    <Button sx={{...mobileButtonStyle, color: "red"}} onClick={() => setOpen(true)}>{menuWords.deleteProblem[languageIdx]}</Button>
   </Box>
 
   const wideMenu = 
@@ -203,44 +205,34 @@ export function ModifyVariations() {
       <Button onClick={goToNextMove}>{rightArrowIcon}</Button>
       <Button onClick={goToLast}>{lastIcon}</Button>
     </ButtonGroup>
-    <Button sx={buttonStyle} onClick={addAnswersAndSetAnswers}>{menuWords.addAnswers[languageIdx]}</Button>
-    <Button sx={buttonStyle} onClick={addVariationsAndSetVariations}>{menuWords.addVariation[languageIdx]}</Button>
-    <Button sx={buttonStyle} onClick={() => removeVariationsAndSetVariations(info.key)}>{menuWords.removeVariation[languageIdx]}</Button>
-    <Button color='warning' sx={{margin: margin, mt: isMobile? 0 : 5, textTransform: "none"}} onClick={() => navigate(`/modify-problem/${problemIdx}`)}>{menuWords.modifyProblem[languageIdx]}</Button>
-    <Button sx={{mt: 5, color: "red", display: isMobile? "none" : "", textTransform: "none"}} onClick={() => setOpen(true)}>{menuWords.deleteProblem[languageIdx]}</Button>
+    <Button sx={wideButtonStyle} onClick={addAnswersAndSetAnswers}>{menuWords.addAnswers[languageIdx]}</Button>
+    <Button sx={wideButtonStyle} onClick={addVariationsAndSetVariations}>{menuWords.addVariation[languageIdx]}</Button>
+    <Button sx={wideButtonStyle} onClick={() => removeVariationsAndSetVariations(info.key)}>{menuWords.removeVariation[languageIdx]}</Button>
+    <Button color='warning' sx={{...wideButtonStyle, mt: 5}} onClick={() => navigate(`/modify-problem/${problemIdx}`)}>{menuWords.modifyProblem[languageIdx]}</Button>
+    <Button sx={{...wideButtonStyle, mt: 5, color: "red"}} onClick={() => setOpen(true)}>{menuWords.deleteProblem[languageIdx]}</Button>
   </Box>
 
   return (
-    <Grid container >
-      <Grid item sx={{margin: margin, width: isMobile? width : width / 5}}>
-        <Grid container>
-          <Grid item xs={12}>
-            <ProblemInformation problemInfo={problemInfo}></ProblemInformation>
-          </Grid>
-          <Grid item xs={12} textAlign="center" justifyContent="center">
-            {isMobile? mobileTopMenu : wideMenu}
-          </Grid>
-        </Grid>
-      </Grid>
-      <Grid item sx={{
-        my: 3, 
-        width: isMobile? width - 16 : height - 100, 
-        height: isMobile? width - 16 : height - 100
-      }}>
+    <Box display={isMobile? "grid" : "flex"} justifyContent="center">
+      <Box display="grid" margin={margin} alignContent="start">
+        <ProblemInformation problemInfo={problemInfo}></ProblemInformation>
+        {isMobile? mobileTopMenu : wideMenu}
+      </Box>
+      <Box my={3} mx={margin}>
         <FinalBoard 
-        lines={info.board.length}
-        board={info.board}
-        boardWidth={isMobile? width - 16 : height - 100}
-        moves={info.key}
-        variations={problemInfo.variations[info.key]}
-        answers={problemInfo.answers[info.key]}
-        questions={problemInfo.questions[info.key]}
-        onClick={handleClick}
+          lines={info.board.length}
+          board={info.board}
+          boardWidth={isMobile? width - 16 : height - 100}
+          moves={info.key}
+          variations={problemInfo.variations[info.key]}
+          answers={problemInfo.answers[info.key]}
+          questions={problemInfo.questions[info.key]}
+          onClick={handleClick}
         />
-      </Grid>
-      <Grid item xs={12} textAlign="center" justifyContent="center">
+      </Box>
+      <Box>
         {isMobile? mobileBottomMenu : <></>}
-      </Grid>
+      </Box>
       <Dialog open={open} onClose={() => setOpen(false)}>
         <DialogTitle>{menuWords.confirmRequest[languageIdx]}</DialogTitle>
         <DialogContent>
@@ -249,15 +241,14 @@ export function ModifyVariations() {
           </DialogContentText>
         </DialogContent>
         <DialogActions>
-          <Button onClick={deleteProblemAndGoHome} color="primary" autoFocus>
+          <Button onClick={deleteProblemAndGoHome} sx={{textTransform: "none"}} color="primary" autoFocus>
             {menuWords.confirm[languageIdx]}
           </Button>
-          <Button onClick={() => setOpen(false)} color="primary">
+          <Button onClick={() => setOpen(false)} sx={{textTransform: "none"}} color="primary">
             {menuWords.cancel[languageIdx]}
           </Button>
         </DialogActions>
       </Dialog>
-    </Grid>
-    
+    </Box>
   )
 }

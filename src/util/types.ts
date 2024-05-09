@@ -33,14 +33,13 @@ export type ProblemInformation = {
   level: number,
   creator: string,
   view: number,
-  liked: string[],
-  disliked: string[],
   correctUser: string[],
   wrong: number,
   reply?: object[]
   totalCorrectUserLevel: number,
   totalWrongUserLevel: number,
   time: Date,
+  liked: number,
 }
 
 export type BoardInfo = {
@@ -59,10 +58,9 @@ export type UserInfo = {
   tried: number[],
   solved: number[],
   liked: number[],
-  disliked: number[],
-  asked: number[],
   language: number,
   auto: boolean,
+  totalLike: number,
 }
 
 export type UserDetailFromServer = {
@@ -74,13 +72,11 @@ export type UserDetailFromServer = {
   tried: number[],
   solved: number[],
   liked: number[],
-  disliked: number[],
-  asked: number[],
-  myFollowers: string[],
-  followList: string[],
   loginTime: Date,
   language: number,
   auto: boolean,
+  level: number,
+  totalLike: number,
 }
 
 export type Filter = {

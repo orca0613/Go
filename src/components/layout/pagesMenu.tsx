@@ -1,12 +1,14 @@
 import { Box, Typography, useMediaQuery } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import { NavButton } from "./NavButton";
-import { HOME, LOGIN_PATH, PROBLEM_PATH, CREATE_PATH, LANGUAGE_IDX, USERINFO, SITE_NAME, mobileFontSize, initialUserInfo, PAGE, SORTING_IDX, SIGNUP_PATH } from "../../util/constants";
+import { HOME, LANGUAGE_IDX, USERINFO, SITE_NAME, mobileFontSize } from "../../util/constants";
 import { menuWords } from "../../util/menuWords";
 import Language from "../Language";
 import { Menu } from "../Menu";
 import { Filter, UserInfo } from "../../util/types";
 import { getRangeByTier, getTier, ownStringify, resetSortingForm } from "../../util/functions";
+import { CREATE_PATH, LOGIN_PATH, PROBLEM_PATH } from "../../util/paths";
+import { initialUserInfo } from "../../util/initialForms";
 
 
 export function PagesMenu() {

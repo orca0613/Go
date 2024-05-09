@@ -225,10 +225,10 @@ export function sortingProblemList(problemList: ProblemInformation[], option: nu
       break
     case 4:
       newProblemList.sort((a, b) => {
-        if (a.liked.length === b.liked.length) {
+        if (a.liked === b.liked) {
           return b.problemIndex - a.problemIndex
         } else {
-          return b.liked.length - a.liked.length
+          return b.liked - a.liked
         }
       })
       break
@@ -279,5 +279,22 @@ export function getPositions(board: Board, color: string) {
     }
   }
   return group
+}
+
+export function getGreetings(name: string, language: number) {
+  switch (language) {
+    case 0:
+      return `Recommended problems for ${name}`
+    case 1:
+      return `${name}님을 위한 추천 문제`
+    case 2:
+      return `为您精选的问题`
+    case 3:
+      return `${name}様におすすめの問題`
+    default:
+      return `Recommended problems for ${name}`
+    
+  }
+
 }
 

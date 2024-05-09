@@ -3,10 +3,11 @@ import { Box, FormControl, InputLabel, MenuItem, Pagination, Select, SelectChang
 import { ProblemInformation, UserInfo } from '../util/types';
 import SampleProblemBox from './problem/SampleProblemBox';
 import { useParams } from 'react-router-dom';
-import { ASKED, CREATED, LANGUAGE_IDX, LIKED, PAGE, PROBLEM_INDICES, SOLVED, SORTING_IDX, UNRESOLVED, USERINFO, WITHQUESTIONS, initialUserInfo, problemsPerPage, sortingMethods } from '../util/constants';
+import { CREATED, LANGUAGE_IDX, LIKED, PAGE, SOLVED, SORTING_IDX, UNRESOLVED, USERINFO, WITHQUESTIONS, problemsPerPage } from '../util/constants';
 import { getProblemByIndexList } from '../network/problemInformation';
 import { menuWords } from '../util/menuWords';
 import { setProblemIndicies, sortingProblemList } from '../util/functions';
+import { initialUserInfo, sortingMethods } from '../util/initialForms';
 
 export default function MyPageProblems() {
   const { part } = useParams()
@@ -46,9 +47,6 @@ export default function MyPageProblems() {
         break
       case (LIKED):
         idxList = userInfo.liked
-        break
-      case (ASKED):
-        idxList = userInfo.asked
         break
       case (WITHQUESTIONS):
         idxList = userInfo.withQuestions

@@ -1,8 +1,16 @@
-import { API_URL, MESSAGE_DB_PATH, USERINFO, initialUserInfo } from "../util/constants"
+import { API_URL, USERINFO } from "../util/constants"
 import { loginWarning } from "../util/functions"
+import { initialUserInfo } from "../util/initialForms"
+import { MESSAGE_DB_PATH } from "../util/paths"
 import { UserInfo } from "../util/types"
 
 export async function sendMessage(sender: string, receiver: string, title: string, contents: string, quotation: string) {
+  if (!title) {
+    title = "No title"
+  }
+  if (!contents) {
+    contents = "No content"
+  }
   const userInfo: UserInfo = JSON.parse(sessionStorage.getItem(USERINFO) || initialUserInfo)
   const token = userInfo.token
   const response = await fetch(`${API_URL}${MESSAGE_DB_PATH}/send`, {
@@ -83,4 +91,27 @@ export async function getNumberUnchecked(): Promise<number> {
   }
   const unchecked = await response.json()
   return unchecked
+}
+
+export async function hideMessage(idList: string, where: string) {
+  const userInfo: UserInfo = JSON.parse(sessionStorage.getItem(USERINFO) || initialUserInfo)
+  const name = userInfo.name
+  const token = userInfo.token
+  const response = await fetch(`${API_URL}${MESSAGE_DB_PATH}/hide-message`, {
+    method: 'PATCH',
+    headers: {
+      'Content-Type': 'application/json',
+      'authorization': `Bearer ${token}`
+    },
+    body: JSON.stringify({idList, name, where}),
+  })
+  if (response.ok) {
+    return 
+  }
+  if (response.status === 401 || 403) {
+    return loginWarning()
+  }
+  throw new Error(`Error: ${response.status}`)
+
+
 }

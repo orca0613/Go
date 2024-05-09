@@ -4,11 +4,12 @@ import { useNavigate } from 'react-router-dom'
 import { menuWords } from '../util/menuWords'
 import { getUserDetail } from '../network/userDetail'
 import { logIn } from '../network/user'
-import { HOME, LANGUAGE_IDX, USERINFO, expires, initialUserInfo } from '../util/constants'
+import { HOME, LANGUAGE_IDX, USERINFO, expires } from '../util/constants'
 import { UserInfo } from '../util/types'
 import { useWindowSize } from 'react-use'
 import CheckEmailDialog from './CheckEmailDialog'
 import { isValidEmail } from '../util/functions'
+import { initialUserInfo } from '../util/initialForms'
 
 export function Login() {
 	const navigate = useNavigate()
@@ -68,9 +69,8 @@ export function Login() {
           tried: r.tried,
           solved: r.solved,
           liked: r.liked,
-          disliked: r.disliked,
-          asked:r.asked,
-          auto: r.auto
+          auto: r.auto,
+          totalLike: r.totalLike,
         }
         sessionStorage.setItem(USERINFO, JSON.stringify(newUserInfo))
         if (r.withQuestions.length) {
@@ -133,7 +133,7 @@ export function Login() {
         <FormControlLabel labelPlacement='start' control={<Checkbox checked={saveInfo} onChange={() => setSaveInfo(!saveInfo)}/>} label={menuWords.saveInformations[languageIdx]}/>
 
         <Box sx={{margin: 3}}>
-          <Button sx={{color: "inherit", textTransform: "none"}} onClick={() => movePage('/signup')}>{menuWords.signup[languageIdx]}</Button>
+          <Button sx={{color: "red", textTransform: "none"}} onClick={() => movePage('/signup')}>{menuWords.signup[languageIdx]}</Button>
           <CheckEmailDialog></CheckEmailDialog>
         </Box>
       </Box>

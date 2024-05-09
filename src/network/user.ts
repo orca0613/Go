@@ -1,5 +1,7 @@
-import { API_URL, LANGUAGE_IDX, USERINFO, USER_DB_PATH, initialUserInfo } from "../util/constants"
+import { API_URL, LANGUAGE_IDX, USERINFO } from "../util/constants"
+import { initialUserInfo } from "../util/initialForms"
 import { menuWords } from "../util/menuWords"
+import { USER_DB_PATH } from "../util/paths"
 import { UserInfo } from "../util/types"
 
 export async function checkMail(email: string) {
@@ -21,7 +23,6 @@ export async function checkUserName(name: string) {
 }
 
 export async function createUser(email: string, password: string, name: string, level: number, language: number) {
-  const languageIdx = Number(localStorage.getItem(LANGUAGE_IDX))
   const response = await fetch(`${API_URL}${USER_DB_PATH}/create`, {
     method: 'POST',
     headers: {
@@ -30,7 +31,7 @@ export async function createUser(email: string, password: string, name: string, 
     body: JSON.stringify({email, password, name, level, language}),
   })
   if (response.ok) {
-    return alert(menuWords.checkMailWarning[languageIdx])
+    return alert(menuWords.checkMailWarning[language])
   }
   throw new Error(`Error: ${response.status}`)
 }

@@ -1,11 +1,12 @@
-import { Box, Typography } from "@mui/material";
+import { Box, Button, Typography } from "@mui/material";
 import { menuWords } from "../../util/menuWords";
 import { LANGUAGE_IDX } from "../../util/constants";
 import { ProblemAndVariations } from "../../util/types";
 import { useEffect, useState } from "react";
 import { getProblemInformations } from "../../network/problemInformation";
 import { useWindowSize } from "react-use";
-import CommunicationMenu from "../CommunicationMenu";
+import { useNavigate } from "react-router-dom";
+import { nameButtonStyle } from "../../util/styles";
 
 interface PIProps {
   problemInfo: ProblemAndVariations
@@ -14,6 +15,7 @@ interface PIProps {
 export function ProblemInformation({ problemInfo }: PIProps) {
 
   const languageIdx = Number(localStorage.getItem(LANGUAGE_IDX))
+  const navigate = useNavigate()
   const {width, height} = useWindowSize()
   const isMobile = height > width * 2 / 3 || width < 1000
   const margin = isMobile? 1 : 2
@@ -63,7 +65,7 @@ export function ProblemInformation({ problemInfo }: PIProps) {
       </Typography>
     </Box>
     <Box display="flex" justifyContent="space-around" alignItems="center">
-      <CommunicationMenu creator={info.creator}></CommunicationMenu>
+      <Button onClick={() => navigate(`/userpage/${info.creator}`)} sx={nameButtonStyle}>{info.creator}</Button>
       <Typography sx={{margin: margin}} mb="0.5ch" variant="body1">{menuWords.views[languageIdx]} : {info.view}</Typography>
     </Box>
     <Typography sx={{margin: margin}} mb="0.5ch" variant="body1">{info.comment}</Typography>
@@ -75,12 +77,12 @@ export function ProblemInformation({ problemInfo }: PIProps) {
       <Typography sx={{margin: margin}} mb="0.5ch" variant="body1">
         {info.color === "b"? menuWords.blackTurn[languageIdx] : menuWords.whiteTurn[languageIdx]} / {info.level > 0? `${info.level}${menuWords.K[languageIdx]}` : `${Math.abs(info.level)}${menuWords.D[languageIdx]}`}
       </Typography>
-      <CommunicationMenu creator={info.creator}></CommunicationMenu>
+      <Button onClick={() => navigate(`/userpage/${info.creator}`)} sx={nameButtonStyle}>{info.creator}</Button>
       <Typography sx={{margin: margin}} mb="0.5ch" variant="body1">{menuWords.views[languageIdx]} : {info.view}</Typography>
       <Typography sx={{margin: margin}} mb="0.5ch" variant="body1">
         {menuWords.correctRate[languageIdx]} : {info.correct + info.wrong > 0? `${String(info.correct / (info.correct + info.wrong) * 100).slice(0, 4)}` : 0} % {`(${info.correct} / ${info.correct + info.wrong})`}
       </Typography>
-      {info.comment? <Typography sx={{height:60, margin: margin}} mb="0.5ch" variant="body1">{info.comment}</Typography> : <></>}
+      {info.comment? <Typography sx={{margin: margin}} mb="0.5ch" variant="body1">{info.comment}</Typography> : <></>}
     </Box>
   return (
     <Box>

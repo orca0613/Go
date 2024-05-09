@@ -1,5 +1,5 @@
 import Switch from '@mui/material/Switch';
-import { HOME, LANGUAGE_IDX, USERINFO, initialUserInfo, languageList, levelArray } from '../util/constants';
+import { HOME, LANGUAGE_IDX, USERINFO, languageList } from '../util/constants';
 import { UserInfo } from '../util/types';
 import { ChangeEvent, useState } from 'react';
 import { Box, Button, FormControl, FormControlLabel, FormLabel, InputLabel, MenuItem, Radio, RadioGroup, Select, SelectChangeEvent, useMediaQuery } from '@mui/material';
@@ -7,6 +7,7 @@ import { menuWords } from '../util/menuWords';
 import { settingChange } from '../network/userDetail';
 import { useNavigate } from 'react-router-dom';
 import CheckPasswordDialog from './CheckPasswordDialog';
+import { initialUserInfo, levelArray } from '../util/initialForms';
 
 export default function Setting() {
   const userInfo: UserInfo = JSON.parse(sessionStorage.getItem(USERINFO) || initialUserInfo)

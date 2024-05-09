@@ -1,7 +1,8 @@
 
 import { CSSProperties, useEffect, useRef } from 'react';
 import { Coordinate } from '../../util/types';
-import { flowerPointPosition, resolution } from '../../util/constants';
+import { resolution } from '../../util/constants';
+import { flowerPointPosition } from '../../util/initialForms';
 
 interface EmptyBoardProps {
   boardWidth: number

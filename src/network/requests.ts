@@ -1,5 +1,7 @@
-import { API_URL, LANGUAGE_IDX, REQUESTS_DB_PATH, USERINFO, initialUserInfo } from "../util/constants"
+import { API_URL, LANGUAGE_IDX, USERINFO } from "../util/constants"
 import { loginWarning } from "../util/functions"
+import { initialUserInfo } from "../util/initialForms"
+import { REQUESTS_DB_PATH } from "../util/paths"
 import { UserInfo } from "../util/types"
 
 export async function sendRequest(problemIdx: number, creator: string, client: string, key: string) {

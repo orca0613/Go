@@ -1,6 +1,8 @@
-import { API_URL, LANGUAGE_IDX, USERDETAIL_DB_PATH, USERINFO, initialUserInfo, } from "../util/constants"
+import { API_URL, LANGUAGE_IDX, USERINFO, } from "../util/constants"
 import { loginWarning } from "../util/functions"
+import { initialUserInfo } from "../util/initialForms"
 import { menuWords } from "../util/menuWords"
+import { USERDETAIL_DB_PATH } from "../util/paths"
 import { CreatorInfo, UserDetailFromServer, UserInfo } from "../util/types"
 
 export async function addElement(element: number, name: string, where: string) {
@@ -89,4 +91,3 @@ export async function settingChange(language: number, level: number, auto: boole
   }
   throw new Error(`Error: ${update.status}`)
 }
-

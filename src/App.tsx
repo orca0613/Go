@@ -14,6 +14,7 @@ import ChangePassword from "./components/ChangePassword";
 import Setting from "./components/Setting";
 import FilteredProblems from "./components/problem/FilteredProblems";
 import MessageList from "./components/MessageList";
+import UserPage from "./components/UserPage";
 
 function App() {
   return (
@@ -34,6 +35,7 @@ function App() {
           <Route path="/setting" element={<Setting/>} />
           <Route path="/problems/:params" element={<FilteredProblems />} />
           <Route path="/message" element={<MessageList />} />
+          <Route path="/userpage/:name" element={<UserPage/>}/>
           
 
         </Route>
