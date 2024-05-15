@@ -1,7 +1,6 @@
 import { API_URL, LANGUAGE_IDX, USERINFO, } from "../util/constants"
 import { loginWarning } from "../util/functions"
 import { initialUserInfo } from "../util/initialForms"
-import { menuWords } from "../util/menuWords"
 import { USERDETAIL_DB_PATH } from "../util/paths"
 import { CreatorInfo, UserDetailFromServer, UserInfo } from "../util/types"
 

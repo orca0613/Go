@@ -152,7 +152,7 @@ export function ModifyVariations() {
   }
 
   function deleteProblemAndGoHome() {
-    deleteProblem(problemIdx, username)
+    deleteProblem(problemIdx, username, problemInfo.level)
     setOpen(false)
     navigate(HOME)
   }
@@ -161,19 +161,29 @@ export function ModifyVariations() {
     if (problemIdx >= 0) {
       const newProblemInfo = getProblemByIdx(problemIdx)
       .then(p => {
-        const initialState = p.initialState
-        setProblemInfo(p)
-        setInfo({
-          board: initialState,
-          color: p.color,
-          key: "0"
-        })
-        setGame(new Game(
-          initialState,
-          p.answers,
-          p.variations,
-          p.color
-        ))
+        if (!p) {
+          alert(menuWords.wrongIndexWarning[languageIdx])
+          navigate(HOME)
+        } else {
+          if (p.creator !== userInfo.name) {
+            alert(menuWords.permissionWarning[languageIdx])
+            sessionStorage.clear()
+            navigate(HOME)
+          }
+          const initialState = p.initialState
+          setProblemInfo(p)
+          setInfo({
+            board: initialState,
+            color: p.color,
+            key: "0"
+          })
+          setGame(new Game(
+            initialState,
+            p.answers,
+            p.variations,
+            p.color
+          ))
+        }
       })
     }
   }, [problemIdx])

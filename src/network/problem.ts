@@ -33,7 +33,7 @@ export async function createProblem(comment: string, problem: Board, creator: st
   throw new Error(`Error: ${response.status}`)
 }
 
-export async function deleteProblem(problemIdx: number, creator: string) {
+export async function deleteProblem(problemIdx: number, creator: string, level: number) {
   const languageIdx = Number(localStorage.getItem(LANGUAGE_IDX))
   const userInfo: UserInfo = JSON.parse(sessionStorage.getItem(USERINFO) || initialUserInfo)
   const token = userInfo.token
@@ -43,7 +43,7 @@ export async function deleteProblem(problemIdx: number, creator: string) {
       'Content-Type': 'application/json',
       'authorization': `Bearer ${token}`
     },
-    body: JSON.stringify({problemIdx, creator}),
+    body: JSON.stringify({problemIdx, creator, level}),
   })
   if (response.ok) {
     return alert(menuWords.deletedProblemWarning[languageIdx])
@@ -54,10 +54,10 @@ export async function deleteProblem(problemIdx: number, creator: string) {
   throw new Error(`Error: ${response.status}`)
 }
 
-export async function getProblemByIdx(problemIdx: number): Promise<ProblemAndVariations> {
+export async function getProblemByIdx(problemIdx: number): Promise<ProblemAndVariations | undefined> {
   const response = await fetch(`${API_URL}${PROBLEM_DB_PATH}/get-by-idx/${problemIdx}`)
-  if (!response.ok) {
-    throw new Error(`Error: ${response.status}`)
+  if (response.status === 404) {
+    return 
   }
   const problem = await response.json()
   return problem

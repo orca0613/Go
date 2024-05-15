@@ -147,4 +147,7 @@ export const menuWords = {
   newestProblem: ["Newest problems", "최신 문제", "最新问题", "最新の問題"],
   seeAll: ["See all", "모두 보기", "查看全部", "全て見る"],
   like: ["Like", "좋아요", "喜欢", "好き"],
+  wrongIndexWarning: ["The problem doesn't exist.", "문제가 존재하지 않습니다.", "问题是不存在的。", "問題は存在しません。"],
+  permissionWarning: ["You do not have permission.", "권한이 없습니다.", "你没有许可", "権限がありません"],
+  reply: ["Reply", "답장", "回复", "返事"]
 }

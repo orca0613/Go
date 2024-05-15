@@ -1,7 +1,7 @@
 import { Box, Typography, useMediaQuery } from "@mui/material"
 import { LANGUAGE_IDX, MARGIN, PAGE, PROBLEM_INDEX, USERINFO, problemsPerPage } from "../../util/constants"
 import { useNavigate } from "react-router-dom"
-import { ProblemInformation, UserInfo } from "../../util/types"
+import { ProblemInformation, SampleProblemInformation, UserInfo } from "../../util/types"
 import { useWindowSize } from "react-use"
 import FinalBoard from "../board/FinalBoard"
 import { menuWords } from "../../util/menuWords"
@@ -9,7 +9,7 @@ import { CheckCircleOutline, Done, Favorite, FavoriteBorder, HelpOutline } from 
 import { initialUserInfo } from "../../util/initialForms"
 
 interface SampleProblemBoxProps {
-  problems: ProblemInformation[]
+  problems: ProblemInformation[] | SampleProblemInformation[]
   page: number
   request?: boolean
 }
@@ -62,12 +62,6 @@ export default function SampleProblemBox({ problems, request, page}: SampleProbl
                   board={problem.initialState}
                 />
                 {info(problem.creator, problem.level, problem.liked, problem.problemIndex)}
-                {/* <SampleProblem 
-                  problem={problem} 
-                  boxWidth={isMobile? Math.floor((width - 20) / 2) : Math.floor((width - 20) / 4)} 
-                  boardWidth={isMobile? (width - 20) / 2.2 : (width - 20) / 4.4}
-                  check={true}
-                /> */}
               </Box>
             )
           })

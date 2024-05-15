@@ -18,13 +18,14 @@ export function Like({ problemIdx, username, creator }: LADProps) {
   const [info, setInfo] = useState({
     like: false,
     likeCount: 0,
+    level: 0
   })
 
   function handleLike() {
     const c = info.likeCount
     const idx = userInfo.liked.indexOf(problemIdx)
     if (info.like) {
-      handleLiked(username, problemIdx, creator, false)
+      handleLiked(username, problemIdx, creator, info.level, false)
       deleteElement(problemIdx, username, LIKED)
       setInfo({
         ...info,
@@ -36,7 +37,7 @@ export function Like({ problemIdx, username, creator }: LADProps) {
       }
     } else {
       addElement(problemIdx, username, LIKED)
-      handleLiked(username, problemIdx, creator, true)
+      handleLiked(username, problemIdx, creator, info.level, true)
       setInfo({
         ...info,
         like: true,
@@ -55,7 +56,8 @@ export function Like({ problemIdx, username, creator }: LADProps) {
       .then(information => {
         setInfo({
           like: userInfo.liked.includes(problemIdx),
-          likeCount: Number(information.liked)
+          likeCount: Number(information.liked),
+          level: information.level
         })
       })
 

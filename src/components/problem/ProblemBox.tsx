@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { Coordinate, BoardInfo, UserInfo } from '../../util/types'
 import _ from 'lodash'
 import { addCurrentVariation } from '../../util/functions'
-import { ANSWER, LANGUAGE_IDX, MARGIN, PROBLEM_INDEX, PROBLEM_INDICES, QUESTIONS, SELF, SOLVED, TRIED, TRY, USERINFO } from '../../util/constants'
+import { ANSWER, HOME, LANGUAGE_IDX, MARGIN, PROBLEM_INDEX, PROBLEM_INDICES, QUESTIONS, SELF, SOLVED, TRIED, TRY, USERINFO } from '../../util/constants'
 import FinalBoard from '../board/FinalBoard'
 import { Alert, Box, Button, ButtonGroup, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, Divider, Snackbar, Typography } from '@mui/material'
 import { menuWords } from '../../util/menuWords'
@@ -125,35 +125,39 @@ export function ProblemBox() {
   }
   useEffect(() => {
     if (problemIdx >= 0 && userInfo.name) {
-      // if (!userInfo.point && !userInfo.tried.includes(problemId)) {
-      //   userInfo.name !== ""? alert(menuWords.pointWarning[languageIdx]) : alert(menuWords.loginWarning[languageIdx])
-      //   return
-      // }
-      changeCount(problemIdx, "view", username, 1)
       const newProblemInfo = getProblemByIdx(problemIdx)
       .then(p => {
-        setProblemInfo(p)
-        // if (!_.isEqual(p.answers, initialVariations)) {
-        //   if (!userInfo.tried.includes(problemId)) {
-        //     userInfo.point -= bonus
-        //   }
-        // }
-        addElement(problemIdx, username, TRIED)
-        userInfo.tried.push(problemIdx)
-        sessionStorage.setItem(USERINFO, JSON.stringify(userInfo))
-        setInfo({
-          board: p.initialState,
-          color: p.color,
-          key: "0"
-        }) 
-        setGame(new Game(
-          p.initialState,
-          p.answers,
-          p.variations,
-          p.color
-        ))
-        setSolved(userInfo.solved.includes(problemIdx))
+        if (!p) {
+          alert(menuWords.wrongIndexWarning[languageIdx])
+          navigate(HOME)
+        } else {
+          setProblemInfo(p)
+          // if (!_.isEqual(p.answers, initialVariations)) {
+          //   if (!userInfo.tried.includes(problemId)) {
+          //     userInfo.point -= bonus
+          //   }
+          // }
+          addElement(problemIdx, username, TRIED)
+          userInfo.tried.push(problemIdx)
+          sessionStorage.setItem(USERINFO, JSON.stringify(userInfo))
+          setInfo({
+            board: p.initialState,
+            color: p.color,
+            key: "0"
+          }) 
+          setGame(new Game(
+            p.initialState,
+            p.answers,
+            p.variations,
+            p.color
+          ))
+          setSolved(userInfo.solved.includes(problemIdx))
+          changeCount(problemIdx, "view", username, 1)
+        }
       })
+    } else {
+      alert(menuWords.wrongApproachWarning[languageIdx])
+      navigate(HOME)
     }
     modeChange(TRY)
   }, [problemIdx])
@@ -395,7 +399,7 @@ export function ProblemBox() {
         <Typography sx={{color: "red", margin: margin, textAlign: "center", display: answerRegistered? "none" : ""}}>{menuWords.noAnswerWarning[languageIdx]}</Typography>
         {isMobile? mobileTopMenu : wideMenu}   
       </Box>
-      <Box my={3} mx={margin}>
+      <Box my={MARGIN} mx={margin}>
         <FinalBoard
           lines={info.board.length}
           board={info.board}

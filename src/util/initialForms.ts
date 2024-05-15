@@ -1,4 +1,4 @@
-import { Coordinate, ProblemAndVariations } from "./types"
+import { Coordinate, Filter, ProblemAndVariations } from "./types"
 
 export const flowerPointPosition: Coordinate[][] = [
   [],
@@ -41,10 +41,10 @@ export const initialVariations = {"0": []}
 export const boardSizeArray = Array.from({length: 17}, (_, index) => index + 3)
 export const levelArray = [-9, -8, -7, -6, -5, -4, -3, -2, -1, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18]
 export const sortingMethods = [
-  ["Newest", "Oldest", "Level(h - l)", "Level(l - h)", "Like", "View(h - l)", "View(l - h)"],
-  ["최신 순", "오래된 순", "레벨 높은 순", "레벨 낮은 순", "좋아요", "조회수 높은 순", "조회수 낮은 순"],
-  ["按新排序", "按最旧排序", "级别（高 -> 低)", "级别（低 -> 高)", "喜欢", "观看次数（高 -> 低)", "观看次数（低 -> 高)"],
-  ["新しい順", "古い順",  "レベル（高 -> 低)", "レベル（低 -> 高)", "好き", "ヒット（高 -> 低)", "ヒット（低 -> 高"]
+  ["Newest", "Oldest", "Level(h - l)", "Level(l - h)", "Like"],
+  ["최신 순", "오래된 순", "레벨 높은 순", "레벨 낮은 순", "좋아요"],
+  ["按新排序", "按最旧排序", "级别（高 -> 低)", "级别（低 -> 高)", "喜欢"],
+  ["新しい順", "古い順",  "レベル（高 -> 低)", "レベル（低 -> 高)", "好き"]
 ]
 export const tiersList = [
   ["All levels", "Hardest (5D ~ 9D)", "Hard (1D ~ 4D)", "Medium (6K ~ 1K)", "Easy (12K ~ 7K)", "Easiest (18K ~ 13K)"],
@@ -52,12 +52,10 @@ export const tiersList = [
   ["所有级别", "最难的 (5段 ~ 9段)", "难的 (1段 ~ 4段)", "中等难度 (6级 ~ 1级)", "简单的 (12级 ~ 7级)", "最简单的 (18级 ~ 13级)"],
   ["すべてのレベル", "最も難しい (5段 ~ 9段)", "難しい (1段 ~ 4段)", "普通 (6級 ~ 1級)", "簡単 (12級 ~ 7級)", "最も簡単 (18級 ~ 13級)"]
 ]
-export const initFilter = {
+export const initFilter: Filter = {
   tier: 0,
-  low: -10,
-  high: 19,
+  level: 0,
   creator: "",
-  page: 0,
 }
 export const initIndices = "[]"
 export const detailLevel = [

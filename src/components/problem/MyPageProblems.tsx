@@ -1,19 +1,18 @@
 import { useState, useEffect, ChangeEvent } from 'react';
 import { Box, FormControl, InputLabel, MenuItem, Pagination, Select, SelectChangeEvent, Stack } from '@mui/material';
-import { ProblemInformation, UserInfo } from '../util/types';
-import SampleProblemBox from './problem/SampleProblemBox';
+import { SampleProblemInformation, UserInfo } from '../../util/types';
+import SampleProblemBox from './SampleProblemBox';
 import { useParams } from 'react-router-dom';
-import { CREATED, LANGUAGE_IDX, LIKED, PAGE, SOLVED, SORTING_IDX, UNRESOLVED, USERINFO, WITHQUESTIONS, problemsPerPage } from '../util/constants';
-import { getProblemByIndexList } from '../network/problemInformation';
-import { menuWords } from '../util/menuWords';
-import { setProblemIndicies, sortingProblemList } from '../util/functions';
-import { initialUserInfo, sortingMethods } from '../util/initialForms';
+import { CREATED, LANGUAGE_IDX, LIKED, PAGE, SOLVED, SORTING_IDX, UNRESOLVED, USERINFO, WITHQUESTIONS, problemsPerPage } from '../../util/constants';
+import { menuWords } from '../../util/menuWords';
+import { setProblemIndicies, sortingProblemList } from '../../util/functions';
+import { initialUserInfo, sortingMethods } from '../../util/initialForms';
+import { getSampleProblemByIndexList } from '../../network/sampleProblem';
 
 export default function MyPageProblems() {
   const { part } = useParams()
   let idxList: number[] = []
-  const [problems, setProblems] = useState<ProblemInformation[]>([]);
-  const [showProblems, setShowProblems] = useState<ProblemInformation[]>([]);
+  const [problems, setProblems] = useState<SampleProblemInformation[]>([]);
   const languageIdx = Number(localStorage.getItem(LANGUAGE_IDX))
   const [sortingIdx, setSortingIdx] = useState(Number(sessionStorage.getItem(SORTING_IDX)))
   const methods = sortingMethods[languageIdx]
@@ -25,8 +24,6 @@ export default function MyPageProblems() {
     sessionStorage.setItem(SORTING_IDX, String(p))
     const sorted = sortingProblemList(problems, p)
     setProblems(sorted)
-    const newShowProblems: ProblemInformation[] = sorted.slice(0, Math.min(problemsPerPage, sorted.length))
-    setShowProblems(newShowProblems)
     setProblemIndicies(sorted)
     setPage(1)
   }
@@ -34,7 +31,6 @@ export default function MyPageProblems() {
   useEffect(() => {
     const userInfo: UserInfo = JSON.parse(sessionStorage.getItem(USERINFO) || initialUserInfo)
     const newPage = Number(sessionStorage.getItem(PAGE))
-    const newStart = (newPage - 1) * problemsPerPage
     switch (part) {
       case (CREATED):
         idxList = userInfo.created
@@ -54,22 +50,24 @@ export default function MyPageProblems() {
       default:
         break
     }
-    const result = getProblemByIndexList(idxList)
+    const result = getSampleProblemByIndexList(idxList)
     result.then(r => {
       const sorted = sortingProblemList(r, sortingIdx)
       setProblemIndicies(sorted)
       setProblems(sorted)
-      setShowProblems(sorted.slice(newStart, Math.min(newStart + problemsPerPage, sorted.length)))
       setPage(newPage)
     })
     }, [part])
     
   function handlePageChange(event: ChangeEvent<unknown>, val: number): void {
     setPage(val)
-    const newStart = (val - 1) * problemsPerPage
-    const newShowProblems = problems.slice(newStart, Math.min(newStart + problemsPerPage, problems.length))
-    setShowProblems(newShowProblems)
     window.scrollTo({ top: 0, behavior: "auto" })
+  }
+
+  function getShowProblems() {
+    const start = (page - 1) * problemsPerPage
+    const showProblems = problems.slice(start, Math.min(start + problemsPerPage, problems.length))
+    return showProblems
   }
 
   return (
@@ -88,7 +86,7 @@ export default function MyPageProblems() {
           })}
         </Select>
       </FormControl>
-      <SampleProblemBox problems={showProblems} page={page} request={part === WITHQUESTIONS}></SampleProblemBox>
+      <SampleProblemBox problems={getShowProblems()} page={page} request={part === WITHQUESTIONS}></SampleProblemBox>
       <Stack spacing={2}>
         <Pagination 
         page={page}

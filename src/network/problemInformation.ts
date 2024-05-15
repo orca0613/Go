@@ -1,7 +1,6 @@
-import { API_URL, LANGUAGE_IDX, USERINFO } from "../util/constants"
+import { API_URL, USERINFO } from "../util/constants"
 import { loginWarning } from "../util/functions"
 import { initialUserInfo } from "../util/initialForms"
-import { menuWords } from "../util/menuWords"
 import { PROBLEMINFO_DB_PATH } from "../util/paths"
 import { ProblemInformation, UserInfo } from "../util/types"
 
@@ -151,36 +150,7 @@ export async function getSolvedProblem(name: string): Promise<ProblemInformation
   return recommended
 }
 
-export async function getProblemByIndexList(problemIndexList: number[]): Promise<ProblemInformation[]> {
-  const stringify = JSON.stringify(problemIndexList)
-  const response = await fetch(`${API_URL}${PROBLEMINFO_DB_PATH}/get-by-idx-list/${stringify}`)
-  if (!response.ok) {
-    throw new Error(`Error: ${response.status}`)
-  }
-  const problem = await response.json()
-  return problem
-}
-
-export async function getProblemByFilter(filter: string): Promise<ProblemInformation[]> {
-  const response = await fetch(`${API_URL}${PROBLEMINFO_DB_PATH}/get-by-filter/${filter}`)
-  if (!response.ok) {
-    throw new Error(`Error: ${response.status}`)
-  }
-  const problem = await response.json()
-  return problem
-}
-
-export async function getUserPageProblem(name: string): Promise<ProblemInformation[]> {
-  const response = await fetch(`${API_URL}${PROBLEMINFO_DB_PATH}/get-userpage/${name}`)
-  if (!response.ok) {
-    throw new Error(`Error: ${response.status}`)
-  }
-  const problem = await response.json()
-  return problem
-}
-
-
-export async function handleLiked(username: string, problemIdx: number, creator: string, add: boolean) {
+export async function handleLiked(username: string, problemIdx: number, creator: string, level: number, add: boolean) {
   const userInfo: UserInfo = JSON.parse(sessionStorage.getItem(USERINFO) || initialUserInfo)
   const token = userInfo.token
   const response = await fetch(`${API_URL}${PROBLEMINFO_DB_PATH}/handle-liked`, {
@@ -189,7 +159,7 @@ export async function handleLiked(username: string, problemIdx: number, creator:
       'Content-Type': 'application/json',
       'authorization': `Bearer ${token}`
     },
-    body: JSON.stringify({username, problemIdx, creator, add}),
+    body: JSON.stringify({username, problemIdx, creator, level, add}),
   })
   if (response.ok) {
     return

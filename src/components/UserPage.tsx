@@ -1,17 +1,15 @@
-import { ChangeEvent, useEffect, useState } from 'react';
-import { Avatar, Box, Button, Divider, Modal, TextField, Typography, useMediaQuery } from '@mui/material';
+import { useEffect, useState } from 'react';
+import { Box, Button, Divider, Typography, useMediaQuery } from '@mui/material';
 import { useNavigate, useParams } from 'react-router-dom';
-import { verifyMail } from '../network/user';
-import { HomeForm } from './HomeForm';
 import { menuWords } from '../util/menuWords';
-import { LANGUAGE_IDX, PROBLEM_INDEX, PROBLEM_INDICES, USERINFO } from '../util/constants';
+import { LANGUAGE_IDX, PAGE, PROBLEM_INDEX, PROBLEM_INDICES, USERINFO } from '../util/constants';
 import { initialUserInfo } from '../util/initialForms';
 import { ProblemInformation, UserInfo } from '../util/types';
 import { getUserDetail } from '../network/userDetail';
-import { getRecommended, getRepresentativeProblem, getSolvedProblem, getUserPageProblem } from '../network/problemInformation';
+import { getRepresentativeProblem, getSolvedProblem } from '../network/problemInformation';
 import { useWindowSize } from 'react-use';
 import FinalBoard from './board/FinalBoard';
-import { sendMessage } from '../network/message';
+import SendMessageForm from './SendMessageForm';
 
 export default function UserPage() {
   const { name } = useParams()
@@ -26,13 +24,10 @@ export default function UserPage() {
   const margin = isMobile? "2%" : "1%"
   const divider = <Divider orientation="horizontal" sx={{borderColor: "lightgray", my: "1%"}} />
   const [level, setLevel] = useState("")
-  const [messageTitle, setMessageTitle] = useState("")
-  const [messageContents, setMessageContents] = useState("")
-  const [open, setOpen] = useState(false)
+  const [open, setOpen] = useState(0)
 
   useEffect(() => {
     if (name) {
-      const newIndices: number[] = []
       const newInfo = getUserDetail(name)
       .then(i => {
         setInfo({
@@ -59,14 +54,6 @@ export default function UserPage() {
     }
   }, [name])
 
-  const handleContentsChange = (e: ChangeEvent<HTMLInputElement>) => {
-    setMessageContents(e.target.value)
-  }
-  
-  const handleTitleChange = (e: ChangeEvent<HTMLInputElement>) => {
-    setMessageTitle(e.target.value)
-  }
-
   const messageIcon = 
   <img src="/images/message.svg" alt="message" width={width / 15} height={width / 15}/>
 
@@ -82,67 +69,11 @@ export default function UserPage() {
     )
   }
 
-  const style = {
-    position: 'absolute' as 'absolute',
-    top: '50%',
-    left: "50%",
-    transform: 'translate(-50%, -50%)',
-    bgcolor: 'background.paper',
-    border: '2px solid #000',
-    boxShadow: 24,
-    p: 4,
-  };
-
-  async function sendMessageAndClose() {
-    const result = await sendMessage(userInfo.name, info.name, messageTitle, messageContents, "")
-    if (result === true) {
-      alert(menuWords.sent[languageIdx])
-    }
-    setOpen(false)
-  }
-
-
-  const sendMessageForm = 
-  <Modal 
-    open={open}
-    onClose={() => setOpen(false)}
-  >
-    <Box sx={style}>
-      <Box display="flex">
-        <Typography mr={2} mb={2}>{menuWords.receiver[languageIdx]}: </Typography>
-        <Typography color="teal">{name}</Typography>
-      </Box>
-      <Box>
-        <TextField
-          variant='standard'
-          label={menuWords.title[languageIdx]}
-          value={messageTitle}
-          onChange={handleTitleChange}
-          >
-        </TextField>
-      </Box>
-      <Box my={3}>
-        <TextField
-          variant='standard'
-          label={menuWords.content[languageIdx]}
-          value={messageContents}
-          onChange={handleContentsChange}
-          >
-        </TextField>
-      </Box>
-      <Box display="flex" justifyContent="space-around">
-        <Button sx={{textTransform: "none"}} onClick={() => setOpen(false)}>{menuWords.cancel[languageIdx]}</Button>
-        <Button sx={{textTransform: "none"}} onClick={sendMessageAndClose}>{menuWords.send[languageIdx]}</Button>
-      </Box>
-    </Box>
-  </Modal>
-
-
   const profile = 
   <Box justifyContent="center">
     <Box display="flex" justifyContent="center" alignContent="center">
       <Typography sx={{alignContent: "center", color: "teal", fontSize: width / 20, my: 3}}>{info.name}</Typography>
-      <Button size='small' onClick={() => setOpen(true)}>{messageIcon}</Button>
+      <Button size='small' onClick={() => setOpen(open + 1)}>{messageIcon}</Button>
     </Box>
     {divider}
     <Box
@@ -167,7 +98,8 @@ export default function UserPage() {
   }
 
   function moveToCreated() {
-    navigate(`/problems/tier=0&low=-10&high=19&creator=${name}&`)
+    sessionStorage.setItem(PAGE, "1")
+    navigate(`/problems/tier=0&level=0&creator=${name}&`)
   }
   
     
@@ -216,7 +148,7 @@ export default function UserPage() {
           })}
         </Box>
       </Box>
-      {sendMessageForm}
+      <SendMessageForm receiver={info.name} sender={userInfo.name} open={open}/>
     </Box>
   );
 }

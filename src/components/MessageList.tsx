@@ -1,13 +1,16 @@
 import { Box, Button, Checkbox, Divider, Modal, Pagination, Stack, Typography, useMediaQuery } from "@mui/material";
-import { MessageForm } from "../util/types";
+import { MessageForm, UserInfo } from "../util/types";
 import { ChangeEvent, useEffect, useState } from "react";
 import { checkMessage, getReceivedMessage, getSentMessage, hideMessage } from "../network/message";
 import { menuWords } from "../util/menuWords";
-import { LANGUAGE_IDX, messagesPerPage } from "../util/constants";
+import { LANGUAGE_IDX, USERINFO, messagesPerPage } from "../util/constants";
 import { useNavigate } from "react-router-dom";
 import { nameButtonStyle } from "../util/styles";
+import SendMessageForm from "./SendMessageForm";
+import { initialUserInfo } from "../util/initialForms";
 
 export default function MessageList() {
+  const userInfo: UserInfo = JSON.parse(sessionStorage.getItem(USERINFO) || initialUserInfo)
   const languageIdx = Number(localStorage.getItem(LANGUAGE_IDX))
   const navigate = useNavigate()
   const isMobile = useMediaQuery("(max-width: 600px)")
@@ -16,9 +19,14 @@ export default function MessageList() {
   const [checked, setChecked] = useState(0)
   const [page, setPage] = useState(1)
   const [deleted, setDeleted] = useState(false)
-
   const [messageList, setMessageList] = useState<MessageForm[]>([])
   const [open, setOpen] = useState(false)
+  const [openSend, setOpenSend] = useState(0)
+  const [sendForm, setSendForm] = useState({
+    receiver: "",
+    sender: ""
+  })
+  const all = 2 ** messagesPerPage - 1
   const [contents, setContents] = useState<MessageForm>({
     _id: "",
     sender: "",
@@ -45,9 +53,6 @@ export default function MessageList() {
     p: 2,
   };
 
-  const all = 2 ** messagesPerPage - 1
-  
-
   useEffect(() => {
     if (received) {
       const newMessageList = getReceivedMessage()
@@ -72,13 +77,24 @@ export default function MessageList() {
             <Typography color="teal" mb={2}>{contents.sender}</Typography>
           </Box>
           {divider}
-          <Box display="flex">
+          <Box>
             <Typography mb={2}>{contents.contents}</Typography>
+            {contents.includeUrl? <Typography left={0} >{<a style={{color: "teal", textDecoration: "none"}} href={contents.url}>{menuWords.goToTheProblem[languageIdx]}</a>}</Typography> : <></>}
           </Box>
-          {contents.includeUrl && divider}
-          {contents.includeUrl? <Typography >{<a style={{color: "teal", textDecoration: "none"}} href={contents.url}>{menuWords.goToTheProblem[languageIdx]}</a>}</Typography> : <></>}
+          {divider}
+          <Box display="flex" alignItems="center" justifyContent="right">
+            <Button onClick={() => openSendMessageForm(contents.sender, userInfo.name)} sx={{right: 0, textTransform: "none", display: received? "" : "none"}}>{menuWords.reply[languageIdx]}</Button>
+          </Box>
         </Box>
       </Modal>
+
+  function openSendMessageForm(receiver: string, sender: string) {
+    setSendForm({
+      receiver: receiver,
+      sender: sender
+    })
+    setOpenSend(openSend + 1)
+  }
 
   function openMessage(message: MessageForm) {
     if (!message.checked) {
@@ -115,7 +131,7 @@ export default function MessageList() {
     const startIdx = (page - 1) * messagesPerPage
     const idList: string[] = []
     for (let i = 0; i < 20; i++) {
-      if ((1 << i) & checked && i < messageList.length) {
+      if ((1 << i) & checked && startIdx + i < messageList.length) {
         idList.push(messageList[startIdx + i]._id)
       }
     }
@@ -126,6 +142,7 @@ export default function MessageList() {
 
   const handlePageChange = (event: ChangeEvent<unknown>, val: number) => {
     setPage(val)
+    setChecked(0)
     window.scrollTo({ top: 0, behavior: "smooth" })
   }
 
@@ -239,6 +256,7 @@ export default function MessageList() {
         />
       </Stack>
       {modal}
+      <SendMessageForm receiver={sendForm.receiver} sender={sendForm.sender} open={openSend}></SendMessageForm>
     </Box>
   )
 }

@@ -39,6 +39,7 @@ export function ReplyBox({ problemId }: ReplyBoxProps) {
   async function registerReply() {
     if (!username) {
       alert(menuWords.loginWarning[languageIdx])
+      sessionStorage.clear()
       navigate(LOGIN_PATH)
     }
     if (!inputValue) {

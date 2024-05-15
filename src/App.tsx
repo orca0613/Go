@@ -8,7 +8,7 @@ import Layout from "./components/layout";
 import { ProblemBox } from "./components/problem/ProblemBox";
 import { ModifyVariations } from "./components/problem/ModifyVariations";
 import VerifyMail from "./components/VerifyMail";
-import MyPageProblems from "./components/MyPageProblems";
+import MyPageProblems from "./components/problem/MyPageProblems";
 import { ModifyProblem } from "./components/problem/ModifyProblem";
 import ChangePassword from "./components/ChangePassword";
 import Setting from "./components/Setting";

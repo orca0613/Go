@@ -81,8 +81,7 @@ export type UserDetailFromServer = {
 
 export type Filter = {
   tier: number,
-  low: number,
-  high: number,
+  level: number,
   creator: string,
 }
 
@@ -111,4 +110,14 @@ export type MessageForm = {
   hideToSender: boolean,
   includeUrl: boolean,
   url?: string,
+}
+
+export type SampleProblemInformation = {
+  _id: string,
+  problemIndex: number,
+  initialState: Board,
+  level: number,
+  creator: string,
+  time: Date,
+  liked: number,
 }

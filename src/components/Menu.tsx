@@ -179,18 +179,21 @@ export function Menu() {
 
   return (
     <div>
+      <Badge
+        badgeContent={userInfo.withQuestions.length + unchecked}
+        color='error'
+        anchorOrigin={{vertical: "top", horizontal: "right"}}
+      >
       <IconButton
         onClick={toggleDrawer(true)}
-        edge="start"
+        edge="end"
         color="inherit"
         aria-label="menu"
-        sx={{
-          width: 50,
-          height: 50,
-        }}
+        size='small'
       >
         <MenuIcon />
       </IconButton>
+      </Badge>
       <Drawer anchor="right" open={open} onClose={toggleDrawer(false)}>
         <List>
           <ListItem sx={{justifyContent: "center"}}>

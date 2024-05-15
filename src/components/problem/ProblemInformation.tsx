@@ -66,9 +66,9 @@ export function ProblemInformation({ problemInfo }: PIProps) {
     </Box>
     <Box display="flex" justifyContent="space-around" alignItems="center">
       <Button onClick={() => navigate(`/userpage/${info.creator}`)} sx={nameButtonStyle}>{info.creator}</Button>
-      <Typography sx={{margin: margin}} mb="0.5ch" variant="body1">{menuWords.views[languageIdx]} : {info.view}</Typography>
+      <Typography sx={{mx: margin}} mb="0.5ch" variant="body1">{menuWords.views[languageIdx]} : {info.view}</Typography>
     </Box>
-    <Typography sx={{margin: margin}} mb="0.5ch" variant="body1">{info.comment}</Typography>
+    <Typography sx={{mx: margin}} mb="0.5ch" variant="body1">{info.comment}</Typography>
   </Box>
 
   const normalVersion = 

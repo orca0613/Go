@@ -19,11 +19,9 @@ export function PagesMenu() {
 
   function resetPageAndMove() {
     const tier = getTier(userInfo.level)
-    const [low, high] = getRangeByTier(tier)
     const filter: Filter = {
       tier: tier,
-      low: low,
-      high: high,
+      level: 0,
       creator: ""
     }
     const F = ownStringify(filter)

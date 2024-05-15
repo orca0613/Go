@@ -1,7 +1,8 @@
+import { useNavigate } from "react-router-dom"
 import { getDeadGroup, handleMove } from "../gologic/logic"
-import { LANGUAGE_IDX, PAGE, PROBLEM_INDICES, SORTING_IDX } from "./constants"
+import { HOME, LANGUAGE_IDX, PAGE, PROBLEM_INDICES, SORTING_IDX } from "./constants"
 import { menuWords } from "./menuWords"
-import { Board, Coordinate, Filter, ProblemInformation, Variations } from "./types"
+import { Board, Coordinate, Filter, ProblemInformation, SampleProblemInformation, Variations } from "./types"
 import _ from 'lodash'
 
 export function playMoveAndReturnNewBoard(board: Board, coord: Coordinate, color: string) {
@@ -140,7 +141,6 @@ export function isValidEmail(email: string): boolean {
 
 export function loginWarning() {
   const languageIdx = Number(localStorage.getItem(LANGUAGE_IDX))
-  sessionStorage.clear()
   alert(menuWords.loginWarning[languageIdx])
 }
 
@@ -196,7 +196,7 @@ export function ownParse(param: string) {
   return filter
 }
 
-export function sortingProblemList(problemList: ProblemInformation[], option: number) {
+export function sortingProblemList(problemList: SampleProblemInformation[], option: number) {
   const newProblemList = problemList
   switch (option) {
     case 0:
@@ -232,24 +232,6 @@ export function sortingProblemList(problemList: ProblemInformation[], option: nu
         }
       })
       break
-    case 5:
-      newProblemList.sort((a, b) => {
-        if (a.view === b.view) {
-          return b.problemIndex - a.problemIndex
-        } else {
-          return b.view - a.view
-        }
-      })
-      break
-    case 6:
-      newProblemList.sort((a, b) => {
-        if (a.view === b.view) {
-          return b.problemIndex - a.problemIndex
-        } else {
-          return a.view - b.view
-        }
-      })
-      break
     default:
       break
   }
@@ -261,7 +243,7 @@ export function resetSortingForm(page: number, sortingIdx: number) {
   sessionStorage.setItem(SORTING_IDX, String(sortingIdx))
 }
 
-export function setProblemIndicies(problemList: ProblemInformation[]) {
+export function setProblemIndicies(problemList: SampleProblemInformation[]) {
   const indices: number[] = []
   problemList.map(p => {
     indices.push(p.problemIndex)
@@ -293,8 +275,16 @@ export function getGreetings(name: string, language: number) {
       return `${name}様におすすめの問題`
     default:
       return `Recommended problems for ${name}`
-    
   }
+}
 
+export function ExcludeSolvedProblems(problemList: SampleProblemInformation[], solved: number[]) {
+  const newProblemList: SampleProblemInformation[] = []
+  problemList.map(p => {
+    if (!solved.includes(p.problemIndex)) {
+      newProblemList.push(p)
+    }
+  })
+  return newProblemList
 }
 

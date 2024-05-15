@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react"
-import { Coordinate } from "../../util/types"
-import { COMMENT, LANGUAGE_IDX, LEVEL, MARGIN, TURN } from "../../util/constants"
+import { Coordinate, UserInfo } from "../../util/types"
+import { COMMENT, HOME, LANGUAGE_IDX, LEVEL, MARGIN, TURN, USERINFO } from "../../util/constants"
 import { Box, Button, ButtonGroup, FormControl, InputLabel, MenuItem, Select, SelectChangeEvent, TextField } from "@mui/material"
 import { isLegalBoard, makingEmptyBoard } from "../../util/functions"
 import { isOutside } from "../../gologic/logic"
@@ -8,17 +8,19 @@ import FinalBoard from "../board/FinalBoard"
 import { menuWords } from "../../util/menuWords"
 import { getProblemByIdx, modifyProblem } from "../../network/problem"
 import { useWindowSize } from "react-use"
-import { useParams } from "react-router-dom"
-import { boardSizeArray, levelArray } from "../../util/initialForms"
+import { useNavigate, useParams } from "react-router-dom"
+import { boardSizeArray, initialUserInfo, levelArray } from "../../util/initialForms"
 import { mobileButtonStyle } from "../../util/styles"
 
 export function ModifyProblem() {
   const { param } = useParams()
   const problemIdx = Number(param)
+  const userInfo: UserInfo = JSON.parse(sessionStorage.getItem(USERINFO) || initialUserInfo)
   const [boardSize, setBoardSize] = useState(9)
   let emptyBoard = makingEmptyBoard(boardSize)
   const [problem, setProblem] = useState(emptyBoard)
   const {width, height} = useWindowSize()
+  const navigate = useNavigate()
   const isMobile = height > width * 2 / 3 || width < 1000
   const margin = MARGIN
   const languageIdx = Number(localStorage.getItem(LANGUAGE_IDX))
@@ -97,16 +99,26 @@ export function ModifyProblem() {
     if (problemIdx >= 0) {
       const newProblemInfo = getProblemByIdx(problemIdx)
       .then(p => {
-        const initialState = p.initialState
-        setProblem(initialState)
-        setInfo({
-          creator: p.creator,
-          comment: p.comment,
-          turn: p.color,
-          color: "",
-          level: p.level
-        })
-        setBoardSize(initialState.length)
+        if (!p) {
+          alert(menuWords.wrongIndexWarning[languageIdx])
+          navigate(HOME)
+        } else {
+          if (p.creator !== userInfo.name) {
+            alert(menuWords.permissionWarning[languageIdx])
+            sessionStorage.clear()
+            navigate(HOME)
+          }
+          const initialState = p.initialState
+          setProblem(initialState)
+          setInfo({
+            creator: p.creator,
+            comment: p.comment,
+            turn: p.color,
+            color: "",
+            level: p.level
+          })
+          setBoardSize(initialState.length)
+        }
       })
     }
   }, [problemIdx])
