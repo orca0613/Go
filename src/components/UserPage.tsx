@@ -4,12 +4,12 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { menuWords } from '../util/menuWords';
 import { LANGUAGE_IDX, PAGE, PROBLEM_INDEX, PROBLEM_INDICES, USERINFO } from '../util/constants';
 import { initialUserInfo } from '../util/initialForms';
-import { ProblemInformation, UserInfo } from '../util/types';
+import { ProblemInformation, SampleProblemInformation, UserInfo } from '../util/types';
 import { getUserDetail } from '../network/userDetail';
-import { getRepresentativeProblem, getSolvedProblem } from '../network/problemInformation';
 import { useWindowSize } from 'react-use';
 import FinalBoard from './board/FinalBoard';
 import SendMessageForm from './SendMessageForm';
+import { getRepresentativeProblem, getSolvedProblem } from '../network/sampleProblem';
 
 export default function UserPage() {
   const { name } = useParams()
@@ -17,8 +17,8 @@ export default function UserPage() {
   const [info, setInfo] = useState<UserInfo>(JSON.parse(initialUserInfo))
   const navigate = useNavigate()
   const languageIdx = Number(localStorage.getItem(LANGUAGE_IDX))
-  const [created, setCreated] = useState<ProblemInformation[]>([])
-  const [solved, setSolved] = useState<ProblemInformation[]>([])
+  const [created, setCreated] = useState<SampleProblemInformation[]>([])
+  const [solved, setSolved] = useState<SampleProblemInformation[]>([])
   const {width, height} = useWindowSize()
   const isMobile = useMediaQuery("(max-width: 800px)")
   const margin = isMobile? "2%" : "1%"
@@ -87,7 +87,7 @@ export default function UserPage() {
   </Box>
 
 
-  function setIdexAndOpenProblem(index: number, problemIdx: number, problemList: ProblemInformation[]) {
+  function setIdexAndOpenProblem(index: number, problemIdx: number, problemList: SampleProblemInformation[]) {
     const newIndices: number[] = []
     problemList.map(p => {
       newIndices.push(p.problemIndex)

@@ -1,28 +1,48 @@
-import { API_URL } from "../util/constants"
+import { API_URL, USERINFO } from "../util/constants"
+import { loginWarning } from "../util/functions"
+import { initialUserInfo } from "../util/initialForms"
 import { SAMPLE_PATH } from "../util/paths"
-import { SampleProblemInformation } from "../util/types"
+import { SampleProblemInformation, UserInfo } from "../util/types"
 
-export async function getSampleProblemByTier(tier: number): Promise<SampleProblemInformation[]> {
-  const response = await fetch(`${API_URL}${SAMPLE_PATH}/get-by-tier/${tier}`)
+export async function getRecommended(name: string): Promise<SampleProblemInformation[]> {
+  const response = await fetch(`${API_URL}${SAMPLE_PATH}/get-recommended/${name}`)
   if (!response.ok) {
     throw new Error(`Error: ${response.status}`)
   }
-  const problem = await response.json()
-  return problem
+  const recommended = response.json()
+  return recommended
 }
+
+export async function getNewest(): Promise<SampleProblemInformation[]> {
+  const response = await fetch(`${API_URL}${SAMPLE_PATH}/get-newest/`)
+  if (!response.ok) {
+    throw new Error(`Error: ${response.status}`)
+  }
+  const newest = response.json()
+  return newest
+}
+
+export async function getRepresentativeProblem(name: string): Promise<SampleProblemInformation[]> {
+  const response = await fetch(`${API_URL}${SAMPLE_PATH}/get-representative/${name}`)
+  if (!response.ok) {
+    throw new Error(`Error: ${response.status}`)
+  }
+  const rep = response.json()
+  return rep
+}
+
+export async function getSolvedProblem(name: string): Promise<SampleProblemInformation[]> {
+  const response = await fetch(`${API_URL}${SAMPLE_PATH}/get-solved/${name}`)
+  if (!response.ok) {
+    throw new Error(`Error: ${response.status}`)
+  }
+  const recommended = response.json()
+  return recommended
+}
+
 
 export async function getSampleProblemByFilter(filter: string): Promise<SampleProblemInformation[]> {
   const response = await fetch(`${API_URL}${SAMPLE_PATH}/get-by-filter/${filter}`)
-  if (!response.ok) {
-    throw new Error(`Error: ${response.status}`)
-  }
-  const problem = await response.json()
-  return problem
-}
-
-
-export async function getSampleProblemByLevel(path: string, level: number): Promise<SampleProblemInformation[]> {
-  const response = await fetch(`${API_URL}${path}/get/${level}`)
   if (!response.ok) {
     throw new Error(`Error: ${response.status}`)
   }
@@ -38,6 +58,36 @@ export async function getSampleProblemByIndexList(problemIndexList: number[]): P
   }
   const problem = await response.json()
   return problem
+}
+
+export async function getSampleProblemByIdx(problemIndex: number): Promise<number> {
+  const response = await fetch(`${API_URL}${SAMPLE_PATH}/get-by-index/${problemIndex}`)
+  if (!response.ok) {
+    throw new Error(`Error: ${response.status}`)
+  }
+  const problem = await response.json()
+  return problem
+}
+
+export async function handleLiked(problemIndex: number, name: string, creator: string, add: boolean): Promise<boolean> {
+  const userInfo: UserInfo = JSON.parse(sessionStorage.getItem(USERINFO) || initialUserInfo)
+  const token = userInfo.token
+  const response = await fetch(`${API_URL}${SAMPLE_PATH}/handle-liked`, {
+    method: 'PATCH',
+    headers: {
+      'Content-Type': 'application/json',
+      'authorization': `Bearer ${token}`
+    },
+    body: JSON.stringify({name, problemIndex, creator, add}),
+  })
+  if (response.ok) {
+    return true
+  }
+  if (response.status === 401 || 403) {
+    loginWarning()
+    return false
+  }
+  throw new Error(`Error: ${response.status}`)
 }
 
 

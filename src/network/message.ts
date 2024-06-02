@@ -61,7 +61,7 @@ export async function getMessageById(id: string) {
   return messageList
 }
 
-export async function checkMessage(id: string) {
+export async function checkMessage(id: string): Promise<boolean> {
   const userInfo: UserInfo = JSON.parse(sessionStorage.getItem(USERINFO) || initialUserInfo)
   const name = userInfo.name
   const token = userInfo.token
@@ -74,10 +74,11 @@ export async function checkMessage(id: string) {
     body: JSON.stringify({id, name}),
   })
   if (response.ok) {
-    return 
+    return true
   }
   if (response.status === 401 || 403) {
-    return loginWarning()
+    loginWarning()
+    return false
   }
   throw new Error(`Error: ${response.status}`)
 }
@@ -93,7 +94,7 @@ export async function getNumberUnchecked(): Promise<number> {
   return unchecked
 }
 
-export async function hideMessage(idList: string, where: string) {
+export async function hideMessage(idList: string, where: string): Promise<boolean> {
   const userInfo: UserInfo = JSON.parse(sessionStorage.getItem(USERINFO) || initialUserInfo)
   const name = userInfo.name
   const token = userInfo.token
@@ -106,12 +107,11 @@ export async function hideMessage(idList: string, where: string) {
     body: JSON.stringify({idList, name, where}),
   })
   if (response.ok) {
-    return 
+    return true
   }
   if (response.status === 401 || 403) {
-    return loginWarning()
+    loginWarning()
+    return false
   }
   throw new Error(`Error: ${response.status}`)
-
-
 }

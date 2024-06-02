@@ -1,8 +1,8 @@
-import { useNavigate } from "react-router-dom"
+
 import { getDeadGroup, handleMove } from "../gologic/logic"
-import { HOME, LANGUAGE_IDX, PAGE, PROBLEM_INDICES, SORTING_IDX } from "./constants"
+import { LANGUAGE_IDX, PAGE, PROBLEM_INDICES, SORTING_IDX } from "./constants"
 import { menuWords } from "./menuWords"
-import { Board, Coordinate, Filter, ProblemInformation, SampleProblemInformation, Variations } from "./types"
+import { Board, Coordinate, Filter, SampleProblemInformation, Variations } from "./types"
 import _ from 'lodash'
 
 export function playMoveAndReturnNewBoard(board: Board, coord: Coordinate, color: string) {

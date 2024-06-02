@@ -5,7 +5,7 @@ import { ProblemInformation, SampleProblemInformation, UserInfo } from "../../ut
 import { useWindowSize } from "react-use"
 import FinalBoard from "../board/FinalBoard"
 import { menuWords } from "../../util/menuWords"
-import { CheckCircleOutline, Done, Favorite, FavoriteBorder, HelpOutline } from "@mui/icons-material"
+import { CheckCircleOutline, FavoriteBorder, HelpOutline } from "@mui/icons-material"
 import { initialUserInfo } from "../../util/initialForms"
 
 interface SampleProblemBoxProps {

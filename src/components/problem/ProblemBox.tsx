@@ -124,39 +124,34 @@ export function ProblemBox() {
 
   }
   useEffect(() => {
-    if (problemIdx >= 0 && userInfo.name) {
-      const newProblemInfo = getProblemByIdx(problemIdx)
+    if (userInfo.name) {
+      getProblemByIdx(problemIdx)
       .then(p => {
         if (!p) {
           alert(menuWords.wrongIndexWarning[languageIdx])
-          navigate(HOME)
-        } else {
-          setProblemInfo(p)
-          // if (!_.isEqual(p.answers, initialVariations)) {
-          //   if (!userInfo.tried.includes(problemId)) {
-          //     userInfo.point -= bonus
-          //   }
-          // }
-          addElement(problemIdx, username, TRIED)
-          userInfo.tried.push(problemIdx)
-          sessionStorage.setItem(USERINFO, JSON.stringify(userInfo))
-          setInfo({
-            board: p.initialState,
-            color: p.color,
-            key: "0"
-          }) 
-          setGame(new Game(
-            p.initialState,
-            p.answers,
-            p.variations,
-            p.color
-          ))
-          setSolved(userInfo.solved.includes(problemIdx))
-          changeCount(problemIdx, "view", username, 1)
-        }
+          return navigate(HOME)
+        } 
+        setProblemInfo(p)
+        addElement(problemIdx, username, TRIED)
+        userInfo.tried.push(problemIdx)
+        sessionStorage.setItem(USERINFO, JSON.stringify(userInfo))
+        setInfo({
+          board: p.initialState,
+          color: p.color,
+          key: "0"
+        }) 
+        setGame(new Game(
+          p.initialState,
+          p.answers,
+          p.variations,
+          p.color
+        ))
+        setSolved(userInfo.solved.includes(problemIdx))
+        changeCount(problemIdx, "view", username, 1)
       })
     } else {
-      alert(menuWords.wrongApproachWarning[languageIdx])
+      alert(menuWords.loginWarning[languageIdx])
+      sessionStorage.clear()
       navigate(HOME)
     }
     modeChange(TRY)

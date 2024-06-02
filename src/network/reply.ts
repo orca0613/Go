@@ -25,10 +25,10 @@ export async function addReply(problemId: string, comment: string, name: string)
   throw new Error(`Error: ${response.status}`)
 }
 
-export async function deleteReply(id: string, name: string) {
+export async function hideReply(id: string, name: string) {
   const userInfo: UserInfo = JSON.parse(sessionStorage.getItem(USERINFO) || initialUserInfo)
   const token = userInfo.token
-  const response = await fetch(`${API_URL}${REPLY_DB_PATH}/delete`, {
+  const response = await fetch(`${API_URL}${REPLY_DB_PATH}/hide`, {
     method: 'PATCH',
     headers: {
       'Content-Type': 'application/json',

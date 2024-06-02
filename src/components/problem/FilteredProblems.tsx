@@ -34,9 +34,7 @@ export default function FilteredProblems() {
 
   useEffect(() => {
     if (params) {
-      const newFilter = ownParse(params)
       const result = getSampleProblemByFilter(params)
-      // const result = getSampleProblemByTier(filter.tier)
       const newPage = Number(sessionStorage.getItem(PAGE))
       result.then(r => {
         setSortingIdx(Number(sessionStorage.getItem(SORTING_IDX)))

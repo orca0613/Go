@@ -70,7 +70,7 @@ export async function getAllCreators(): Promise<string[]> {
 
 export async function settingChange(language: number, level: number, auto: boolean) {
   const userInfo: UserInfo = JSON.parse(sessionStorage.getItem(USERINFO) || initialUserInfo)
-  const username = userInfo.name
+  const name = userInfo.name
   const token = userInfo.token
   const update = await fetch(`${API_URL}${USERDETAIL_DB_PATH}/setting`, {
     method: "PATCH",
@@ -78,7 +78,7 @@ export async function settingChange(language: number, level: number, auto: boole
       "Content-Type": "application/json",
       'authorization': `Bearer ${token}`
     },
-    body: JSON.stringify({username, language, level, auto})
+    body: JSON.stringify({name, language, level, auto})
   })
   if (update.ok) {
     localStorage.setItem(LANGUAGE_IDX, String(language))

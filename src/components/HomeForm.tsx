@@ -2,15 +2,15 @@
 import { Box, Button, Divider, Typography, useMediaQuery } from '@mui/material'
 import { menuWords } from '../util/menuWords'
 import { LANGUAGE_IDX, PROBLEM_INDEX, PROBLEM_INDICES, USERINFO } from '../util/constants'
-import { ProblemInformation, UserInfo } from '../util/types'
+import { SampleProblemInformation, UserInfo } from '../util/types'
 import { initialUserInfo } from '../util/initialForms'
-import { getNewest, getRecommended } from '../network/problemInformation'
 import { useEffect, useState } from 'react'
 import { useWindowSize } from 'react-use'
 import { useNavigate } from 'react-router-dom'
 import { LOGIN_PATH } from '../util/paths'
 import FinalBoard from './board/FinalBoard'
 import { getGreetings } from '../util/functions'
+import { getNewest, getRecommended } from '../network/sampleProblem'
 
 export function HomeForm() {
 
@@ -18,8 +18,8 @@ export function HomeForm() {
   const username = userInfo.name
   const languageIdx = Number(localStorage.getItem(LANGUAGE_IDX))
   const divider = <Divider orientation="horizontal" sx={{borderColor: "gray"}} />
-  const [recommended, setRecommended] = useState<ProblemInformation[]>([])
-  const [newest, setNewest] = useState<ProblemInformation[]>([])
+  const [recommended, setRecommended] = useState<SampleProblemInformation[]>([])
+  const [newest, setNewest] = useState<SampleProblemInformation[]>([])
   const [greetings, setGreetings] = useState("")
   const {width, height} = useWindowSize()
   const isMobile = useMediaQuery("(max-width: 800px)")
@@ -29,20 +29,19 @@ export function HomeForm() {
     if (!username) {
       navigate(LOGIN_PATH)
     }
-    const newIndices: number[] = []
     const newGreetings = getGreetings(username, languageIdx)
     setGreetings(newGreetings)
-    const newestProblem = getNewest()
+    getNewest()
     .then(n => {
       setNewest(n)
     })
-    const newRecommended = getRecommended(username)
+    getRecommended(username)
     .then(r => {
       setRecommended(r)
     })
   }, [username])
 
-  function setIdexAndOpenProblem(index: number, problemIdx: number, problemList: ProblemInformation[]) {
+  function setIdexAndOpenProblem(index: number, problemIdx: number, problemList: SampleProblemInformation[]) {
     const newIndices: number[] = []
     problemList.map(p => {
       newIndices.push(p.problemIndex)

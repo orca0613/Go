@@ -1,7 +1,7 @@
 import { Avatar, Box, Button, Divider, Typography } from "@mui/material";
 import { ReplyForm, UserInfo } from "../util/types";
 import { LANGUAGE_IDX, USERINFO } from "../util/constants";
-import { deleteReply } from "../network/reply";
+import { hideReply } from "../network/reply";
 import { menuWords } from "../util/menuWords";
 import { initialUserInfo } from "../util/initialForms";
 
@@ -17,7 +17,7 @@ export function Reply({ replyForm }: ReplyProps) {
   const comment = replyForm.deleted? menuWords.deletedComment[languageIdx] : replyForm.comment
   
   async function deleteReplyAndRefresh() {
-    const del = await deleteReply(replyForm._id, userInfo.name)
+    const del = await hideReply(replyForm._id, userInfo.name)
     if (del) {
       alert(menuWords.deletedNotice[languageIdx])
       return location.reload()

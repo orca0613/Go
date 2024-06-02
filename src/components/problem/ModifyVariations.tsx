@@ -158,34 +158,31 @@ export function ModifyVariations() {
   }
 
   useEffect(() => {
-    if (problemIdx >= 0) {
-      const newProblemInfo = getProblemByIdx(problemIdx)
-      .then(p => {
-        if (!p) {
-          alert(menuWords.wrongIndexWarning[languageIdx])
-          navigate(HOME)
-        } else {
-          if (p.creator !== userInfo.name) {
-            alert(menuWords.permissionWarning[languageIdx])
-            sessionStorage.clear()
-            navigate(HOME)
-          }
-          const initialState = p.initialState
-          setProblemInfo(p)
-          setInfo({
-            board: initialState,
-            color: p.color,
-            key: "0"
-          })
-          setGame(new Game(
-            initialState,
-            p.answers,
-            p.variations,
-            p.color
-          ))
-        }
+    const newProblemInfo = getProblemByIdx(problemIdx)
+    .then(p => {
+      if (!p) {
+        alert(menuWords.wrongIndexWarning[languageIdx])
+        return navigate(HOME)
+      } 
+      if (p.creator !== userInfo.name) {
+        alert(menuWords.permissionWarning[languageIdx])
+        sessionStorage.clear()
+        navigate(HOME)
+      }
+      const initialState = p.initialState
+      setProblemInfo(p)
+      setInfo({
+        board: initialState,
+        color: p.color,
+        key: "0"
       })
-    }
+      setGame(new Game(
+        initialState,
+        p.answers,
+        p.variations,
+        p.color
+      ))
+    })
   }, [problemIdx])
 
   const mobileTopMenu = 

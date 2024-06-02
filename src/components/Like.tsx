@@ -1,11 +1,12 @@
 import { useEffect, useState } from "react"
 import { LIKED, USERINFO } from "../util/constants"
 import { Box, Checkbox, Typography } from "@mui/material"
-import { getProblemInformations, handleLiked } from "../network/problemInformation"
+import { getProblemInformations } from "../network/problemInformation"
 import { addElement, deleteElement } from "../network/userDetail"
 import { UserInfo } from "../util/types"
 import { Favorite, FavoriteBorder } from "@mui/icons-material"
 import { initialUserInfo } from "../util/initialForms"
+import { getSampleProblemByIdx, handleLiked } from "../network/sampleProblem"
 
 interface LADProps {
   problemIdx: number,
@@ -18,17 +19,15 @@ export function Like({ problemIdx, username, creator }: LADProps) {
   const [info, setInfo] = useState({
     like: false,
     likeCount: 0,
-    level: 0
   })
 
   function handleLike() {
     const c = info.likeCount
     const idx = userInfo.liked.indexOf(problemIdx)
     if (info.like) {
-      handleLiked(username, problemIdx, creator, info.level, false)
+      handleLiked(problemIdx, username, creator, false)
       deleteElement(problemIdx, username, LIKED)
       setInfo({
-        ...info,
         like: false,
         likeCount: c - 1
       })
@@ -37,9 +36,8 @@ export function Like({ problemIdx, username, creator }: LADProps) {
       }
     } else {
       addElement(problemIdx, username, LIKED)
-      handleLiked(username, problemIdx, creator, info.level, true)
+      handleLiked(problemIdx, username, creator, true)
       setInfo({
-        ...info,
         like: true,
         likeCount: c + 1
       })
@@ -52,12 +50,11 @@ export function Like({ problemIdx, username, creator }: LADProps) {
 
   useEffect(() => {
     if (problemIdx >= 0) {
-      const newInformation = getProblemInformations(problemIdx)
+      getSampleProblemByIdx(problemIdx)
       .then(information => {
         setInfo({
           like: userInfo.liked.includes(problemIdx),
-          likeCount: Number(information.liked),
-          level: information.level
+          likeCount: Number(information),
         })
       })
 

@@ -33,7 +33,7 @@ export function ProblemInformation({ problemInfo }: PIProps) {
 
   useEffect(() => {
     if (problemInfo && problemInfo._id) {
-      const newInformation = getProblemInformations(problemInfo.problemIdx)
+      getProblemInformations(problemInfo.problemIdx)
       .then(information => {
         setInfo({
           color: problemInfo.color,
