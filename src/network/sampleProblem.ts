@@ -1,5 +1,5 @@
-import { API_URL, USERINFO } from "../util/constants"
-import { loginWarning } from "../util/functions"
+import { API_URL, PATCH, USERINFO } from "../util/constants"
+import { getRequestForm, loginWarning } from "../util/functions"
 import { initialUserInfo } from "../util/initialForms"
 import { SAMPLE_PATH } from "../util/paths"
 import { SampleProblemInformation, UserInfo } from "../util/types"
@@ -72,14 +72,8 @@ export async function getSampleProblemByIdx(problemIndex: number): Promise<numbe
 export async function handleLiked(problemIndex: number, name: string, creator: string, add: boolean): Promise<boolean> {
   const userInfo: UserInfo = JSON.parse(sessionStorage.getItem(USERINFO) || initialUserInfo)
   const token = userInfo.token
-  const response = await fetch(`${API_URL}${SAMPLE_PATH}/handle-liked`, {
-    method: 'PATCH',
-    headers: {
-      'Content-Type': 'application/json',
-      'authorization': `Bearer ${token}`
-    },
-    body: JSON.stringify({name, problemIndex, creator, add}),
-  })
+  const requestForm = getRequestForm(PATCH, token, JSON.stringify({name, problemIndex, creator, add}))
+  const response = await fetch(`${API_URL}${SAMPLE_PATH}/handle-liked`, requestForm)
   if (response.ok) {
     return true
   }

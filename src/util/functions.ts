@@ -6,26 +6,19 @@ import { Board, Coordinate, Filter, SampleProblemInformation, Variations } from 
 import _ from 'lodash'
 
 export function playMoveAndReturnNewBoard(board: Board, coord: Coordinate, color: string) {
-    let newBoard = _.cloneDeep(board)
-    newBoard = handleMove(
-      {
-        board: newBoard,
-        color: color,
-        currentMove: coord
-      }
-    )
-    return newBoard
+  let newBoard = _.cloneDeep(board)
+  newBoard = handleMove(
+    {
+      board: newBoard,
+      color: color,
+      currentMove: coord
+    }
+  )
+  return newBoard
 }
 
 export function makeRandomNumber(n: number) {
-    return Math.floor(Math.random() * n)
-  }
-
-export function getCoordinate(e: React.MouseEvent, lineSpacing: number) {
-  const x = Math.floor(e.clientX / lineSpacing)
-  const y = Math.floor(e.clientY / lineSpacing)
-  const coord: Coordinate = [y, x]
-  return coord
+  return Math.floor(Math.random() * n)
 }
 
 export function makingEmptyBoard(size: number): Board {
@@ -122,16 +115,6 @@ export function getAverageLevel(total: number, divider:number): number {
     return 1
   }
   return -1
-}
-
-export function removeElement(list: string[], val: string) {
-  const idx = list.indexOf(val)
-  if (idx < 0) {
-    return list
-  } else {
-    list.splice(idx, 1)
-    return list
-  }
 }
 
 export function isValidEmail(email: string): boolean {
@@ -251,18 +234,6 @@ export function setProblemIndicies(problemList: SampleProblemInformation[]) {
   sessionStorage.setItem(PROBLEM_INDICES, JSON.stringify(indices))
 }
 
-export function getPositions(board: Board, color: string) {
-  const group: Coordinate[] = []
-  for (let i = 0; i < board.length; i++) {
-    for (let j = 0; j < board[i].length; j++) {
-      if (board[i][j] === color) {
-        group.push([i, j])
-      }
-    }
-  }
-  return group
-}
-
 export function getGreetings(name: string, language: number) {
   switch (language) {
     case 0:
@@ -286,5 +257,17 @@ export function ExcludeSolvedProblems(problemList: SampleProblemInformation[], s
     }
   })
   return newProblemList
+}
+
+export function getRequestForm(method: string, token: string, body: string) {
+  const requestForm = {
+    method: method,
+    headers: {
+      'Content-Type': 'application/json',
+      'authorization': `Bearer ${token}`
+    },
+    body: body,
+  }
+  return requestForm
 }
 

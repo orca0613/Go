@@ -1,5 +1,5 @@
-import { API_URL, USERINFO } from "../util/constants"
-import { loginWarning } from "../util/functions"
+import { API_URL, PATCH, POST, USERINFO } from "../util/constants"
+import { getRequestForm, loginWarning } from "../util/functions"
 import { initialUserInfo } from "../util/initialForms"
 import { MESSAGE_DB_PATH } from "../util/paths"
 import { UserInfo } from "../util/types"
@@ -13,14 +13,8 @@ export async function sendMessage(sender: string, receiver: string, title: strin
   }
   const userInfo: UserInfo = JSON.parse(sessionStorage.getItem(USERINFO) || initialUserInfo)
   const token = userInfo.token
-  const response = await fetch(`${API_URL}${MESSAGE_DB_PATH}/send`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'authorization': `Bearer ${token}`
-    },
-    body: JSON.stringify({sender, receiver, title, contents, quotation}),
-  })
+  const requestForm = getRequestForm(POST, token, JSON.stringify({sender, receiver, title, contents, quotation}))
+  const response = await fetch(`${API_URL}${MESSAGE_DB_PATH}/send`, requestForm)
   if (response.ok) {
     return true
   }
@@ -65,14 +59,8 @@ export async function checkMessage(id: string): Promise<boolean> {
   const userInfo: UserInfo = JSON.parse(sessionStorage.getItem(USERINFO) || initialUserInfo)
   const name = userInfo.name
   const token = userInfo.token
-  const response = await fetch(`${API_URL}${MESSAGE_DB_PATH}/check`, {
-    method: 'PATCH',
-    headers: {
-      'Content-Type': 'application/json',
-      'authorization': `Bearer ${token}`
-    },
-    body: JSON.stringify({id, name}),
-  })
+  const requestForm = getRequestForm(PATCH, token, JSON.stringify({id, name}))
+  const response = await fetch(`${API_URL}${MESSAGE_DB_PATH}/check`, requestForm)
   if (response.ok) {
     return true
   }
@@ -98,14 +86,8 @@ export async function hideMessage(idList: string, where: string): Promise<boolea
   const userInfo: UserInfo = JSON.parse(sessionStorage.getItem(USERINFO) || initialUserInfo)
   const name = userInfo.name
   const token = userInfo.token
-  const response = await fetch(`${API_URL}${MESSAGE_DB_PATH}/hide-message`, {
-    method: 'PATCH',
-    headers: {
-      'Content-Type': 'application/json',
-      'authorization': `Bearer ${token}`
-    },
-    body: JSON.stringify({idList, name, where}),
-  })
+  const requestForm = getRequestForm(PATCH, token, JSON.stringify({idList, name, where}))
+  const response = await fetch(`${API_URL}${MESSAGE_DB_PATH}/hide-message`, requestForm)
   if (response.ok) {
     return true
   }

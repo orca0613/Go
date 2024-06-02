@@ -1,5 +1,5 @@
-import { API_URL, USERINFO } from "../util/constants"
-import { loginWarning } from "../util/functions"
+import { API_URL, PATCH, POST, USERINFO } from "../util/constants"
+import { getRequestForm, loginWarning } from "../util/functions"
 import { initialUserInfo } from "../util/initialForms"
 import { REPLY_DB_PATH } from "../util/paths"
 import { ReplyForm, UserInfo } from "../util/types"
@@ -7,14 +7,8 @@ import { ReplyForm, UserInfo } from "../util/types"
 export async function addReply(problemId: string, comment: string, name: string) {
   const userInfo: UserInfo = JSON.parse(sessionStorage.getItem(USERINFO) || initialUserInfo)
   const token = userInfo.token
-  const response = await fetch(`${API_URL}${REPLY_DB_PATH}/add`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'authorization': `Bearer ${token}`
-    },
-    body: JSON.stringify({problemId, comment, name}),
-  })
+  const requestForm = getRequestForm(POST, token, JSON.stringify({problemId, comment, name}))
+  const response = await fetch(`${API_URL}${REPLY_DB_PATH}/add`, requestForm)
   if (response.ok) {
     return true
   }
@@ -28,14 +22,8 @@ export async function addReply(problemId: string, comment: string, name: string)
 export async function hideReply(id: string, name: string) {
   const userInfo: UserInfo = JSON.parse(sessionStorage.getItem(USERINFO) || initialUserInfo)
   const token = userInfo.token
-  const response = await fetch(`${API_URL}${REPLY_DB_PATH}/hide`, {
-    method: 'PATCH',
-    headers: {
-      'Content-Type': 'application/json',
-      'authorization': `Bearer ${token}`
-    },
-    body: JSON.stringify({id, name}),
-  })
+  const requestForm = getRequestForm(PATCH, token, JSON.stringify({id, name}))
+  const response = await fetch(`${API_URL}${REPLY_DB_PATH}/hide`, requestForm)
   if (response.ok) {
     return true
   }

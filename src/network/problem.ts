@@ -1,6 +1,6 @@
 import _ from "lodash";
-import { API_URL, LANGUAGE_IDX, QUESTIONS, USERINFO } from "../util/constants";
-import { loginWarning } from "../util/functions";
+import { API_URL, DELETE, LANGUAGE_IDX, PATCH, POST, QUESTIONS, USERINFO } from "../util/constants";
+import { getRequestForm, loginWarning } from "../util/functions";
 import { menuWords } from "../util/menuWords";
 import { Board, ProblemAndVariations, UserInfo } from "../util/types";
 import { PROBLEM_DB_PATH } from "../util/paths";
@@ -15,15 +15,8 @@ export async function createProblem(comment: string, problem: Board, creator: st
   const questions = initialVariations
   const userInfo: UserInfo = JSON.parse(sessionStorage.getItem(USERINFO) || initialUserInfo)
   const token = userInfo.token
-  const response = await fetch(`${API_URL}${PROBLEM_DB_PATH}/create`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'authorization': `Bearer ${token}`
-
-    },
-    body: JSON.stringify({initialState, creator, variations, answers, questions, level, comment, color}),
-  })
+  const requestForm = getRequestForm(POST, token, JSON.stringify({initialState, creator, variations, answers, questions, level, comment, color}))
+  const response = await fetch(`${API_URL}${PROBLEM_DB_PATH}/create`, requestForm)
   if (response.ok) {
     return alert(menuWords.registered[languageIdx])
   }
@@ -37,14 +30,8 @@ export async function deleteProblem(problemIdx: number, creator: string, level: 
   const languageIdx = Number(localStorage.getItem(LANGUAGE_IDX))
   const userInfo: UserInfo = JSON.parse(sessionStorage.getItem(USERINFO) || initialUserInfo)
   const token = userInfo.token
-  const response = await fetch(`${API_URL}${PROBLEM_DB_PATH}/delete`, {
-    method: 'DELETE',
-    headers: {
-      'Content-Type': 'application/json',
-      'authorization': `Bearer ${token}`
-    },
-    body: JSON.stringify({problemIdx, creator, level}),
-  })
+  const requestForm = getRequestForm(DELETE, token, JSON.stringify({problemIdx, creator, level}))
+  const response = await fetch(`${API_URL}${PROBLEM_DB_PATH}/delete`, requestForm)
   if (response.ok) {
     return alert(menuWords.deletedProblemWarning[languageIdx])
   } 
@@ -67,14 +54,8 @@ export async function updateVariations(problemIdx: number, where: string, variat
   const languageIdx = Number(localStorage.getItem(LANGUAGE_IDX))
   const userInfo: UserInfo = JSON.parse(sessionStorage.getItem(USERINFO) || initialUserInfo)
   const token = userInfo.token
-  const response = await fetch(`${API_URL}${PROBLEM_DB_PATH}/update-variations`, {
-    method: 'PATCH',
-    headers: {
-      'Content-Type': 'application/json',
-      'authorization': `Bearer ${token}`
-    },
-    body: JSON.stringify({problemIdx, where, variations, name, creator}),
-  })
+  const requestForm = getRequestForm(PATCH, token, JSON.stringify({problemIdx, where, variations, name, creator}))
+  const response = await fetch(`${API_URL}${PROBLEM_DB_PATH}/update-variations`, requestForm)
   if (response.ok) {
     if (save) {
       return alert(menuWords.saved[languageIdx])
@@ -96,14 +77,8 @@ export async function modifyProblem(problemIdx: number, problem: Board, comment:
   const initialState = problem
   const userInfo: UserInfo = JSON.parse(sessionStorage.getItem(USERINFO) || initialUserInfo)
   const token = userInfo.token
-  const response = await fetch(`${API_URL}${PROBLEM_DB_PATH}/modify-problem`, {
-    method: 'PATCH',
-    headers: {
-      'Content-Type': 'application/json',
-      'authorization': `Bearer ${token}`
-    },
-    body: JSON.stringify({problemIdx, initialState, comment, level, color, creator}),
-  })
+  const requestForm = getRequestForm(PATCH, token, JSON.stringify({problemIdx, initialState, comment, level, color, creator}))
+  const response = await fetch(`${API_URL}${PROBLEM_DB_PATH}/modify-problem`, requestForm)
   if (response.ok) {
     return alert(menuWords.modifiedNotice[languageIdx])
   } 

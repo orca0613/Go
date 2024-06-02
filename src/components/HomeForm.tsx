@@ -1,5 +1,5 @@
 
-import { Box, Button, Divider, Typography, useMediaQuery } from '@mui/material'
+import { Box, Divider, Typography, useMediaQuery } from '@mui/material'
 import { menuWords } from '../util/menuWords'
 import { LANGUAGE_IDX, PROBLEM_INDEX, PROBLEM_INDICES, USERINFO } from '../util/constants'
 import { SampleProblemInformation, UserInfo } from '../util/types'
@@ -17,7 +17,6 @@ export function HomeForm() {
   const userInfo: UserInfo = JSON.parse(sessionStorage.getItem(USERINFO) || initialUserInfo)
   const username = userInfo.name
   const languageIdx = Number(localStorage.getItem(LANGUAGE_IDX))
-  const divider = <Divider orientation="horizontal" sx={{borderColor: "gray"}} />
   const [recommended, setRecommended] = useState<SampleProblemInformation[]>([])
   const [newest, setNewest] = useState<SampleProblemInformation[]>([])
   const [greetings, setGreetings] = useState("")

@@ -58,7 +58,7 @@ export function Login() {
 
   useEffect(() => {
     if (name) {
-      const detail = getUserDetail(name)
+      getUserDetail(name)
       .then(r => {
         const userInfo: UserInfo = JSON.parse(sessionStorage.getItem(USERINFO) || initialUserInfo)
         const newUserInfo: UserInfo = {

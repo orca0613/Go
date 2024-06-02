@@ -32,8 +32,7 @@ export const languageList = ["ENG", "한국어", "中文", "日本語"]
 export const expires = 365 * 24 * 60 * 60 * 1000
 export const problemsPerPage = 24
 export const messagesPerPage = 10
-export const TIER = "tier"
-export const LOW = "low"
-export const HIGH = "high"
-export const CREATOR = "creator"
+export const POST = "POST"
+export const PATCH = "PATCH"
+export const DELETE = "DELETE"
 

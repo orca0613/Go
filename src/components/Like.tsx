@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react"
 import { LIKED, USERINFO } from "../util/constants"
 import { Box, Checkbox, Typography } from "@mui/material"
-import { getProblemInformations } from "../network/problemInformation"
 import { addElement, deleteElement } from "../network/userDetail"
 import { UserInfo } from "../util/types"
 import { Favorite, FavoriteBorder } from "@mui/icons-material"

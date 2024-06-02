@@ -45,7 +45,6 @@ export function ProblemBox() {
   const {width, height} = useWindowSize()
   const isMobile = height > width * 2 / 3 || width < 1000
   const languageIdx = Number(localStorage.getItem(LANGUAGE_IDX))
-  const divider = <Divider orientation="horizontal" sx={{borderColor: "white", margin: 5}} />
 
   const [mode, setMode] = useState(TRY)
   const [alertInfo, setAlertInfo] = useState({

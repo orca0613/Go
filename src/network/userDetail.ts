@@ -1,5 +1,5 @@
-import { API_URL, LANGUAGE_IDX, USERINFO, } from "../util/constants"
-import { loginWarning } from "../util/functions"
+import { API_URL, LANGUAGE_IDX, PATCH, USERINFO, } from "../util/constants"
+import { getRequestForm, loginWarning } from "../util/functions"
 import { initialUserInfo } from "../util/initialForms"
 import { USERDETAIL_DB_PATH } from "../util/paths"
 import { CreatorInfo, UserDetailFromServer, UserInfo } from "../util/types"
@@ -7,14 +7,8 @@ import { CreatorInfo, UserDetailFromServer, UserInfo } from "../util/types"
 export async function addElement(element: number, name: string, where: string) {
   const userInfo: UserInfo = JSON.parse(sessionStorage.getItem(USERINFO) || initialUserInfo)
   const token = userInfo.token
-  const response = await fetch(`${API_URL}${USERDETAIL_DB_PATH}/add-element`, {
-    method: 'PATCH',
-    headers: {
-      'Content-Type': 'application/json',
-      'authorization': `Bearer ${token}`
-    },
-    body: JSON.stringify({element, name, where}),
-  })
+  const requestForm = getRequestForm(PATCH, token, JSON.stringify({element, name, where}))
+  const response = await fetch(`${API_URL}${USERDETAIL_DB_PATH}/add-element`, requestForm)
   if (response.ok) {
     return
   }
@@ -29,14 +23,8 @@ export async function addElement(element: number, name: string, where: string) {
 export async function deleteElement(element: number, name: string, where: string) {
   const userInfo: UserInfo = JSON.parse(sessionStorage.getItem(USERINFO) || initialUserInfo)
   const token = userInfo.token
-  const response = await fetch(`${API_URL}${USERDETAIL_DB_PATH}/delete-element`, {
-    method: 'PATCH',
-    headers: {
-      'Content-Type': 'application/json',
-      'authorization': `Bearer ${token}`
-    },
-    body: JSON.stringify({element, name, where}),
-  })
+  const requestForm = getRequestForm(PATCH, token, JSON.stringify({element, name, where}))
+  const response = await fetch(`${API_URL}${USERDETAIL_DB_PATH}/delete-element`, requestForm)
   if (response.ok) {
     return
   }
@@ -72,14 +60,8 @@ export async function settingChange(language: number, level: number, auto: boole
   const userInfo: UserInfo = JSON.parse(sessionStorage.getItem(USERINFO) || initialUserInfo)
   const name = userInfo.name
   const token = userInfo.token
-  const update = await fetch(`${API_URL}${USERDETAIL_DB_PATH}/setting`, {
-    method: "PATCH",
-    headers: {
-      "Content-Type": "application/json",
-      'authorization': `Bearer ${token}`
-    },
-    body: JSON.stringify({name, language, level, auto})
-  })
+  const requestForm = getRequestForm(PATCH, token, JSON.stringify({name, language, level, auto}))
+  const update = await fetch(`${API_URL}${USERDETAIL_DB_PATH}/setting`, requestForm)
   if (update.ok) {
     localStorage.setItem(LANGUAGE_IDX, String(language))
     userInfo.auto = auto

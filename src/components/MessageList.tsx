@@ -55,12 +55,12 @@ export default function MessageList() {
 
   useEffect(() => {
     if (received) {
-      const newMessageList = getReceivedMessage()
+      getReceivedMessage()
       .then(m => {
         setMessageList(m)
       })
     } else {
-      const newMessageList = getSentMessage()
+      getSentMessage()
       .then(m => {
         setMessageList(m)
       })
@@ -135,7 +135,7 @@ export default function MessageList() {
         idList.push(messageList[startIdx + i]._id)
       }
     }
-    const remove = await hideMessage(idList.join("&"), where)
+    await hideMessage(idList.join("&"), where)
     setChecked(0)
     setDeleted(!deleted)
   }

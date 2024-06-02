@@ -14,7 +14,7 @@ export default function VerifyMail() {
 
   useEffect(() => {
     if (userId) {
-      const result = verifyMail(userId)
+      verifyMail(userId)
       .then(r => {
         if (r) {
           alert(menuWords.verificationCompleteNotice[languageIdx])

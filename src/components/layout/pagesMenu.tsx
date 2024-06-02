@@ -6,7 +6,7 @@ import { menuWords } from "../../util/menuWords";
 import Language from "../Language";
 import { Menu } from "../Menu";
 import { Filter, UserInfo } from "../../util/types";
-import { getRangeByTier, getTier, ownStringify, resetSortingForm } from "../../util/functions";
+import { getTier, ownStringify, resetSortingForm } from "../../util/functions";
 import { CREATE_PATH, LOGIN_PATH, PROBLEM_PATH } from "../../util/paths";
 import { initialUserInfo } from "../../util/initialForms";
 

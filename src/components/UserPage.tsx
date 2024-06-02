@@ -4,7 +4,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { menuWords } from '../util/menuWords';
 import { LANGUAGE_IDX, PAGE, PROBLEM_INDEX, PROBLEM_INDICES, USERINFO } from '../util/constants';
 import { initialUserInfo } from '../util/initialForms';
-import { ProblemInformation, SampleProblemInformation, UserInfo } from '../util/types';
+import { SampleProblemInformation, UserInfo } from '../util/types';
 import { getUserDetail } from '../network/userDetail';
 import { useWindowSize } from 'react-use';
 import FinalBoard from './board/FinalBoard';
@@ -28,7 +28,7 @@ export default function UserPage() {
 
   useEffect(() => {
     if (name) {
-      const newInfo = getUserDetail(name)
+      getUserDetail(name)
       .then(i => {
         setInfo({
           ...info,
@@ -42,11 +42,11 @@ export default function UserPage() {
         })
         const newLevel = i.level > 0? String(i.level) + menuWords.K[languageIdx] : String(Math.abs(i.level)) + menuWords.D[languageIdx]
         setLevel(newLevel)
-        const newCreated = getRepresentativeProblem(name)
+        getRepresentativeProblem(name)
         .then(c => {
           setCreated(c)
         })
-        const newsolved = getSolvedProblem(name)
+        getSolvedProblem(name)
         .then(s => {
           setSolved(s)
         })

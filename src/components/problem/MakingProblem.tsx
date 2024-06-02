@@ -1,4 +1,4 @@
-import { useRef, useState } from "react"
+import { useState } from "react"
 import { Coordinate, UserInfo } from "../../util/types"
 import { COMMENT, LANGUAGE_IDX, LEVEL, MARGIN, TURN, USERINFO } from "../../util/constants"
 import { Box, Button, ButtonGroup, FormControl, InputLabel, MenuItem, Select, SelectChangeEvent, TextField, useMediaQuery } from "@mui/material"
@@ -11,7 +11,6 @@ import { useWindowSize } from "react-use"
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 import { boardSizeArray, initialUserInfo, levelArray } from "../../util/initialForms"
 import { mobileButtonStyle } from "../../util/styles"
-import html2canvas from 'html2canvas';
 
 export function MakingProblem() {
   const userInfo: UserInfo = JSON.parse(sessionStorage.getItem(USERINFO) || initialUserInfo)
@@ -85,17 +84,6 @@ export function MakingProblem() {
   function resetBoard() {
     setProblem(makingEmptyBoard(boardSize))
   }
-
-  // const elementRef = useRef<HTMLDivElement>(null);
-
-  // const handleCapture = () => {
-  //   if (elementRef.current) {
-  //     html2canvas(elementRef.current).then(canvas => {
-  //       const imgData = canvas.toDataURL();
-  //       // 여기서 imgData를 처리하거나 저장할 수 있습니다.
-  //     });
-  //   }
-  // };
 
   const blackStone = 
   <img src="/images/black.svg.png" alt="black" width={isMobile? width / 20 : width / 30} height={isMobile? width / 20 : width / 30}/>

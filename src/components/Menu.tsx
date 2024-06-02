@@ -20,13 +20,12 @@ export function Menu() {
   const [open, setOpen] = useState(false);
   const userInfo: UserInfo = JSON.parse(sessionStorage.getItem(USERINFO) || initialUserInfo)
   const level = userInfo.level
-  const [info, setInfo] = useState<UserInfo>(userInfo)
   const [unsolved, setUnsolved] = useState<number[]>([])
   const [unchecked, setUnchecked] = useState(0)
   const divider = <Divider orientation="horizontal" sx={{borderColor: "gray"}} />
 
   useEffect(() => {
-    const detail = getUserDetail(userInfo.name)
+    getUserDetail(userInfo.name)
     .then(r => {
       const newUserInfo: UserInfo = {
         ...userInfo,
@@ -39,11 +38,10 @@ export function Menu() {
         language:r.language,
         auto: r.auto
       }
-      setInfo(newUserInfo)
       sessionStorage.setItem(USERINFO, JSON.stringify(newUserInfo))
       const newUnsolved = r.tried.filter(element => !r.solved.includes(element))
       setUnsolved(newUnsolved)
-      const newUnchecked = getNumberUnchecked()
+      getNumberUnchecked()
       .then(n => {
         setUnchecked(n)
       })

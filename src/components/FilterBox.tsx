@@ -4,7 +4,7 @@ import { LANGUAGE_IDX, PAGE } from "../util/constants"
 import { useEffect, useState } from "react"
 import { Filter } from "../util/types"
 import { detailLevel, tiersList } from "../util/initialForms"
-import { getRangeByTier, ownStringify } from "../util/functions"
+import { ownStringify } from "../util/functions"
 import { useNavigate } from "react-router-dom"
 import { getAllCreators } from "../network/userDetail"
 

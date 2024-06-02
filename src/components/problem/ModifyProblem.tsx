@@ -97,7 +97,7 @@ export function ModifyProblem() {
 
   useEffect(() => {
     if (problemIdx >= 0) {
-      const newProblemInfo = getProblemByIdx(problemIdx)
+      getProblemByIdx(problemIdx)
       .then(p => {
         if (!p) {
           alert(menuWords.wrongIndexWarning[languageIdx])
