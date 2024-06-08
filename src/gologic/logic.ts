@@ -56,38 +56,24 @@ export function getDeadGroup(board: Board, coord: Coordinate, color: string, opp
 
     return group
 }
-interface handleMoveProps {
 
-    board: Board
-    color: string
-    currentMove: Coordinate;
-}
-
-export function handleMove(props: handleMoveProps) {
-    let boardState = props.board;
-    const currentMove = props.currentMove;
-    const color = props.color;
+export function handleMove(board: Board, color: string, currentMove: Coordinate) {
+    let boardState = _.cloneDeep(board)
     const opponentColor = color === 'b'? 'w' : 'b'
     const neighbors = addNeighbors(currentMove)
 
     if (isOutside(currentMove, boardState.length) || getStatus(boardState, currentMove) !== '.') {
-        return boardState
-    } else {
-        boardState = changeStatus(boardState, currentMove, color)
+        return board
     }
-
+    boardState = changeStatus(boardState, currentMove, color)
     let dead: Coordinate[] = []
     for (let i = 0; i < neighbors.length; i ++) {
         dead = dead.concat(getDeadGroup(boardState, neighbors[i], opponentColor, color))
     }
-
     const suicide: Coordinate[] = getDeadGroup(boardState, currentMove, color, opponentColor)
     if (dead.length === 0 && suicide.length > 0) {
-        boardState = changeStatus(boardState, currentMove, '.')
-        return boardState
+        return board
     }
-
-
     boardState = removeDeadGroup(boardState, dead)
     return boardState
 }

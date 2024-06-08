@@ -4,7 +4,7 @@ import { initialUserInfo } from "../util/initialForms"
 import { REPLY_DB_PATH } from "../util/paths"
 import { ReplyForm, UserInfo } from "../util/types"
 
-export async function addReply(problemId: string, comment: string, name: string) {
+export async function addReply(problemId: string, comment: string, name: string): Promise<boolean> {
   const userInfo: UserInfo = JSON.parse(sessionStorage.getItem(USERINFO) || initialUserInfo)
   const token = userInfo.token
   const requestForm = getRequestForm(POST, token, JSON.stringify({problemId, comment, name}))
@@ -19,7 +19,7 @@ export async function addReply(problemId: string, comment: string, name: string)
   throw new Error(`Error: ${response.status}`)
 }
 
-export async function hideReply(id: string, name: string) {
+export async function hideReply(id: string, name: string): Promise<boolean> {
   const userInfo: UserInfo = JSON.parse(sessionStorage.getItem(USERINFO) || initialUserInfo)
   const token = userInfo.token
   const requestForm = getRequestForm(PATCH, token, JSON.stringify({id, name}))

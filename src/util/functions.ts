@@ -6,14 +6,7 @@ import { Board, Coordinate, Filter, SampleProblemInformation, Variations } from 
 import _ from 'lodash'
 
 export function playMoveAndReturnNewBoard(board: Board, coord: Coordinate, color: string) {
-  let newBoard = _.cloneDeep(board)
-  newBoard = handleMove(
-    {
-      board: newBoard,
-      color: color,
-      currentMove: coord
-    }
-  )
+  const newBoard = handleMove(board, color, coord)
   return newBoard
 }
 

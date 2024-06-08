@@ -4,16 +4,17 @@ import { initialUserInfo } from "../util/initialForms"
 import { PROBLEMINFO_DB_PATH } from "../util/paths"
 import { ProblemInformation, UserInfo } from "../util/types"
 
-export async function changeCount(problemIdx: number, where: string, name: string, count: number) {
+export async function changeCount(problemIdx: number, where: string, name: string, count: number): Promise<boolean> {
   const userInfo: UserInfo = JSON.parse(sessionStorage.getItem(USERINFO) || initialUserInfo)
   const token = userInfo.token
   const requestForm = getRequestForm(PATCH, token, JSON.stringify({problemIdx, where, name, count}))
   const response = await fetch(`${API_URL}${PROBLEMINFO_DB_PATH}/change-count`, requestForm)
   if (response.ok) {
-    return
+    return true
   }
   if (response.status === 401 || 403) {
-    return loginWarning()
+    loginWarning()
+    return false
   }
   throw new Error(`Error: ${response.status}`)
 }
@@ -27,30 +28,32 @@ export async function getProblemInformations(problemIdx: number): Promise<Proble
   return informations
 }
 
-export async function addCorrectUser(problemId:string, name: string, level: number) {
+export async function addCorrectUser(problemIndex:number, name: string, level: number): Promise<boolean> {
   const userInfo: UserInfo = JSON.parse(sessionStorage.getItem(USERINFO) || initialUserInfo)
   const token = userInfo.token
-  const requestForm = getRequestForm(PATCH, token, JSON.stringify({problemId, name, level}))
+  const requestForm = getRequestForm(PATCH, token, JSON.stringify({problemIndex, name, level}))
   const response = await fetch(`${API_URL}${PROBLEMINFO_DB_PATH}/add-correct`, requestForm)
   if (response.ok) {
-    return
+    return true
   }
   if (response.status === 401 || 403) {
-    return loginWarning()
+    loginWarning()
+    return false
   }
   throw new Error(`Error: ${response.status}`)
 }
 
-export async function addWrong(problemId:string, name: string, level: number) {
+export async function addWrong(problemId:string, name: string, level: number): Promise<boolean> {
   const userInfo: UserInfo = JSON.parse(sessionStorage.getItem(USERINFO) || initialUserInfo)
   const token = userInfo.token
   const requestForm = getRequestForm(PATCH, token, JSON.stringify({problemId, name, level}))
   const response = await fetch(`${API_URL}${PROBLEMINFO_DB_PATH}/add-wrong`, requestForm)
   if (response.ok) {
-    return
+    return true
   }
   if (response.status === 401 || 403) {
-    return loginWarning()
+    loginWarning()
+    return false
   }
   throw new Error(`Error: ${response.status}`)
 }

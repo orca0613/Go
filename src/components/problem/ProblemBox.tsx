@@ -18,6 +18,7 @@ import { sendRequest } from '../../network/requests'
 import { ReplyBox } from '../ReplyBox'
 import { initIndices, initialProblemInfo, initialUserInfo, initialVariations } from '../../util/initialForms'
 import { mobileButtonStyle, wideButtonStyle } from '../../util/styles'
+import { LOGIN_PATH } from '../../util/paths'
 
 export function ProblemBox() {
 
@@ -125,15 +126,21 @@ export function ProblemBox() {
   useEffect(() => {
     if (userInfo.name) {
       getProblemByIdx(problemIdx)
-      .then(p => {
+      .then(async p => {
         if (!p) {
           alert(menuWords.wrongIndexWarning[languageIdx])
           return navigate(HOME)
         } 
+        const result = await changeCount(problemIdx, "view", username, 1)
+        if (!result) {
+          logout()
+        }
         setProblemInfo(p)
-        addElement(problemIdx, username, TRIED)
-        userInfo.tried.push(problemIdx)
-        sessionStorage.setItem(USERINFO, JSON.stringify(userInfo))
+        if (!userInfo.tried.includes(problemIdx)) {
+          await addElement(problemIdx, username, TRIED)
+          userInfo.tried.push(problemIdx)
+          sessionStorage.setItem(USERINFO, JSON.stringify(userInfo))
+        }
         setInfo({
           board: p.initialState,
           color: p.color,
@@ -146,15 +153,18 @@ export function ProblemBox() {
           p.color
         ))
         setSolved(userInfo.solved.includes(problemIdx))
-        changeCount(problemIdx, "view", username, 1)
       })
     } else {
       alert(menuWords.loginWarning[languageIdx])
-      sessionStorage.clear()
-      navigate(HOME)
+      logout()
     }
     modeChange(TRY)
   }, [problemIdx])
+
+  function logout() {
+    sessionStorage.clear()
+    navigate(LOGIN_PATH)
+  }
 
   function reset() {
     setInfo(initInfo)
@@ -235,8 +245,14 @@ export function ProblemBox() {
       ...problemInfo,
       questions: newQuestions
     })
-    updateVariations(problemIdx, QUESTIONS, newQuestions, username, problemInfo.creator, true)
-    sendRequest(problemIdx, problemInfo.creator, username, info.key)
+    const result = await updateVariations(problemIdx, QUESTIONS, newQuestions, username, problemInfo.creator, true)
+    if (!result) {
+      logout()
+    }
+    const sent = sendRequest(problemIdx, problemInfo.creator, username, info.key)
+    if (!sent) {
+      logout()
+    }
     setDialogInfo({
       ...dialogInfo,
       open: false
@@ -271,18 +287,22 @@ export function ProblemBox() {
     navigate(`/problem/${nextProblemIdx}`)
   }
 
-  function setAnswerModeAndsetSolved() {
+  async function setAnswerModeAndsetSolved() {
     if (mode === ANSWER) {
       modeChange(TRY)
       return
     } else {
+      const result = await addElement(problemIdx, username, SOLVED)
+      if (!result) {
+        logout()
+      }
       modeChange(ANSWER)
-      addElement(problemIdx, username, SOLVED)
       addSolved(problemInfo.problemIdx)
+      setSolved(true)
     }
   }
 
-  function handleWrong() {
+  async function handleWrong() {
     const newAlertInfo = {
       open: true,
       answer: false,
@@ -292,10 +312,13 @@ export function ProblemBox() {
     if (solved) {
       return
     }
-    addWrong(problemInfo._id, username, userLevel)
+    const result = await addWrong(problemInfo._id, username, userLevel)
+    if (!result) {
+      logout()
+    }
   }
 
-  function requestSuggestion() {
+  async function requestSuggestion() {
     const newDialogInfo = {
       open: true,
       title: menuWords.wrong[languageIdx],
@@ -305,7 +328,10 @@ export function ProblemBox() {
     if (solved) {
       return
     }
-    addWrong(problemInfo._id, username, userLevel)
+    const result = await addWrong(problemInfo._id, username, userLevel)
+    if (!result) {
+      logout()
+    }
   }
 
   function addSolved(idx: number) {
@@ -314,7 +340,7 @@ export function ProblemBox() {
       sessionStorage.setItem(USERINFO, JSON.stringify(userInfo))
     }
   }
-  function handleCorrect() {
+  async function handleCorrect() {
     const newAlertInfo = {
       open: true,
       answer: true,
@@ -322,10 +348,12 @@ export function ProblemBox() {
     }
     setAlertInfo(newAlertInfo)
     if (!solved) {
-      addCorrectUser(problemInfo._id, username, userLevel)
+      const result = await addCorrectUser(problemInfo.problemIdx, username, userLevel)
+      if (!result) {
+        logout()
+      }
       setSolved(true)
       addSolved(problemIdx)
-      addElement(problemIdx, username, SOLVED)
     }
     if (auto) {
       moveToAdjacentProblem(1)

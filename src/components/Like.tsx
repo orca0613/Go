@@ -1,11 +1,12 @@
 import { useEffect, useState } from "react"
-import { LIKED, USERINFO } from "../util/constants"
+import { USERINFO } from "../util/constants"
 import { Box, Checkbox, Typography } from "@mui/material"
-import { addElement, deleteElement } from "../network/userDetail"
 import { UserInfo } from "../util/types"
 import { Favorite, FavoriteBorder } from "@mui/icons-material"
 import { initialUserInfo } from "../util/initialForms"
 import { getSampleProblemByIdx, handleLiked } from "../network/sampleProblem"
+import { useNavigate } from "react-router-dom"
+import { LOGIN_PATH } from "../util/paths"
 
 interface LADProps {
   problemIdx: number,
@@ -15,17 +16,21 @@ interface LADProps {
 
 export function Like({ problemIdx, username, creator }: LADProps) {
   const userInfo: UserInfo = JSON.parse(sessionStorage.getItem(USERINFO) || initialUserInfo)
+  const navigate = useNavigate()
   const [info, setInfo] = useState({
     like: false,
     likeCount: 0,
   })
 
-  function handleLike() {
+  async function handleLike() {
     const c = info.likeCount
     const idx = userInfo.liked.indexOf(problemIdx)
     if (info.like) {
-      handleLiked(problemIdx, username, creator, false)
-      deleteElement(problemIdx, username, LIKED)
+      const result = await handleLiked(problemIdx, username, creator, false)
+      if (!result) {
+        sessionStorage.clear()
+        navigate(LOGIN_PATH)
+      }
       setInfo({
         like: false,
         likeCount: c - 1
@@ -34,7 +39,6 @@ export function Like({ problemIdx, username, creator }: LADProps) {
         userInfo.liked.splice(idx, 1)
       }
     } else {
-      addElement(problemIdx, username, LIKED)
       handleLiked(problemIdx, username, creator, true)
       setInfo({
         like: true,

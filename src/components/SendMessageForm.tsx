@@ -1,8 +1,9 @@
 import { Box, Button, Modal, TextField, Typography } from "@mui/material"
 import { menuWords } from "../util/menuWords";
-import { LANGUAGE_IDX } from "../util/constants";
+import { HOME, LANGUAGE_IDX } from "../util/constants";
 import { ChangeEvent, useEffect, useState } from "react";
 import { sendMessage } from "../network/message";
+import { useNavigate } from "react-router-dom";
 
 
 interface SendMessageFormProps {
@@ -14,6 +15,7 @@ interface SendMessageFormProps {
 export default function SendMessageForm({ receiver, sender, open }: SendMessageFormProps) {
 
   const languageIdx = Number(localStorage.getItem(LANGUAGE_IDX))
+  const navigate = useNavigate()
   const [messageTitle, setMessageTitle] = useState("")
   const [messageContents, setMessageContents] = useState("")
   const [openModal, setOpenModal] = useState(false)
@@ -82,11 +84,14 @@ export default function SendMessageForm({ receiver, sender, open }: SendMessageF
 
   async function sendMessageAndClose() {
     const result = await sendMessage(sender, receiver, messageTitle, messageContents, "")
-    if (result === true) {
+    if (result) {
       alert(menuWords.sent[languageIdx])
+    } else {
+      sessionStorage.clear()
+      navigate(HOME)
     }
     setOpenModal(false)
-}
+  }
 
   return (
     <Box>

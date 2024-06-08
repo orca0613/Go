@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { BoardInfo, Coordinate, UserInfo } from '../../util/types'
+import { BoardInfo, Coordinate, UserInfo, Variations } from '../../util/types'
 import _ from 'lodash'
 import { addCurrentVariation, removeCurrentVariation } from '../../util/functions'
 import { Box, Button, ButtonGroup, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle } from '@mui/material'
@@ -14,6 +14,7 @@ import { useWindowSize } from 'react-use'
 import { checkRequest } from '../../network/requests'
 import { initialProblemInfo, initialUserInfo } from '../../util/initialForms'
 import { mobileButtonStyle, wideButtonStyle } from '../../util/styles'
+import { LOGIN_PATH } from '../../util/paths'
 
 export function ModifyVariations() {
 
@@ -79,7 +80,19 @@ export function ModifyVariations() {
     setInfo(newInfo)
   }
 
-  function addVariationsAndSetVariations() {
+  function logout() {
+    sessionStorage.clear()
+    navigate(LOGIN_PATH)
+  }
+
+  async function update(problemIdx: number, where: string, vars: Variations, name: string, creator: string, save: boolean) {
+    const result = await updateVariations(problemIdx, where, vars, name, creator, save)
+    if (!result) {
+      logout()
+    }
+  }
+
+  async function addVariationsAndSetVariations() {
     const l = info.key.split('-')
     if ((l.length % 2 === 0)) {
       alert(menuWords.invalidResultWarning[languageIdx])
@@ -90,7 +103,7 @@ export function ModifyVariations() {
       ...problemInfo,
       variations: newVariations
     })
-    updateVariations(problemIdx, VARIATIONS, newVariations, username, problemInfo.creator, true)
+    update(problemIdx, VARIATIONS, newVariations, username, problemInfo.creator, true)
   }
 
   function addAnswersAndSetAnswers() {
@@ -104,7 +117,7 @@ export function ModifyVariations() {
       ...problemInfo,
       answers: newAnswers
     })
-    updateVariations(problemIdx, ANSWERS, newAnswers, username, problemInfo.creator, true)
+    update(problemIdx, ANSWERS, newAnswers, username, problemInfo.creator, true)
   }
 
   async function removeVariationsAndSetVariations(key: string) {
@@ -114,21 +127,21 @@ export function ModifyVariations() {
         ...problemInfo,
         variations: newVariations
       })
-      updateVariations(problemIdx, VARIATIONS, newVariations, username, problemInfo.creator, false)
+      update(problemIdx, VARIATIONS, newVariations, username, problemInfo.creator, false)
     } else if (problemInfo.answers.hasOwnProperty(key) && problemInfo.answers[key].length === 0) {
       const newAnswers = removeCurrentVariation(key, problemInfo.answers)
       setProblemInfo({
         ...problemInfo,
         answers: newAnswers
       })
-      updateVariations(problemIdx, ANSWERS, newAnswers, username, problemInfo.creator, false)
+      update(problemIdx, ANSWERS, newAnswers, username, problemInfo.creator, false)
     } else if (problemInfo.questions.hasOwnProperty(key) && problemInfo.questions[key].length === 0) {
       const newQuestions = removeCurrentVariation(key, problemInfo.questions)
       setProblemInfo({
         ...problemInfo,
         questions: newQuestions
       })
-      updateVariations(problemIdx, QUESTIONS, newQuestions, username, problemInfo.creator, false)
+      update(problemIdx, QUESTIONS, newQuestions, username, problemInfo.creator, false)
     } else {
       alert(menuWords.invalidConditionWarning[languageIdx])
       return
@@ -141,7 +154,10 @@ export function ModifyVariations() {
     const newInfo = game.playMove(info, coord)
     if (problemInfo.questions.hasOwnProperty(newInfo.key) && problemInfo.questions[newInfo.key].length === 0) {
       removeVariationsAndSetVariations(newInfo.key)
-      await checkRequest(problemIdx, problemInfo.creator, newInfo.key)
+      const result = await checkRequest(problemIdx, problemInfo.creator, newInfo.key)
+      if (!result) {
+        logout()
+      }
     }
     setInfo(newInfo)
   }
@@ -151,8 +167,11 @@ export function ModifyVariations() {
     game.clearHistory()
   }
 
-  function deleteProblemAndGoHome() {
-    deleteProblem(problemIdx, username, problemInfo.level)
+  async function deleteProblemAndGoHome() {
+    const result = await deleteProblem(problemIdx, username, problemInfo.level)
+    if (!result) {
+      logout()
+    }
     setOpen(false)
     navigate(HOME)
   }
@@ -166,8 +185,7 @@ export function ModifyVariations() {
       } 
       if (p.creator !== userInfo.name) {
         alert(menuWords.permissionWarning[languageIdx])
-        sessionStorage.clear()
-        navigate(HOME)
+        logout()
       }
       const initialState = p.initialState
       setProblemInfo(p)

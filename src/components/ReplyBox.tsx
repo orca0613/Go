@@ -36,11 +36,15 @@ export function ReplyBox({ problemId }: ReplyBoxProps) {
     setInputValue(e.target.value)
   }
 
+  function logout() {
+    sessionStorage.clear()
+    navigate(LOGIN_PATH)
+  }
+
   async function registerReply() {
     if (!username) {
       alert(menuWords.loginWarning[languageIdx])
-      sessionStorage.clear()
-      navigate(LOGIN_PATH)
+      logout()
     }
     if (!inputValue) {
       alert("please enter reply")
@@ -51,6 +55,8 @@ export function ReplyBox({ problemId }: ReplyBoxProps) {
     if (add) {
       alert(menuWords.saved[languageIdx])
       return location.reload()
+    } else {
+      logout()
     }
   }
 

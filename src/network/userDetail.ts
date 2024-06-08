@@ -4,34 +4,20 @@ import { initialUserInfo } from "../util/initialForms"
 import { USERDETAIL_DB_PATH } from "../util/paths"
 import { CreatorInfo, UserDetailFromServer, UserInfo } from "../util/types"
 
-export async function addElement(element: number, name: string, where: string) {
+export async function addElement(element: number, name: string, where: string): Promise<boolean> {
   const userInfo: UserInfo = JSON.parse(sessionStorage.getItem(USERINFO) || initialUserInfo)
   const token = userInfo.token
   const requestForm = getRequestForm(PATCH, token, JSON.stringify({element, name, where}))
   const response = await fetch(`${API_URL}${USERDETAIL_DB_PATH}/add-element`, requestForm)
   if (response.ok) {
-    return
+    return true
   }
   if (response.status === 401 || 403) {
-    return loginWarning()
+    loginWarning()
+    return false
   }
   throw new Error(`Error: ${response.status}`)
 
-}
-
-
-export async function deleteElement(element: number, name: string, where: string) {
-  const userInfo: UserInfo = JSON.parse(sessionStorage.getItem(USERINFO) || initialUserInfo)
-  const token = userInfo.token
-  const requestForm = getRequestForm(PATCH, token, JSON.stringify({element, name, where}))
-  const response = await fetch(`${API_URL}${USERDETAIL_DB_PATH}/delete-element`, requestForm)
-  if (response.ok) {
-    return
-  }
-  if (response.status === 401 || 403) {
-    return loginWarning()
-  }
-  throw new Error(`Error: ${response.status}`)
 }
 
 export async function getUserDetail(name: string): Promise<UserDetailFromServer> {

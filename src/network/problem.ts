@@ -6,7 +6,7 @@ import { Board, ProblemAndVariations, UserInfo } from "../util/types";
 import { PROBLEM_DB_PATH } from "../util/paths";
 import { initialUserInfo, initialVariations } from "../util/initialForms";
 
-export async function createProblem(comment: string, problem: Board, creator: string | null, level: number, color: string) {
+export async function createProblem(comment: string, problem: Board, creator: string | null, level: number, color: string): Promise<boolean> {
   const languageIdx = Number(localStorage.getItem(LANGUAGE_IDX))
 
   const initialState = problem;
@@ -18,25 +18,29 @@ export async function createProblem(comment: string, problem: Board, creator: st
   const requestForm = getRequestForm(POST, token, JSON.stringify({initialState, creator, variations, answers, questions, level, comment, color}))
   const response = await fetch(`${API_URL}${PROBLEM_DB_PATH}/create`, requestForm)
   if (response.ok) {
-    return alert(menuWords.registered[languageIdx])
+    alert(menuWords.registered[languageIdx])
+    return true
   }
   if (response.status === 401 || response.status === 403) {
-    return loginWarning()
+    loginWarning()
+    return false
   }
   throw new Error(`Error: ${response.status}`)
 }
 
-export async function deleteProblem(problemIdx: number, creator: string, level: number) {
+export async function deleteProblem(problemIdx: number, creator: string, level: number): Promise<boolean> {
   const languageIdx = Number(localStorage.getItem(LANGUAGE_IDX))
   const userInfo: UserInfo = JSON.parse(sessionStorage.getItem(USERINFO) || initialUserInfo)
   const token = userInfo.token
   const requestForm = getRequestForm(DELETE, token, JSON.stringify({problemIdx, creator, level}))
   const response = await fetch(`${API_URL}${PROBLEM_DB_PATH}/delete`, requestForm)
   if (response.ok) {
-    return alert(menuWords.deletedProblemWarning[languageIdx])
+    alert(menuWords.deletedProblemWarning[languageIdx])
+    return true
   } 
   if (response.status === 401 || response.status === 403) {
-    return loginWarning()
+    loginWarning()
+    return false
   }
   throw new Error(`Error: ${response.status}`)
 }
@@ -50,7 +54,7 @@ export async function getProblemByIdx(problemIdx: number): Promise<ProblemAndVar
   return problem
 }
 
-export async function updateVariations(problemIdx: number, where: string, variations: object, name: string, creator: string, save: boolean) {
+export async function updateVariations(problemIdx: number, where: string, variations: object, name: string, creator: string, save: boolean): Promise<boolean> {
   const languageIdx = Number(localStorage.getItem(LANGUAGE_IDX))
   const userInfo: UserInfo = JSON.parse(sessionStorage.getItem(USERINFO) || initialUserInfo)
   const token = userInfo.token
@@ -58,21 +62,22 @@ export async function updateVariations(problemIdx: number, where: string, variat
   const response = await fetch(`${API_URL}${PROBLEM_DB_PATH}/update-variations`, requestForm)
   if (response.ok) {
     if (save) {
-      return alert(menuWords.saved[languageIdx])
+      alert(menuWords.saved[languageIdx])
     } else {
       if (!_.isEqual(where, QUESTIONS)) {
         alert(menuWords.deletedNotice[languageIdx])
       }
-      return
     }
+    return true
   }
   if (response.status === 401 || 403) {
-    return loginWarning()
+    loginWarning()
+    return false
   }
   throw new Error(`Error: ${response.status}`)
 }
 
-export async function modifyProblem(problemIdx: number, problem: Board, comment: string, level: number, color: string, creator: string) {
+export async function modifyProblem(problemIdx: number, problem: Board, comment: string, level: number, color: string, creator: string): Promise<boolean> {
   const languageIdx = Number(localStorage.getItem(LANGUAGE_IDX))
   const initialState = problem
   const userInfo: UserInfo = JSON.parse(sessionStorage.getItem(USERINFO) || initialUserInfo)
@@ -80,10 +85,12 @@ export async function modifyProblem(problemIdx: number, problem: Board, comment:
   const requestForm = getRequestForm(PATCH, token, JSON.stringify({problemIdx, initialState, comment, level, color, creator}))
   const response = await fetch(`${API_URL}${PROBLEM_DB_PATH}/modify-problem`, requestForm)
   if (response.ok) {
-    return alert(menuWords.modifiedNotice[languageIdx])
+    alert(menuWords.modifiedNotice[languageIdx])
+    return true
   } 
   if (response.status === 401 || 403) {
-    return loginWarning()
+    loginWarning()
+    return false
   }
   throw new Error(`Error: ${response.status}`)
 }

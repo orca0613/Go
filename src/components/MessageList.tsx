@@ -3,7 +3,7 @@ import { MessageForm, UserInfo } from "../util/types";
 import { ChangeEvent, useEffect, useState } from "react";
 import { checkMessage, getReceivedMessage, getSentMessage, hideMessage } from "../network/message";
 import { menuWords } from "../util/menuWords";
-import { LANGUAGE_IDX, USERINFO, messagesPerPage } from "../util/constants";
+import { HOME, LANGUAGE_IDX, USERINFO, messagesPerPage } from "../util/constants";
 import { useNavigate } from "react-router-dom";
 import { nameButtonStyle } from "../util/styles";
 import SendMessageForm from "./SendMessageForm";
@@ -96,9 +96,13 @@ export default function MessageList() {
     setOpenSend(openSend + 1)
   }
 
-  function openMessage(message: MessageForm) {
+  async function openMessage(message: MessageForm) {
     if (!message.checked) {
-      checkMessage(message._id)
+      const check = await checkMessage(message._id)
+      if (!check) {
+        sessionStorage.clear()
+        navigate(HOME)
+      }
     }
     let content = ""
     let url = ""
@@ -135,7 +139,11 @@ export default function MessageList() {
         idList.push(messageList[startIdx + i]._id)
       }
     }
-    await hideMessage(idList.join("&"), where)
+    const hide = await hideMessage(idList.join("&"), where)
+    if (!hide) {
+      sessionStorage.clear()
+      navigate(HOME)
+    }
     setChecked(0)
     setDeleted(!deleted)
   }

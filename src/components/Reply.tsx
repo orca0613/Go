@@ -4,6 +4,9 @@ import { LANGUAGE_IDX, USERINFO } from "../util/constants";
 import { hideReply } from "../network/reply";
 import { menuWords } from "../util/menuWords";
 import { initialUserInfo } from "../util/initialForms";
+import { loginWarning } from "../util/functions";
+import { useNavigate } from "react-router-dom";
+import { LOGIN_PATH } from "../util/paths";
 
 
 interface ReplyProps {
@@ -12,6 +15,7 @@ interface ReplyProps {
 export function Reply({ replyForm }: ReplyProps) {
   const userInfo: UserInfo = JSON.parse(sessionStorage.getItem(USERINFO) || initialUserInfo)
   const languageIdx = Number(localStorage.getItem(LANGUAGE_IDX))
+  const navigate = useNavigate()
   const divider = <Divider orientation="horizontal" sx={{borderColor: "whitesmoke" }} />
 
   const comment = replyForm.deleted? menuWords.deletedComment[languageIdx] : replyForm.comment
@@ -21,6 +25,10 @@ export function Reply({ replyForm }: ReplyProps) {
     if (del) {
       alert(menuWords.deletedNotice[languageIdx])
       return location.reload()
+    } else {
+      loginWarning()
+      sessionStorage.clear()
+      navigate(LOGIN_PATH)
     }
   }
 

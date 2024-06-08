@@ -4,7 +4,7 @@ import { initialUserInfo } from "../util/initialForms"
 import { MESSAGE_DB_PATH } from "../util/paths"
 import { UserInfo } from "../util/types"
 
-export async function sendMessage(sender: string, receiver: string, title: string, contents: string, quotation: string) {
+export async function sendMessage(sender: string, receiver: string, title: string, contents: string, quotation: string): Promise<boolean> {
   if (!title) {
     title = "No title"
   }
@@ -19,7 +19,8 @@ export async function sendMessage(sender: string, receiver: string, title: strin
     return true
   }
   if (response.status === 401 || 403) {
-    return loginWarning()
+    loginWarning()
+    return false
   }
   throw new Error(`Error: ${response.status}`)
 }

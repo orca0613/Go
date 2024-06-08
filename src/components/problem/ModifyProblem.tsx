@@ -86,13 +86,17 @@ export function ModifyProblem() {
     setProblem(makingEmptyBoard(boardSize))
   }
 
-  function checkAndModify() {
+  async function checkAndModify() {
     if (info.comment.length > 50) {return}
     if (!isLegalBoard(problem)) {
       alert(menuWords.invalidBoardWarning[languageIdx])
       return
     }
-    modifyProblem(problemIdx, problem, info.comment, info.level, info.turn, info.creator)
+    const result = await modifyProblem(problemIdx, problem, info.comment, info.level, info.turn, info.creator)
+    if (!result) {
+      sessionStorage.clear()
+      navigate(HOME)
+    }
   }
 
   useEffect(() => {
