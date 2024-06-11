@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { BoardInfo, Coordinate, UserInfo, Variations } from '../../util/types'
 import _ from 'lodash'
-import { addCurrentVariation, removeCurrentVariation } from '../../util/functions'
+import { addCurrentVariation, loginWarning, removeCurrentVariation } from '../../util/functions'
 import { Box, Button, ButtonGroup, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle } from '@mui/material'
 import { ANSWERS, HOME, LANGUAGE_IDX, MARGIN, QUESTIONS, USERINFO, VARIATIONS } from '../../util/constants'
 import FinalBoard from '../board/FinalBoard'
@@ -41,7 +41,7 @@ export function ModifyVariations() {
     problemInfo.variations,
     problemInfo.color,
   ))
-  const [open, setOpen] = useState(false)
+  const [openWarning, setOpenWarning] = useState(false)
 
   const mobileIconSize = width / 20
   const IconSize = width / 70
@@ -58,6 +58,19 @@ export function ModifyVariations() {
   const buttonStyle = {
     margin: margin,
     textTransform: "none",
+  }
+
+  const dialogContent = (title: string, content: string) => {
+    return (
+      <>
+        <DialogTitle>{title}</DialogTitle>
+        <DialogContent>
+          <DialogContentText>
+            {content}
+          </DialogContentText>
+        </DialogContent>
+      </>
+    )
   }
 
   function goToLast() {
@@ -86,10 +99,7 @@ export function ModifyVariations() {
   }
 
   async function update(problemIdx: number, where: string, vars: Variations, name: string, creator: string, save: boolean) {
-    const result = await updateVariations(problemIdx, where, vars, name, creator, save)
-    if (!result) {
-      logout()
-    }
+    await updateVariations(problemIdx, where, vars, name, creator, save)
   }
 
   async function addVariationsAndSetVariations() {
@@ -150,33 +160,26 @@ export function ModifyVariations() {
 
 
 
+
   async function handleClick(coord: Coordinate) {
     const newInfo = game.playMove(info, coord)
+    setInfo(newInfo)
     if (problemInfo.questions.hasOwnProperty(newInfo.key) && problemInfo.questions[newInfo.key].length === 0) {
       removeVariationsAndSetVariations(newInfo.key)
-      const result = await checkRequest(problemIdx, problemInfo.creator, newInfo.key)
-      if (!result) {
-        logout()
-      }
+      await checkRequest(problemIdx, problemInfo.creator, newInfo.key)
     }
-    setInfo(newInfo)
-  }
-
-  function reset() {
-    setInfo(initInfo)
-    game.clearHistory()
   }
 
   async function deleteProblemAndGoHome() {
-    const result = await deleteProblem(problemIdx, username, problemInfo.level)
-    if (!result) {
-      logout()
-    }
-    setOpen(false)
+    await deleteProblem(problemIdx, username, problemInfo.level)
+    setOpenWarning(false)
     navigate(HOME)
   }
 
   useEffect(() => {
+    if (!userInfo.name) {
+      logout()
+    }
     getProblemByIdx(problemIdx)
     .then(p => {
       if (!p) {
@@ -219,7 +222,7 @@ export function ModifyVariations() {
       <Button onClick={goToNextMove}>{rightArrowIcon}</Button>
       <Button onClick={goToLast}>{lastIcon}</Button>
     </ButtonGroup>
-    <Button sx={{...mobileButtonStyle, color: "red"}} onClick={() => setOpen(true)}>{menuWords.deleteProblem[languageIdx]}</Button>
+    <Button sx={{...mobileButtonStyle, color: "red"}} onClick={() => setOpenWarning(true)}>{menuWords.deleteProblem[languageIdx]}</Button>
   </Box>
 
   const wideMenu = 
@@ -234,7 +237,7 @@ export function ModifyVariations() {
     <Button sx={wideButtonStyle} onClick={addVariationsAndSetVariations}>{menuWords.addVariation[languageIdx]}</Button>
     <Button sx={wideButtonStyle} onClick={() => removeVariationsAndSetVariations(info.key)}>{menuWords.removeVariation[languageIdx]}</Button>
     <Button color='warning' sx={{...wideButtonStyle, mt: 5}} onClick={() => navigate(`/modify-problem/${problemIdx}`)}>{menuWords.modifyProblem[languageIdx]}</Button>
-    <Button sx={{...wideButtonStyle, mt: 5, color: "red"}} onClick={() => setOpen(true)}>{menuWords.deleteProblem[languageIdx]}</Button>
+    <Button sx={{...wideButtonStyle, mt: 5, color: "red"}} onClick={() => setOpenWarning(true)}>{menuWords.deleteProblem[languageIdx]}</Button>
   </Box>
 
   return (
@@ -258,18 +261,13 @@ export function ModifyVariations() {
       <Box>
         {isMobile? mobileBottomMenu : <></>}
       </Box>
-      <Dialog open={open} onClose={() => setOpen(false)}>
-        <DialogTitle>{menuWords.confirmRequest[languageIdx]}</DialogTitle>
-        <DialogContent>
-          <DialogContentText>
-            {menuWords.deleteProblemWarning[languageIdx]}
-          </DialogContentText>
-        </DialogContent>
+      <Dialog open={openWarning} onClose={() => setOpenWarning(false)}>
+        {dialogContent(menuWords.confirmRequest[languageIdx], menuWords.deleteProblemWarning[languageIdx])}
         <DialogActions>
           <Button onClick={deleteProblemAndGoHome} sx={{textTransform: "none"}} color="primary" autoFocus>
             {menuWords.confirm[languageIdx]}
           </Button>
-          <Button onClick={() => setOpen(false)} sx={{textTransform: "none"}} color="primary">
+          <Button onClick={() => setOpenWarning(false)} sx={{textTransform: "none"}} color="primary">
             {menuWords.cancel[languageIdx]}
           </Button>
         </DialogActions>

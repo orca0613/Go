@@ -5,8 +5,6 @@ import { UserInfo } from "../util/types"
 import { Favorite, FavoriteBorder } from "@mui/icons-material"
 import { initialUserInfo } from "../util/initialForms"
 import { getSampleProblemByIdx, handleLiked } from "../network/sampleProblem"
-import { useNavigate } from "react-router-dom"
-import { LOGIN_PATH } from "../util/paths"
 
 interface LADProps {
   problemIdx: number,
@@ -16,7 +14,6 @@ interface LADProps {
 
 export function Like({ problemIdx, username, creator }: LADProps) {
   const userInfo: UserInfo = JSON.parse(sessionStorage.getItem(USERINFO) || initialUserInfo)
-  const navigate = useNavigate()
   const [info, setInfo] = useState({
     like: false,
     likeCount: 0,
@@ -26,11 +23,7 @@ export function Like({ problemIdx, username, creator }: LADProps) {
     const c = info.likeCount
     const idx = userInfo.liked.indexOf(problemIdx)
     if (info.like) {
-      const result = await handleLiked(problemIdx, username, creator, false)
-      if (!result) {
-        sessionStorage.clear()
-        navigate(LOGIN_PATH)
-      }
+      await handleLiked(problemIdx, username, creator, false)
       setInfo({
         like: false,
         likeCount: c - 1
@@ -52,16 +45,13 @@ export function Like({ problemIdx, username, creator }: LADProps) {
   }
 
   useEffect(() => {
-    if (problemIdx >= 0) {
-      getSampleProblemByIdx(problemIdx)
-      .then(information => {
-        setInfo({
-          like: userInfo.liked.includes(problemIdx),
-          likeCount: Number(information),
-        })
+    getSampleProblemByIdx(problemIdx)
+    .then(information => {
+      setInfo({
+        like: userInfo.liked.includes(problemIdx),
+        likeCount: Number(information),
       })
-
-    }
+    })
   }, [problemIdx])
   return (
     <Box textAlign="center" display="flex" alignItems="center" justifyContent="center">

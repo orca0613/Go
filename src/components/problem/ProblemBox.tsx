@@ -1,10 +1,10 @@
 import { useEffect, useState } from 'react'
 import { Coordinate, BoardInfo, UserInfo } from '../../util/types'
 import _ from 'lodash'
-import { addCurrentVariation } from '../../util/functions'
+import { addCurrentVariation, loginWarning } from '../../util/functions'
 import { ANSWER, HOME, LANGUAGE_IDX, MARGIN, PROBLEM_INDEX, PROBLEM_INDICES, QUESTIONS, SELF, SOLVED, TRIED, TRY, USERINFO } from '../../util/constants'
 import FinalBoard from '../board/FinalBoard'
-import { Alert, Box, Button, ButtonGroup, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, Divider, Snackbar, Typography } from '@mui/material'
+import { Alert, Box, Button, ButtonGroup, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, Snackbar, Typography } from '@mui/material'
 import { menuWords } from '../../util/menuWords'
 import { addCorrectUser, addWrong, changeCount } from '../../network/problemInformation'
 import { addElement } from '../../network/userDetail'
@@ -124,47 +124,38 @@ export function ProblemBox() {
 
   }
   useEffect(() => {
-    if (userInfo.name) {
-      getProblemByIdx(problemIdx)
-      .then(async p => {
-        if (!p) {
-          alert(menuWords.wrongIndexWarning[languageIdx])
-          return navigate(HOME)
-        } 
-        const result = await changeCount(problemIdx, "view", username, 1)
-        if (!result) {
-          logout()
-        }
-        setProblemInfo(p)
-        if (!userInfo.tried.includes(problemIdx)) {
-          await addElement(problemIdx, username, TRIED)
-          userInfo.tried.push(problemIdx)
-          sessionStorage.setItem(USERINFO, JSON.stringify(userInfo))
-        }
-        setInfo({
-          board: p.initialState,
-          color: p.color,
-          key: "0"
-        }) 
-        setGame(new Game(
-          p.initialState,
-          p.answers,
-          p.variations,
-          p.color
-        ))
-        setSolved(userInfo.solved.includes(problemIdx))
-      })
-    } else {
-      alert(menuWords.loginWarning[languageIdx])
-      logout()
+    if (!userInfo.name) {
+      loginWarning()
+      navigate(LOGIN_PATH)
     }
+    getProblemByIdx(problemIdx)
+    .then(async p => {
+      if (!p) {
+        alert(menuWords.wrongIndexWarning[languageIdx])
+        return navigate(HOME)
+      } 
+      await changeCount(problemIdx, "view", username, 1)
+      setProblemInfo(p)
+      if (!userInfo.tried.includes(problemIdx)) {
+        await addElement(problemIdx, username, TRIED)
+        userInfo.tried.push(problemIdx)
+        sessionStorage.setItem(USERINFO, JSON.stringify(userInfo))
+      }
+      setInfo({
+        board: p.initialState,
+        color: p.color,
+        key: "0"
+      }) 
+      setGame(new Game(
+        p.initialState,
+        p.answers,
+        p.variations,
+        p.color
+      ))
+      setSolved(userInfo.solved.includes(problemIdx))
+    })
     modeChange(TRY)
   }, [problemIdx])
-
-  function logout() {
-    sessionStorage.clear()
-    navigate(LOGIN_PATH)
-  }
 
   function reset() {
     setInfo(initInfo)
@@ -182,32 +173,32 @@ export function ProblemBox() {
   }
 
   function handleClick(coord: Coordinate) {
-    if (mode === TRY) {
-      if (info.color !== problemInfo.color) {
-        return
-      }
-      const newInfo = game.tryMove(info, coord)
-      if (newInfo.key === info.key) {
-        return
-      }
-      if (newInfo.color === problemInfo.color) {
-        if (problemInfo.variations.hasOwnProperty(newInfo.key) && problemInfo.variations[newInfo.key].length === 0) {
-          handleWrong()
-        } else if (problemInfo.answers.hasOwnProperty(newInfo.key) && problemInfo.answers[newInfo.key].length === 0) {
-          handleCorrect()
-        }
-      } else {
-        if (problemInfo.answers.hasOwnProperty(newInfo.key) && problemInfo.answers[newInfo.key].length === 0) {
-          handleCorrect()
-        } else {
-          requestSuggestion()
-        }
-      }
-      setInfo(newInfo)
-    } else {
+    if (mode !== TRY) {
       const newInfo = game.playMove(info, coord)
       setInfo(newInfo)
+      return
     }
+    if (info.color !== problemInfo.color) {
+      return
+    }
+    const newInfo = game.tryMove(info, coord)
+    if (newInfo.key === info.key) {
+      return
+    }
+    if (newInfo.color === problemInfo.color) {
+      if (problemInfo.variations.hasOwnProperty(newInfo.key) && problemInfo.variations[newInfo.key].length === 0) {
+        handleWrong()
+      } else if (problemInfo.answers.hasOwnProperty(newInfo.key) && problemInfo.answers[newInfo.key].length === 0) {
+        handleCorrect()
+      }
+    } else {
+      if (problemInfo.answers.hasOwnProperty(newInfo.key) && problemInfo.answers[newInfo.key].length === 0) {
+        handleCorrect()
+      } else {
+        requestSuggestion()
+      }
+    }
+    setInfo(newInfo)
   }
 
   function goToPreviousMove() {
@@ -245,14 +236,8 @@ export function ProblemBox() {
       ...problemInfo,
       questions: newQuestions
     })
-    const result = await updateVariations(problemIdx, QUESTIONS, newQuestions, username, problemInfo.creator, true)
-    if (!result) {
-      logout()
-    }
-    const sent = sendRequest(problemIdx, problemInfo.creator, username, info.key)
-    if (!sent) {
-      logout()
-    }
+    await updateVariations(problemIdx, QUESTIONS, newQuestions, username, problemInfo.creator, true)
+    await sendRequest(problemIdx, problemInfo.creator, username, info.key)
     setDialogInfo({
       ...dialogInfo,
       open: false
@@ -292,10 +277,7 @@ export function ProblemBox() {
       modeChange(TRY)
       return
     } else {
-      const result = await addElement(problemIdx, username, SOLVED)
-      if (!result) {
-        logout()
-      }
+      await addElement(problemIdx, username, SOLVED)
       modeChange(ANSWER)
       addSolved(problemInfo.problemIdx)
       setSolved(true)
@@ -312,10 +294,7 @@ export function ProblemBox() {
     if (solved) {
       return
     }
-    const result = await addWrong(problemInfo._id, username, userLevel)
-    if (!result) {
-      logout()
-    }
+    await addWrong(problemInfo.problemIdx, username, userLevel, problemInfo.level)
   }
 
   async function requestSuggestion() {
@@ -328,10 +307,7 @@ export function ProblemBox() {
     if (solved) {
       return
     }
-    const result = await addWrong(problemInfo._id, username, userLevel)
-    if (!result) {
-      logout()
-    }
+    await addWrong(problemInfo.problemIdx, username, userLevel, problemInfo.level)
   }
 
   function addSolved(idx: number) {
@@ -348,10 +324,7 @@ export function ProblemBox() {
     }
     setAlertInfo(newAlertInfo)
     if (!solved) {
-      const result = await addCorrectUser(problemInfo.problemIdx, username, userLevel)
-      if (!result) {
-        logout()
-      }
+      await addCorrectUser(problemInfo.problemIdx, username, userLevel, problemInfo.level)
       setSolved(true)
       addSolved(problemIdx)
     }

@@ -4,12 +4,13 @@ import SampleProblemBox from './SampleProblemBox'
 import {Box, Divider, FormControl, FormControlLabel, InputLabel, MenuItem, Pagination, Select, SelectChangeEvent, Stack, Switch, useMediaQuery } from '@mui/material'
 import { LANGUAGE_IDX, PAGE, SORTING_IDX, USERINFO, problemsPerPage } from '../../util/constants'
 import { useWindowSize } from 'react-use'
-import { ExcludeSolvedProblems, ownParse, resetSortingForm, setProblemIndicies, sortingProblemList } from '../../util/functions'
-import { useParams } from 'react-router-dom'
+import { ExcludeSolvedProblems, loginWarning, ownParse, resetSortingForm, setProblemIndicies, sortingProblemList } from '../../util/functions'
+import { useNavigate, useParams } from 'react-router-dom'
 import { initFilter, initialUserInfo, sortingMethods } from '../../util/initialForms'
 import FilterBox from '../FilterBox'
 import { menuWords } from '../../util/menuWords'
 import { getSampleProblemByFilter } from '../../network/sampleProblem'
+import { LOGIN_PATH } from '../../util/paths'
 
 export default function FilteredProblems() {
 
@@ -31,22 +32,28 @@ export default function FilteredProblems() {
   const [unsolved, setUnsolved] = useState<SampleProblemInformation[]>([])
   const [page, setPage] = useState(Number(sessionStorage.getItem(PAGE)))
   const divider = <Divider orientation="horizontal" sx={{borderColor: "black", my: "5%", border: "0.5px solid black"}} />
+  const navigate = useNavigate()
 
   useEffect(() => {
-    if (params) {
-      const result = getSampleProblemByFilter(params)
-      const newPage = Number(sessionStorage.getItem(PAGE))
-      result.then(r => {
-        setSortingIdx(Number(sessionStorage.getItem(SORTING_IDX)))
-        const newUnsolved = ExcludeSolvedProblems(r, userInfo.solved)
-        const sortedUnsolved: SampleProblemInformation[] = sortingProblemList(newUnsolved, sortingIdx)
-        const sortedProblems: SampleProblemInformation[] = sortingProblemList(r, sortingIdx)
-        exclude? setProblemIndicies(sortedUnsolved) : setProblemIndicies(sortedProblems)
-        setProblems(sortedProblems)
-        setUnsolved(newUnsolved)
-        setPage(newPage)
-      })
+    if (!userInfo.name) {
+      loginWarning()
+      navigate(LOGIN_PATH)
     }
+    if (!params) {
+      return
+    }
+    const result = getSampleProblemByFilter(params)
+    const newPage = Number(sessionStorage.getItem(PAGE))
+    result.then(r => {
+      setSortingIdx(Number(sessionStorage.getItem(SORTING_IDX)))
+      const newUnsolved = ExcludeSolvedProblems(r, userInfo.solved)
+      const sortedUnsolved: SampleProblemInformation[] = sortingProblemList(newUnsolved, sortingIdx)
+      const sortedProblems: SampleProblemInformation[] = sortingProblemList(r, sortingIdx)
+      exclude? setProblemIndicies(sortedUnsolved) : setProblemIndicies(sortedProblems)
+      setProblems(sortedProblems)
+      setUnsolved(newUnsolved)
+      setPage(newPage)
+    })
   }, [params])
 
   const methodBox = 

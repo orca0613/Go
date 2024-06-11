@@ -83,16 +83,9 @@ export default function SendMessageForm({ receiver, sender, open }: SendMessageF
   </Modal>
 
   async function sendMessageAndClose() {
-    const result = await sendMessage(sender, receiver, messageTitle, messageContents, "")
-    if (result) {
-      alert(menuWords.sent[languageIdx])
-    } else {
-      sessionStorage.clear()
-      navigate(HOME)
-    }
+    await sendMessage(sender, receiver, messageTitle, messageContents, "")
     setOpenModal(false)
   }
-
   return (
     <Box>
       {sendMessageForm}

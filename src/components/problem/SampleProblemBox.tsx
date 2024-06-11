@@ -14,7 +14,7 @@ interface SampleProblemBoxProps {
   request?: boolean
 }
 
-export default function SampleProblemBox({ problems, request, page}: SampleProblemBoxProps) {
+export default function SampleProblemBox({ problems, request, page }: SampleProblemBoxProps) {
   const userInfo: UserInfo = JSON.parse(sessionStorage.getItem(USERINFO) || initialUserInfo)
   const languageIdx = Number(localStorage.getItem(LANGUAGE_IDX))
   const navigate = useNavigate()

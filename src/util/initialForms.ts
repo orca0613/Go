@@ -24,7 +24,7 @@ export const flowerPointPosition: Coordinate[][] = [
 
 export const initialProblemInfo: ProblemAndVariations = {
   _id: "",
-  problemIdx: -1,
+  problemIdx: 0,
   initialState: [["."]],
   variations: {},
   answers: {},

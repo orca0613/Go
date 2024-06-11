@@ -1,4 +1,4 @@
-import { Box, Typography, useMediaQuery } from "@mui/material";
+import { Box, Button, useMediaQuery } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import { NavButton } from "./NavButton";
 import { HOME, LANGUAGE_IDX, USERINFO, SITE_NAME, mobileFontSize } from "../../util/constants";
@@ -50,20 +50,19 @@ export function PagesMenu() {
 
   return (
     <>
-      <Typography sx={{
+      <Button sx={{
         fontWeight: 700,
         fontSize: isMobile? 15 : 20,
         textDecoration: "none",
         color: "inherit",
-        mr: "2%"
+        mr: "2%",
+        padding: 0,
       }}
-      component="a"
-      href={HOME}
-      noWrap
+      onClick={() =>navigate(HOME)}
       
       >
         {SITE_NAME}
-      </Typography>
+      </Button>
 
       <Box sx={{ flexGrow: 1, display: "flex" }}>
         {problems}

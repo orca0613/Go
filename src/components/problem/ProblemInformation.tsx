@@ -32,22 +32,20 @@ export function ProblemInformation({ problemInfo }: PIProps) {
   })
 
   useEffect(() => {
-    if (problemInfo && problemInfo._id) {
-      getProblemInformations(problemInfo.problemIdx)
-      .then(information => {
-        setInfo({
-          color: problemInfo.color,
-          creator: problemInfo.creator,
-          level: problemInfo.level,
-          view: information.view,
-          correct: information.correctUser.length,
-          wrong: information.wrong,
-          totalCorrectUserLevel: information.totalCorrectUserLevel,
-          totalWrongUserLevel: information.totalWrongUserLevel,
-          comment: problemInfo.comment
-        })
+    getProblemInformations(problemInfo.problemIdx)
+    .then(information => {
+      setInfo({
+        color: problemInfo.color,
+        creator: problemInfo.creator,
+        level: problemInfo.level,
+        view: information.view,
+        correct: information.correctUser.length,
+        wrong: information.wrong,
+        totalCorrectUserLevel: information.totalCorrectUserLevel,
+        totalWrongUserLevel: information.totalWrongUserLevel,
+        comment: problemInfo.comment
       })
-    }
+    })
   }, [problemInfo])
 
   const mobileVersion = 

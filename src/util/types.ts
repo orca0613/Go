@@ -61,6 +61,11 @@ export type UserInfo = {
   language: number,
   auto: boolean,
   totalLike: number,
+  wrong: object,
+  wrongPerLevel: object,
+  totalWrong: number,
+  correctPerLevel: object,
+  totalCorrect: number
 }
 
 export type UserDetailFromServer = {
@@ -77,6 +82,11 @@ export type UserDetailFromServer = {
   auto: boolean,
   level: number,
   totalLike: number,
+  wrong: object,
+  wrongPerLevel: object,
+  totalWrong: number,
+  correctPerLevel: object,
+  totalCorrect: number
 }
 
 export type Filter = {

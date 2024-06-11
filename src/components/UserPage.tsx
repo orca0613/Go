@@ -10,6 +10,8 @@ import { useWindowSize } from 'react-use';
 import FinalBoard from './board/FinalBoard';
 import SendMessageForm from './SendMessageForm';
 import { getRepresentativeProblem, getSolvedProblem } from '../network/sampleProblem';
+import { loginWarning } from '../util/functions';
+import { LOGIN_PATH } from '../util/paths';
 
 export default function UserPage() {
   const { name } = useParams()
@@ -27,31 +29,38 @@ export default function UserPage() {
   const [open, setOpen] = useState(0)
 
   useEffect(() => {
-    if (name) {
-      getUserDetail(name)
-      .then(i => {
-        setInfo({
-          ...info,
-          name: name,
-          created: i.created,
-          solved: i.solved,
-          liked: i.liked,
-          language: i.language,
-          level: i.level,
-          totalLike: i.totalLike
-        })
-        const newLevel = i.level > 0? String(i.level) + menuWords.K[languageIdx] : String(Math.abs(i.level)) + menuWords.D[languageIdx]
-        setLevel(newLevel)
-        getRepresentativeProblem(name)
-        .then(c => {
-          setCreated(c)
-        })
-        getSolvedProblem(name)
-        .then(s => {
-          setSolved(s)
-        })
-      })
+    if (!userInfo.name) {
+      loginWarning()
+      navigate(LOGIN_PATH)
     }
+    if (!name) {
+      return
+    }
+    getUserDetail(name)
+    .then(i => {
+      setInfo({
+        ...info,
+        name: name,
+        created: i.created,
+        solved: i.solved,
+        liked: i.liked,
+        language: i.language,
+        level: i.level,
+        totalLike: i.totalLike,
+        totalWrong: i.totalWrong,
+        totalCorrect: i.totalCorrect,
+      })
+      const newLevel = i.level > 0? String(i.level) + menuWords.K[languageIdx] : String(Math.abs(i.level)) + menuWords.D[languageIdx]
+      setLevel(newLevel)
+      getRepresentativeProblem(name)
+      .then(c => {
+        setCreated(c)
+      })
+      getSolvedProblem(name)
+      .then(s => {
+        setSolved(s)
+      })
+    })
   }, [name])
 
   const messageIcon = 
@@ -63,28 +72,60 @@ export default function UserPage() {
         textAlign="center" 
         alignContent="center"
       >
-        <Typography variant='h4'>{title}</Typography>
+        <Typography variant="body1" mt={1}>{title}</Typography>
         <Typography variant='caption' color="gray">{content}</Typography>
       </Box>
     )
   }
 
-  const profile = 
-  <Box justifyContent="center">
-    <Box display="flex" justifyContent="center" alignContent="center">
-      <Typography sx={{alignContent: "center", color: "teal", fontSize: width / 20, my: 3}}>{info.name}</Typography>
-      <Button size='small' onClick={() => setOpen(open + 1)}>{messageIcon}</Button>
-    </Box>
-    {divider}
-    <Box
-      display="flex" justifyContent="space-around"
-    >
-      {customBox(level, menuWords.level[languageIdx])}
-      {customBox(String(info.created.length), menuWords.createdProblem[languageIdx])}
-      {customBox(String(info.totalLike), menuWords.like[languageIdx])}
-      {customBox(String(info.solved.length), menuWords.solved[languageIdx])}
-    </Box>
+  const allSeeButton = 
+  <Button 
+  sx={{fontSize: "120%", color: "black", textTransform: "none", display: info.created.length > 4? "" : "none", mx: margin}} 
+  onClick={() => moveToCreated()}
+>
+  {menuWords.seeAll[languageIdx]}
+</Button>
+
+const profile = 
+<Box justifyContent="center">
+  <Box display="flex" justifyContent="center" alignContent="center">
+    <Typography sx={{alignContent: "center", color: "teal", fontSize: width / 20, my: 3}}>{info.name}</Typography>
+    <Button size='small' onClick={() => setOpen(open + 1)}>{messageIcon}</Button>
   </Box>
+  {divider}
+  <Box
+    display="flex" justifyContent="space-around"
+  >
+    {customBox(level, menuWords.level[languageIdx])}
+    {customBox(String(info.created.length), menuWords.createdProblem[languageIdx])}
+    {customBox(String(info.totalLike), menuWords.like[languageIdx])}
+    {customBox(String(info.solved.length), menuWords.solved[languageIdx])}
+  </Box>
+</Box>
+
+  const problemLine = (title: string, problemList: SampleProblemInformation[], count: number, created: boolean) => {
+    return (
+      <Box>
+        <Box display="flex" justifyContent="space-between" alignItems="center">
+          <Typography mx={margin} variant="h6">{`${title} (${count})`}</Typography>
+          {created? allSeeButton : ""}
+        </Box>
+        <Box sx={{display: "flex", flexWrap: "wrap", justifyContent: "space-between"}}>
+          {problemList.map((p, idx) => {
+            return (
+              <Box key={idx} onClick={() => setIdexAndOpenProblem(idx, p.problemIndex, problemList)} m={margin}>
+                <FinalBoard 
+                  lines={p.initialState.length} 
+                  boardWidth={isMobile? width / 2.3 : width / 4.6} 
+                  board={p.initialState}
+                />
+              </Box>
+            )
+          })}
+        </Box>
+      </Box>
+    )
+  }
 
 
   function setIdexAndOpenProblem(index: number, problemIdx: number, problemList: SampleProblemInformation[]) {
@@ -107,47 +148,9 @@ export default function UserPage() {
     <Box>
       {profile}
       {divider}
-      <Box>
-        <Box display="flex" justifyContent="space-between" alignItems="center">
-          <Typography mx={margin} variant="h6">{`${menuWords.createdProblem[languageIdx]} (${info.created.length})`}</Typography>
-          <Button 
-            sx={{fontSize: "120%", color: "black", textTransform: "none", display: info.created.length > 4? "" : "none", mx: margin}} 
-            onClick={() => moveToCreated()}
-          >
-            {menuWords.seeAll[languageIdx]}
-          </Button>
-        </Box>
-        <Box sx={{display: "flex", flexWrap: "wrap", justifyContent: "space-between"}}>
-          {created.map((p, idx) => {
-            return (
-              <Box key={idx} onClick={() => setIdexAndOpenProblem(idx, p.problemIndex, created)} m={margin}>
-                <FinalBoard 
-                  lines={p.initialState.length} 
-                  boardWidth={isMobile? width / 2.3 : width / 4.6} 
-                  board={p.initialState}
-                />
-              </Box>
-            )
-          })}
-        </Box>
-      </Box>
+      {problemLine(menuWords.createdProblem[languageIdx], created, info.created.length, true)}
       {divider}
-      <Box>
-        <Typography mx={margin} variant="h6">{`${menuWords.solved[languageIdx]} (${info.solved.length})`}</Typography>
-        <Box sx={{display: "flex", flexWrap: "wrap", justifyContent: "space-between"}}>
-          {solved.map((p, idx) => {
-            return (
-              <Box key={idx} onClick={() => setIdexAndOpenProblem(idx, p.problemIndex, solved)} m={margin}>
-                <FinalBoard 
-                  lines={p.initialState.length} 
-                  boardWidth={isMobile? width / 2.3 : width / 4.6} 
-                  board={p.initialState}
-                />
-              </Box>
-            )
-          })}
-        </Box>
-      </Box>
+      {problemLine(menuWords.solved[languageIdx], solved, info.solved.length, false)}
       <SendMessageForm receiver={info.name} sender={userInfo.name} open={open}/>
     </Box>
   );

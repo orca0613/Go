@@ -25,11 +25,10 @@ export function Reply({ replyForm }: ReplyProps) {
     if (del) {
       alert(menuWords.deletedNotice[languageIdx])
       return location.reload()
-    } else {
-      loginWarning()
-      sessionStorage.clear()
-      navigate(LOGIN_PATH)
     }
+    loginWarning()
+    sessionStorage.clear()
+    navigate(LOGIN_PATH)
   }
 
 

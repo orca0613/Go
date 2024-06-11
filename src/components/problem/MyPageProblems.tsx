@@ -2,21 +2,24 @@ import { useState, useEffect, ChangeEvent } from 'react';
 import { Box, FormControl, InputLabel, MenuItem, Pagination, Select, SelectChangeEvent, Stack } from '@mui/material';
 import { SampleProblemInformation, UserInfo } from '../../util/types';
 import SampleProblemBox from './SampleProblemBox';
-import { useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { CREATED, LANGUAGE_IDX, LIKED, PAGE, SOLVED, SORTING_IDX, UNRESOLVED, USERINFO, WITHQUESTIONS, problemsPerPage } from '../../util/constants';
 import { menuWords } from '../../util/menuWords';
-import { setProblemIndicies, sortingProblemList } from '../../util/functions';
+import { loginWarning, setProblemIndicies, sortingProblemList } from '../../util/functions';
 import { initialUserInfo, sortingMethods } from '../../util/initialForms';
 import { getSampleProblemByIndexList } from '../../network/sampleProblem';
+import { LOGIN_PATH } from '../../util/paths';
 
 export default function MyPageProblems() {
   const { part } = useParams()
   let idxList: number[] = []
+  const userInfo: UserInfo = JSON.parse(sessionStorage.getItem(USERINFO) || initialUserInfo)
   const [problems, setProblems] = useState<SampleProblemInformation[]>([]);
   const languageIdx = Number(localStorage.getItem(LANGUAGE_IDX))
   const [sortingIdx, setSortingIdx] = useState(Number(sessionStorage.getItem(SORTING_IDX)))
   const methods = sortingMethods[languageIdx]
   const [page, setPage] = useState(Number(sessionStorage.getItem(PAGE)))
+  const navigate = useNavigate()
 
   function sorting(e: SelectChangeEvent) {
     const p = Number(e.target.value)
@@ -29,7 +32,10 @@ export default function MyPageProblems() {
   }
 
   useEffect(() => {
-    const userInfo: UserInfo = JSON.parse(sessionStorage.getItem(USERINFO) || initialUserInfo)
+    if (!userInfo.name) {
+      loginWarning()
+      navigate(LOGIN_PATH)
+    }
     const newPage = Number(sessionStorage.getItem(PAGE))
     switch (part) {
       case (CREATED):

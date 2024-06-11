@@ -8,6 +8,8 @@ import { useNavigate } from "react-router-dom";
 import { nameButtonStyle } from "../util/styles";
 import SendMessageForm from "./SendMessageForm";
 import { initialUserInfo } from "../util/initialForms";
+import { loginWarning } from "../util/functions";
+import { LOGIN_PATH } from "../util/paths";
 
 export default function MessageList() {
   const userInfo: UserInfo = JSON.parse(sessionStorage.getItem(USERINFO) || initialUserInfo)
@@ -54,17 +56,22 @@ export default function MessageList() {
   };
 
   useEffect(() => {
+    if (!userInfo.name) {
+      loginWarning()
+      navigate(LOGIN_PATH)
+    }
     if (received) {
       getReceivedMessage()
       .then(m => {
         setMessageList(m)
       })
-    } else {
-      getSentMessage()
-      .then(m => {
-        setMessageList(m)
-      })
-    }
+      return
+    } 
+    getSentMessage()
+    .then(m => {
+      setMessageList(m)
+    })
+
   }, [received, deleted])
 
   const modal = 
@@ -98,11 +105,7 @@ export default function MessageList() {
 
   async function openMessage(message: MessageForm) {
     if (!message.checked) {
-      const check = await checkMessage(message._id)
-      if (!check) {
-        sessionStorage.clear()
-        navigate(HOME)
-      }
+      await checkMessage(message._id)
     }
     let content = ""
     let url = ""
@@ -139,11 +142,7 @@ export default function MessageList() {
         idList.push(messageList[startIdx + i]._id)
       }
     }
-    const hide = await hideMessage(idList.join("&"), where)
-    if (!hide) {
-      sessionStorage.clear()
-      navigate(HOME)
-    }
+    await hideMessage(idList.join("&"), where)
     setChecked(0)
     setDeleted(!deleted)
   }

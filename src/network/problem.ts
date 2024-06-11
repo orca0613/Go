@@ -1,12 +1,12 @@
 import _ from "lodash";
 import { API_URL, DELETE, LANGUAGE_IDX, PATCH, POST, QUESTIONS, USERINFO } from "../util/constants";
-import { getRequestForm, loginWarning } from "../util/functions";
+import { getRequestForm } from "../util/functions";
 import { menuWords } from "../util/menuWords";
 import { Board, ProblemAndVariations, UserInfo } from "../util/types";
 import { PROBLEM_DB_PATH } from "../util/paths";
 import { initialUserInfo, initialVariations } from "../util/initialForms";
 
-export async function createProblem(comment: string, problem: Board, creator: string | null, level: number, color: string): Promise<boolean> {
+export async function createProblem(comment: string, problem: Board, creator: string | null, level: number, color: string) {
   const languageIdx = Number(localStorage.getItem(LANGUAGE_IDX))
 
   const initialState = problem;
@@ -19,16 +19,16 @@ export async function createProblem(comment: string, problem: Board, creator: st
   const response = await fetch(`${API_URL}${PROBLEM_DB_PATH}/create`, requestForm)
   if (response.ok) {
     alert(menuWords.registered[languageIdx])
-    return true
+    return
   }
   if (response.status === 401 || response.status === 403) {
-    loginWarning()
-    return false
+    sessionStorage.clear()
+    return
   }
   throw new Error(`Error: ${response.status}`)
 }
 
-export async function deleteProblem(problemIdx: number, creator: string, level: number): Promise<boolean> {
+export async function deleteProblem(problemIdx: number, creator: string, level: number) {
   const languageIdx = Number(localStorage.getItem(LANGUAGE_IDX))
   const userInfo: UserInfo = JSON.parse(sessionStorage.getItem(USERINFO) || initialUserInfo)
   const token = userInfo.token
@@ -36,11 +36,11 @@ export async function deleteProblem(problemIdx: number, creator: string, level: 
   const response = await fetch(`${API_URL}${PROBLEM_DB_PATH}/delete`, requestForm)
   if (response.ok) {
     alert(menuWords.deletedProblemWarning[languageIdx])
-    return true
+    return
   } 
   if (response.status === 401 || response.status === 403) {
-    loginWarning()
-    return false
+    sessionStorage.clear()
+    return
   }
   throw new Error(`Error: ${response.status}`)
 }
@@ -54,7 +54,7 @@ export async function getProblemByIdx(problemIdx: number): Promise<ProblemAndVar
   return problem
 }
 
-export async function updateVariations(problemIdx: number, where: string, variations: object, name: string, creator: string, save: boolean): Promise<boolean> {
+export async function updateVariations(problemIdx: number, where: string, variations: object, name: string, creator: string, save: boolean) {
   const languageIdx = Number(localStorage.getItem(LANGUAGE_IDX))
   const userInfo: UserInfo = JSON.parse(sessionStorage.getItem(USERINFO) || initialUserInfo)
   const token = userInfo.token
@@ -68,16 +68,16 @@ export async function updateVariations(problemIdx: number, where: string, variat
         alert(menuWords.deletedNotice[languageIdx])
       }
     }
-    return true
+    return
   }
   if (response.status === 401 || 403) {
-    loginWarning()
-    return false
+    sessionStorage.clear()
+    return
   }
   throw new Error(`Error: ${response.status}`)
 }
 
-export async function modifyProblem(problemIdx: number, problem: Board, comment: string, level: number, color: string, creator: string): Promise<boolean> {
+export async function modifyProblem(problemIdx: number, problem: Board, comment: string, level: number, color: string, creator: string) {
   const languageIdx = Number(localStorage.getItem(LANGUAGE_IDX))
   const initialState = problem
   const userInfo: UserInfo = JSON.parse(sessionStorage.getItem(USERINFO) || initialUserInfo)
@@ -86,11 +86,11 @@ export async function modifyProblem(problemIdx: number, problem: Board, comment:
   const response = await fetch(`${API_URL}${PROBLEM_DB_PATH}/modify-problem`, requestForm)
   if (response.ok) {
     alert(menuWords.modifiedNotice[languageIdx])
-    return true
+    return
   } 
   if (response.status === 401 || 403) {
-    loginWarning()
-    return false
+    sessionStorage.clear()
+    return
   }
   throw new Error(`Error: ${response.status}`)
 }

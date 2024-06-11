@@ -1,5 +1,5 @@
 import { API_URL, PATCH, USERINFO } from "../util/constants"
-import { getRequestForm, loginWarning } from "../util/functions"
+import { getRequestForm } from "../util/functions"
 import { initialUserInfo } from "../util/initialForms"
 import { SAMPLE_PATH } from "../util/paths"
 import { SampleProblemInformation, UserInfo } from "../util/types"
@@ -69,17 +69,17 @@ export async function getSampleProblemByIdx(problemIndex: number): Promise<numbe
   return problem
 }
 
-export async function handleLiked(problemIndex: number, name: string, creator: string, add: boolean): Promise<boolean> {
+export async function handleLiked(problemIndex: number, name: string, creator: string, add: boolean) {
   const userInfo: UserInfo = JSON.parse(sessionStorage.getItem(USERINFO) || initialUserInfo)
   const token = userInfo.token
   const requestForm = getRequestForm(PATCH, token, JSON.stringify({name, problemIndex, creator, add}))
   const response = await fetch(`${API_URL}${SAMPLE_PATH}/handle-liked`, requestForm)
   if (response.ok) {
-    return true
+    return
   }
   if (response.status === 401 || 403) {
-    loginWarning()
-    return false
+    sessionStorage.clear()
+    return
   }
   throw new Error(`Error: ${response.status}`)
 }

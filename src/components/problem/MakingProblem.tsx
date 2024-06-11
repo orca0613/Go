@@ -1,8 +1,8 @@
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { Coordinate, UserInfo } from "../../util/types"
-import { COMMENT, HOME, LANGUAGE_IDX, LEVEL, MARGIN, TURN, USERINFO } from "../../util/constants"
+import { COMMENT, LANGUAGE_IDX, LEVEL, MARGIN, TURN, USERINFO } from "../../util/constants"
 import { Box, Button, ButtonGroup, FormControl, InputLabel, MenuItem, Select, SelectChangeEvent, TextField, useMediaQuery } from "@mui/material"
-import { isLegalBoard, makingEmptyBoard } from "../../util/functions"
+import { isLegalBoard, loginWarning, makingEmptyBoard } from "../../util/functions"
 import { isOutside } from "../../gologic/logic"
 import FinalBoard from "../board/FinalBoard"
 import { menuWords } from "../../util/menuWords"
@@ -12,6 +12,7 @@ import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 import { boardSizeArray, initialUserInfo, levelArray } from "../../util/initialForms"
 import { mobileButtonStyle } from "../../util/styles"
 import { useNavigate } from "react-router-dom"
+import { LOGIN_PATH } from "../../util/paths"
 
 export function MakingProblem() {
   const userInfo: UserInfo = JSON.parse(sessionStorage.getItem(USERINFO) || initialUserInfo)
@@ -30,6 +31,13 @@ export function MakingProblem() {
     color: "b",
     level: 18,
   })  
+
+  useEffect(() => {
+    if (!userInfo.name) {
+      loginWarning()
+      navigate(LOGIN_PATH)
+    }
+  }, [])
   
   function changeInfo(where: string, val:any) {
     setInfo({
@@ -60,11 +68,7 @@ export function MakingProblem() {
       alert(menuWords.invalidBoardWarning[languageIdx])
       return
     }
-    const result = await createProblem(info.comment, problem, creator, info.level, info.turn)
-    if (!result) {
-      sessionStorage.clear()
-      navigate(HOME)
-    }
+    await createProblem(info.comment, problem, creator, info.level, info.turn)
     setProblem(emptyBoard)
     changeInfo(COMMENT, "")
   }

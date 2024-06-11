@@ -2,7 +2,7 @@ import { useEffect, useState } from "react"
 import { Coordinate, UserInfo } from "../../util/types"
 import { COMMENT, HOME, LANGUAGE_IDX, LEVEL, MARGIN, TURN, USERINFO } from "../../util/constants"
 import { Box, Button, ButtonGroup, FormControl, InputLabel, MenuItem, Select, SelectChangeEvent, TextField } from "@mui/material"
-import { isLegalBoard, makingEmptyBoard } from "../../util/functions"
+import { isLegalBoard, loginWarning, makingEmptyBoard } from "../../util/functions"
 import { isOutside } from "../../gologic/logic"
 import FinalBoard from "../board/FinalBoard"
 import { menuWords } from "../../util/menuWords"
@@ -11,6 +11,7 @@ import { useWindowSize } from "react-use"
 import { useNavigate, useParams } from "react-router-dom"
 import { boardSizeArray, initialUserInfo, levelArray } from "../../util/initialForms"
 import { mobileButtonStyle } from "../../util/styles"
+import { LOGIN_PATH } from "../../util/paths"
 
 export function ModifyProblem() {
   const { param } = useParams()
@@ -92,39 +93,36 @@ export function ModifyProblem() {
       alert(menuWords.invalidBoardWarning[languageIdx])
       return
     }
-    const result = await modifyProblem(problemIdx, problem, info.comment, info.level, info.turn, info.creator)
-    if (!result) {
-      sessionStorage.clear()
-      navigate(HOME)
-    }
+    await modifyProblem(problemIdx, problem, info.comment, info.level, info.turn, info.creator)
   }
 
   useEffect(() => {
-    if (problemIdx >= 0) {
-      getProblemByIdx(problemIdx)
-      .then(p => {
-        if (!p) {
-          alert(menuWords.wrongIndexWarning[languageIdx])
-          navigate(HOME)
-        } else {
-          if (p.creator !== userInfo.name) {
-            alert(menuWords.permissionWarning[languageIdx])
-            sessionStorage.clear()
-            navigate(HOME)
-          }
-          const initialState = p.initialState
-          setProblem(initialState)
-          setInfo({
-            creator: p.creator,
-            comment: p.comment,
-            turn: p.color,
-            color: "",
-            level: p.level
-          })
-          setBoardSize(initialState.length)
-        }
-      })
+    if (!userInfo.name) {
+      loginWarning()
+      navigate(LOGIN_PATH)
     }
+    getProblemByIdx(problemIdx)
+    .then(p => {
+      if (!p) {
+        alert(menuWords.wrongIndexWarning[languageIdx])
+        return navigate(HOME)
+      } 
+      if (p.creator !== userInfo.name) {
+        alert(menuWords.permissionWarning[languageIdx])
+        sessionStorage.clear()
+        navigate(HOME)
+      }
+      const initialState = p.initialState
+      setProblem(initialState)
+      setInfo({
+        creator: p.creator,
+        comment: p.comment,
+        turn: p.color,
+        color: "",
+        level: p.level
+      })
+      setBoardSize(initialState.length)
+    })
   }, [problemIdx])
 
   const topMenu = 

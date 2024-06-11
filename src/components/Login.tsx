@@ -57,28 +57,29 @@ export function Login() {
   }
 
   useEffect(() => {
-    if (name) {
-      getUserDetail(name)
-      .then(r => {
-        const userInfo: UserInfo = JSON.parse(sessionStorage.getItem(USERINFO) || initialUserInfo)
-        const newUserInfo: UserInfo = {
-          ...userInfo,
-          point: r.point,
-          created: r.created,
-          withQuestions: r.withQuestions,
-          tried: r.tried,
-          solved: r.solved,
-          liked: r.liked,
-          auto: r.auto,
-          totalLike: r.totalLike,
-        }
-        sessionStorage.setItem(USERINFO, JSON.stringify(newUserInfo))
-        if (r.withQuestions.length) {
-          alert(menuWords.requestWarning[languageIdx])
-        }
-      })
-      movePage(HOME)
+    if (!name) {
+      return
     }
+    getUserDetail(name)
+    .then(r => {
+      const userInfo: UserInfo = JSON.parse(sessionStorage.getItem(USERINFO) || initialUserInfo)
+      const newUserInfo: UserInfo = {
+        ...userInfo,
+        point: r.point,
+        created: r.created,
+        withQuestions: r.withQuestions,
+        tried: r.tried,
+        solved: r.solved,
+        liked: r.liked,
+        auto: r.auto,
+        totalLike: r.totalLike,
+      }
+      sessionStorage.setItem(USERINFO, JSON.stringify(newUserInfo))
+      if (r.withQuestions.length) {
+        alert(menuWords.requestWarning[languageIdx])
+      }
+    })
+    movePage(HOME)
   }, [name])
 
   async function logInAndSetting() {

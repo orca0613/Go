@@ -15,6 +15,7 @@ import { getNumberUnchecked } from '../network/message';
 import { resetSortingForm } from '../util/functions';
 import { LOGIN_PATH, MYPAGE_PATH } from '../util/paths';
 import { initialUserInfo } from '../util/initialForms';
+import { nameButtonStyle } from '../util/styles';
 
 export function Menu() {
   const [open, setOpen] = useState(false);
@@ -79,41 +80,19 @@ export function Menu() {
     navigate(`${MYPAGE_PATH}/${where}`)
   }
 
-  const created = 
-    <NavButton 
-      key="created" 
-      onClick={() => resetPageAndMove(CREATED)}
-      sx={buttonStyle}
-    >
-      {menuWords.created[languageIdx]}
-    </NavButton>
-
-  const solved = 
-    <NavButton 
-      key="solved" 
-      onClick={() => resetPageAndMove(SOLVED)}
-      sx={buttonStyle}
-    >
-      {menuWords.solved[languageIdx]}
-    </NavButton>
-  
-  const unresolved = 
-  <NavButton 
-    key="unresolved" 
-    onClick={() => resetPageAndMove(UNRESOLVED)}
-    sx={buttonStyle}
-  >
-    {menuWords.unresolved[languageIdx]}
-  </NavButton>
-
-  const liked = 
-  <NavButton 
-    key="liked" 
-    onClick={() => resetPageAndMove(LIKED)}
-    sx={buttonStyle}
-  >
-    {menuWords.liked[languageIdx]}
-  </NavButton>
+  const problemMenuButton = (count: number, where: string, title: string) => {
+    return (
+      <ListItem sx={{display: count? "" : "none", justifyContent: "center"}}>
+        <NavButton 
+          key={where}
+          onClick={() => resetPageAndMove(where)}
+          sx={buttonStyle}
+        >
+          {title}
+        </NavButton>
+      </ListItem>
+    )
+  }
 
   const message = 
   unchecked > 0?
@@ -195,8 +174,9 @@ export function Menu() {
       <Drawer anchor="right" open={open} onClose={toggleDrawer(false)}>
         <List>
           <ListItem sx={{justifyContent: "center"}}>
-            <Typography variant='button' sx={{textTransform: "none", color: "gray"}}>{userInfo.name}</Typography>
+            <NavButton onClick={() => navigate(`/userpage/${userInfo.name}`)} sx={nameButtonStyle}>{userInfo.name}</NavButton>
           </ListItem>
+          
           <ListItem sx={{justifyContent: "center"}}>
             <Typography variant='button' sx={{textTransform: "none", color: "gray"}}>{`${Math.abs(level)}${level > 0? menuWords.K[languageIdx] : menuWords.D[languageIdx]} / ${userInfo.point} P`}</Typography>
           </ListItem>
@@ -204,18 +184,10 @@ export function Menu() {
             {message}
           </ListItem>
           {divider}
-          <ListItem sx={{display: userInfo.created.length? "" : "none", justifyContent: "center"}}>
-            {created}
-          </ListItem>
-          <ListItem sx={{display: userInfo.solved.length? "" : "none", justifyContent: "center"}}>
-            {solved}
-          </ListItem>
-          <ListItem sx={{display: unsolved.length? "" : "none", justifyContent: "center"}}>
-            {unresolved}
-          </ListItem>
-          <ListItem sx={{display: userInfo.liked.length? "" : "none", justifyContent: "center"}}>
-            {liked}
-          </ListItem>
+          {problemMenuButton(userInfo.created.length, CREATED, menuWords.created[languageIdx])}
+          {problemMenuButton(userInfo.solved.length, SOLVED, menuWords.solved[languageIdx])}
+          {problemMenuButton(unsolved.length, UNRESOLVED, menuWords.unresolved[languageIdx])}
+          {problemMenuButton(userInfo.liked.length, LIKED, menuWords.liked[languageIdx])}
           <ListItem sx={{display: userInfo.withQuestions.length? "" : "none", justifyContent: "center"}}>
             {withQuestions}
           </ListItem>

@@ -1,20 +1,20 @@
 import { API_URL, LANGUAGE_IDX, PATCH, USERINFO, } from "../util/constants"
-import { getRequestForm, loginWarning } from "../util/functions"
+import { getRequestForm } from "../util/functions"
 import { initialUserInfo } from "../util/initialForms"
 import { USERDETAIL_DB_PATH } from "../util/paths"
 import { CreatorInfo, UserDetailFromServer, UserInfo } from "../util/types"
 
-export async function addElement(element: number, name: string, where: string): Promise<boolean> {
+export async function addElement(element: number, name: string, where: string) {
   const userInfo: UserInfo = JSON.parse(sessionStorage.getItem(USERINFO) || initialUserInfo)
   const token = userInfo.token
   const requestForm = getRequestForm(PATCH, token, JSON.stringify({element, name, where}))
   const response = await fetch(`${API_URL}${USERDETAIL_DB_PATH}/add-element`, requestForm)
   if (response.ok) {
-    return true
+    return
   }
   if (response.status === 401 || 403) {
-    loginWarning()
-    return false
+    sessionStorage.clear()
+    return
   }
   throw new Error(`Error: ${response.status}`)
 

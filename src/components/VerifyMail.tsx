@@ -13,18 +13,16 @@ export default function VerifyMail() {
 
 
   useEffect(() => {
-    if (userId) {
-      verifyMail(userId)
-      .then(r => {
-        if (r) {
-          alert(menuWords.verificationCompleteNotice[languageIdx])
-          navigate("/login")
-        } else {
-          alert(menuWords.wrongApproachWarning)
-          navigate("/home")
-        }
-      })
-    }
+    verifyMail(String(userId))
+    .then(r => {
+      if (r) {
+        alert(menuWords.verificationCompleteNotice[languageIdx])
+        navigate("/login")
+      } else {
+        alert(menuWords.wrongApproachWarning)
+        navigate("/home")
+      }
+    })
     }, [userId])
     
   return (

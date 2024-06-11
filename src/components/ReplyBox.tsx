@@ -23,13 +23,11 @@ export function ReplyBox({ problemId }: ReplyBoxProps) {
   const navigate = useNavigate()
 
   useEffect(() => {
-    if (problemId) {
-      const newAllReplies = getReplies(problemId)
-      newAllReplies.then(r => {
-        setAllReplies(r)
-      })
-      setInputValue("")
-    }
+    const newAllReplies = getReplies(problemId)
+    newAllReplies.then(r => {
+      setAllReplies(r)
+    })
+    setInputValue("")
   }, [problemId, reply])
 
   function handleInputValueChange(e: React.ChangeEvent<HTMLInputElement>) {
@@ -51,13 +49,7 @@ export function ReplyBox({ problemId }: ReplyBoxProps) {
       return
     }
     setReply(inputValue)
-    const add = await addReply(problemId, inputValue, username)
-    if (add) {
-      alert(menuWords.saved[languageIdx])
-      return location.reload()
-    } else {
-      logout()
-    }
+    await addReply(problemId, inputValue, username)
   }
 
   return (

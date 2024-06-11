@@ -1,5 +1,5 @@
-export const API_URL = "http://localhost:3001"
-// export const API_URL = "https://go-problem-test.an.r.appspot.com"
+// export const API_URL = "http://localhost:3001"
+export const API_URL = "https://go-problem-test.an.r.appspot.com"
 export const HOME = "/"
 export const SITE_NAME = "GO-PROBLEM"
 export const bonus = 100
