@@ -22,7 +22,7 @@ function App() {
       <Routes>
         <Route element={<Layout />}>
           <Route path="/login" element={<Login/>} />
-          <Route path="" element={<HomeForm/>} />
+          <Route path="/" element={<HomeForm/>} />
           <Route path="/*" element={<NotFound/>} />
           <Route path="/signup" element={<Signup/>} />
           <Route path="/create" element={<MakingProblem />} />

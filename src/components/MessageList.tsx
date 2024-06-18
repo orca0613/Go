@@ -86,7 +86,7 @@ export default function MessageList() {
           {divider}
           <Box>
             <Typography mb={2}>{contents.contents}</Typography>
-            {contents.includeUrl? <Typography left={0} >{<a style={{color: "teal", textDecoration: "none"}} href={contents.url}>{menuWords.goToTheProblem[languageIdx]}</a>}</Typography> : <></>}
+            {contents.includeUrl? <Button onClick={() => navigate(`/problem/${contents.url}`)} sx={{color: "teal", textDecoration: "none", left: 0}}>{menuWords.goToTheProblem[languageIdx]}</Button> : <></>}
           </Box>
           {divider}
           <Box display="flex" alignItems="center" justifyContent="right">

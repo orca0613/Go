@@ -109,8 +109,15 @@ export class Game {
   }
 
   private addHistory(boardInfo: BoardInfo) {
-    const newHistory = this.history.slice(0, this.idx + 1)
-    this.idx = newHistory.length
+    this.idx += 1
+    if (this.idx === this.history.length) {
+      this.history.push(boardInfo)
+      return
+    }
+    if (_.isEqual(boardInfo.board, this.history[this.idx].board)) {
+      return
+    }
+    const newHistory = this.history.slice(0, this.idx)
     newHistory.push(boardInfo)
     this.history = newHistory
   }

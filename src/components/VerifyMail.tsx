@@ -4,7 +4,8 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { verifyMail } from '../network/user';
 import { HomeForm } from './HomeForm';
 import { menuWords } from '../util/menuWords';
-import { LANGUAGE_IDX } from '../util/constants';
+import { HOME, LANGUAGE_IDX } from '../util/constants';
+import { LOGIN_PATH } from '../util/paths';
 
 export default function VerifyMail() {
   const { userId } = useParams()
@@ -17,10 +18,10 @@ export default function VerifyMail() {
     .then(r => {
       if (r) {
         alert(menuWords.verificationCompleteNotice[languageIdx])
-        navigate("/login")
+        navigate(HOME)
       } else {
-        alert(menuWords.wrongApproachWarning)
-        navigate("/home")
+        alert(menuWords.wrongApproachWarning[languageIdx])
+        navigate(LOGIN_PATH)
       }
     })
     }, [userId])

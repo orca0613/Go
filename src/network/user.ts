@@ -80,7 +80,18 @@ export async function verifyMail(userId: string): Promise<boolean> {
     }
     throw new Error(`Error: ${response.status}`)
   }
-  return true
+  const userInfo: UserInfo = JSON.parse(sessionStorage.getItem(USERINFO) || initialUserInfo)
+  const userData = await response.json()
+  const newUserInfo: UserInfo = {
+    ...userInfo,
+    name: userData.name,
+    level: userData.level,
+    token: userData.token,
+    language: userData.language
+  }
+  localStorage.setItem(LANGUAGE_IDX, userData.language)
+  sessionStorage.setItem(USERINFO, JSON.stringify(newUserInfo))
+  return userData.name
 }
 
 export async function changePassword(id: string, password: string) {

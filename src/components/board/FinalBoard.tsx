@@ -1,9 +1,6 @@
 import { Box } from "@mui/system";
-import { Board, Coordinate, UserInfo } from "../../util/types";
+import { Board, Coordinate } from "../../util/types";
 import Background from "./Background";
-import { USERINFO } from "../../util/constants";
-import { CheckCircleOutline } from "@mui/icons-material";
-import { initialUserInfo } from "../../util/initialForms";
 import EmptyBoard from "./EmptyBoard";
 import Stones from "./Stones";
 
@@ -16,13 +13,10 @@ interface FinalBoardProps {
   answers?: string[]
   questions?: string[]
   onClick?: (c: Coordinate) => void,
-  problemIndex?: number
-  check?: boolean
 }
 
-function FinalBoard({lines, boardWidth, board, moves, variations, answers, questions, onClick, problemIndex, check}: FinalBoardProps) {
+function FinalBoard({lines, boardWidth, board, moves, variations, answers, questions, onClick}: FinalBoardProps) {
 
-  const userInfo: UserInfo = JSON.parse(sessionStorage.getItem(USERINFO) || initialUserInfo)
   const offset = boardWidth / 200
   const cellSize = (boardWidth - (offset * 2)) / lines
   const stoneSize = cellSize / 2.1
@@ -60,21 +54,6 @@ function FinalBoard({lines, boardWidth, board, moves, variations, answers, quest
         >
 
         </Stones>
-        {
-          check?
-          <CheckCircleOutline 
-            style={{
-              position: "absolute", 
-              fontSize: boardWidth / 4, 
-              right: 0, 
-              bottom: 0, 
-              color: userInfo.solved.includes(Number(problemIndex))? "blue" : "red", 
-              display: userInfo.tried.includes(Number(problemIndex))? "" : "none", 
-              zIndex: 3
-            }}
-          /> : 
-          <></>
-        }
       </Box>
     );
   }

@@ -21,6 +21,7 @@ export function Signup() {
   const [repeatPasswordErrorMessage, setRepeatPasswordErrorMessage] = useState("")
   const [nameErrorMessage, setNameErrorMessage] = useState("")
   const [language, setLanguage] = useState(Number(localStorage.getItem(LANGUAGE_IDX)))
+  const invalidChars = [" ", "!", "@", "#", "$", "%", "^", "&", "*", "(", ")"]
   
 
   const handleEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -35,10 +36,14 @@ export function Signup() {
   const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newName = e.target.value
     setName(newName)
-    if (newName.includes(" ")) {
-      setNameErrorMessage(menuWords.spaceWarning[language])
-    } else {
-      setNameErrorMessage("")
+    setNameErrorMessage("")
+    if (newName.length > 15) {
+      setNameErrorMessage(menuWords.nameLengthWarning[language])
+    }
+    for (const char of newName) {
+      if (invalidChars.includes(char)) {
+        setNameErrorMessage(menuWords.specialCharWarning[language])
+      }
     }
   }
   const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
