@@ -1,5 +1,5 @@
 
-import { Box, Divider, Typography, useMediaQuery } from '@mui/material'
+import { Box, Typography, useMediaQuery } from '@mui/material'
 import { menuWords } from '../util/menuWords'
 import { LANGUAGE_IDX, PROBLEM_INDEX, PROBLEM_INDICES, USERINFO } from '../util/constants'
 import { SampleProblemInformation, UserInfo } from '../util/types'
@@ -11,6 +11,7 @@ import { LOGIN_PATH } from '../util/paths'
 import FinalBoard from './board/FinalBoard'
 import { getGreetings } from '../util/functions'
 import { getNewest, getRecommended } from '../network/sampleProblem'
+import { LoadingPage } from './LoadingPage'
 
 export function HomeForm() {
 
@@ -20,6 +21,7 @@ export function HomeForm() {
   const [recommended, setRecommended] = useState<SampleProblemInformation[]>([])
   const [newest, setNewest] = useState<SampleProblemInformation[]>([])
   const [greetings, setGreetings] = useState("")
+  const [loading, setLoading] = useState(true)
   const {width, height} = useWindowSize()
   const isMobile = useMediaQuery("(max-width: 800px)")
   const navigate = useNavigate()
@@ -38,6 +40,7 @@ export function HomeForm() {
     .then(r => {
       setRecommended(r)
     })
+    setLoading(false)
   }, [username])
 
   function setIdexAndOpenProblem(index: number, problemIdx: number, problemList: SampleProblemInformation[]) {
@@ -50,6 +53,11 @@ export function HomeForm() {
     navigate(`/problem/${problemIdx}`)
   }
   
+  if (loading) {
+    return (
+      <LoadingPage></LoadingPage>
+    )
+  }
 
   return (
     <Box>

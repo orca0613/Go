@@ -11,6 +11,7 @@ import FilterBox from '../FilterBox'
 import { menuWords } from '../../util/menuWords'
 import { getSampleProblemByFilter } from '../../network/sampleProblem'
 import { LOGIN_PATH } from '../../util/paths'
+import { LoadingPage } from '../LoadingPage'
 
 export default function FilteredProblems() {
 
@@ -31,6 +32,7 @@ export default function FilteredProblems() {
   const [problems, setProblems] = useState<SampleProblemInformation[]>([])
   const [unsolved, setUnsolved] = useState<SampleProblemInformation[]>([])
   const [page, setPage] = useState(Number(sessionStorage.getItem(PAGE)))
+  const [loading, setLoading] = useState(true)
   const divider = <Divider orientation="horizontal" sx={{borderColor: "black", my: "5%", border: "0.5px solid black"}} />
   const navigate = useNavigate()
 
@@ -53,6 +55,7 @@ export default function FilteredProblems() {
       setProblems(sortedProblems)
       setUnsolved(newUnsolved)
       setPage(newPage)
+      setLoading(false)
     })
   }, [params])
 
@@ -116,6 +119,12 @@ export default function FilteredProblems() {
     (unsolved.slice(start, Math.min(start + problemsPerPage, unsolved.length))) : 
     (problems.slice(start, Math.min(start + problemsPerPage, problems.length)))
     return showProblems
+  }
+
+  if (loading) {
+    return (
+      <LoadingPage></LoadingPage>
+    )
   }
 
   return (

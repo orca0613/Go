@@ -10,6 +10,7 @@ import CheckPasswordDialog from './CheckPasswordDialog';
 import { initialUserInfo, levelArray } from '../util/initialForms';
 import { loginWarning } from '../util/functions';
 import { LOGIN_PATH } from '../util/paths';
+import DeleteAccountDialog from './DeleteAccountDialog';
 
 export default function Setting() {
   const userInfo: UserInfo = JSON.parse(sessionStorage.getItem(USERINFO) || initialUserInfo)
@@ -91,11 +92,12 @@ export default function Setting() {
             return <MenuItem key={level} value={level}>{Math.abs(level)}{level > 0? menuWords.K[language] : menuWords.D[language]}</MenuItem>
           })}
         </Select>
-        <Button color='info' onClick={handleSettingChange} variant='contained' sx={{width: "100%", mb: margin * 2, textTransform: "none"}}>{menuWords.change[language]}</Button>
-        <CheckPasswordDialog></CheckPasswordDialog>
+        <Button color='info' onClick={handleSettingChange} variant='contained' sx={{width: "100%", mb: margin, textTransform: "none"}}>{menuWords.change[language]}</Button>
+        <Box sx={{mb: margin, width: "100%"}}>
+          <CheckPasswordDialog languageIdx={language}></CheckPasswordDialog>
+        </Box>
+        <DeleteAccountDialog languageIdx={language}></DeleteAccountDialog>
       </FormControl>
-
-
     </Box>
   );
 }

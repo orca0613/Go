@@ -151,5 +151,14 @@ export const menuWords = {
   like: ["Like", "좋아요", "喜欢", "好き"],
   wrongIndexWarning: ["The problem doesn't exist.", "문제가 존재하지 않습니다.", "问题是不存在的。", "問題は存在しません。"],
   permissionWarning: ["You do not have permission.", "권한이 없습니다.", "你没有许可", "権限がありません"],
-  reply: ["Reply", "답장", "回复", "返事"]
+  reply: ["Reply", "답장", "回复", "返事"],
+  registrationComplete: ["Registration completed", "문제 등록 완료", "问题登记完成", "登録完了"],
+  variationSuggestion: [
+    "The problem has been registered. Would you like to move to enter variations?", 
+    "문제가 등록 되었습니다. 변화도를 입력 하시겠습니까?", 
+    "已登记问题。您想输入变化吗？",
+    "問題が登録されました。変化図を入力しますか?"
+  ],
+  loadingWarning: ["Loading data.", "데이터를 불러오고 있습니다.", "加载数据中。", "データのロード。"],
+  deleteAccount: ["Delete account", "계정 삭제하기", "删除帐户", "アカウントの削除"],
 }

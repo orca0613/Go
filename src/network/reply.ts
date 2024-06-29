@@ -13,11 +13,11 @@ export async function addReply(problemId: string, comment: string, name: string)
   const response = await fetch(`${API_URL}${REPLY_DB_PATH}/add`, requestForm)
   if (response.ok) {
     alert(menuWords.saved[languageIdx])
-    return 
+    return true
   }
   if (response.status === 401 || 403) {
     sessionStorage.clear()
-    return 
+    return false
   }
   throw new Error(`Error: ${response.status}`)
 }
@@ -28,7 +28,7 @@ export async function hideReply(id: string, name: string) {
   const requestForm = getRequestForm(PATCH, token, JSON.stringify({id, name}))
   const response = await fetch(`${API_URL}${REPLY_DB_PATH}/hide`, requestForm)
   if (response.ok) {
-    return
+    return true
   }
   if (response.status === 401 || 403) {
     sessionStorage.clear()

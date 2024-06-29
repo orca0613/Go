@@ -48,8 +48,10 @@ export function ReplyBox({ problemId }: ReplyBoxProps) {
       alert("please enter reply")
       return
     }
-    setReply(inputValue)
-    await addReply(problemId, inputValue, username)
+    const add = await addReply(problemId, inputValue, username)
+    if (add) {
+      setReply(inputValue)
+    }
   }
 
   return (

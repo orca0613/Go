@@ -37,7 +37,6 @@ export async function createUser(email: string, password: string, name: string, 
 }
 
 export async function logIn(email: string, password: string): Promise<string> {
-  // 이메일과 패스워드를 통해 로그인 시도. 로그인에 성공하면 서버로부터 유저의 정보가 리턴됨.
   const languageIdx = Number(localStorage.getItem(LANGUAGE_IDX))
   const userInfo: UserInfo = JSON.parse(sessionStorage.getItem(USERINFO) || initialUserInfo)
   const response = await fetch(`${API_URL}${USER_DB_PATH}/login`, {
@@ -133,4 +132,22 @@ export async function checkMailAndSendUrl(email: string) {
   }
   throw new Error(`Error: ${response.status}`)
 }
+
+export async function deleteAccount(name: string, email: string, password: string) {
+  const languageIdx = Number(localStorage.getItem(LANGUAGE_IDX))
+  const response = await fetch(`${API_URL}${USER_DB_PATH}/delete-id`, {
+    method: 'DELETE',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ name, email, password }),
+  })
+  if (response.ok) {
+    alert(menuWords.deletedNotice[languageIdx])
+    return true
+  }
+  alert(menuWords.wrongApproachWarning[languageIdx])
+  return false
+}
+
 

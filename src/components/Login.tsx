@@ -1,21 +1,15 @@
 import { Box, Button, Checkbox, FormControlLabel, TextField } from '@mui/material'
-import React, { useEffect, useState } from 'react'
+import React, { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { menuWords } from '../util/menuWords'
-import { getUserDetail } from '../network/userDetail'
 import { logIn } from '../network/user'
-import { HOME, LANGUAGE_IDX, USERINFO, expires } from '../util/constants'
-import { UserInfo } from '../util/types'
+import { HOME, LANGUAGE_IDX, expires } from '../util/constants'
 import { useWindowSize } from 'react-use'
 import CheckEmailDialog from './CheckEmailDialog'
 import { isValidEmail } from '../util/functions'
-import { initialUserInfo } from '../util/initialForms'
 
 export function Login() {
 	const navigate = useNavigate()
-	const movePage = (address: string) => {
-		navigate(address)
-  }
 
   function setCookie(name: string, val: string) {
     let date = new Date()
@@ -38,7 +32,6 @@ export function Login() {
   const [emailErrorMessage, setEmailErrorMessage] = useState("")
   const [saveInfo, setSaveInfo] = useState(Boolean(getCookie("saved")))
   const [password, setPassword] = useState(getCookie("pw"))
-  const [name, setName] = useState("")
   const languageIdx = Number(localStorage.getItem(LANGUAGE_IDX))
   const {width, height} = useWindowSize()
 
@@ -109,7 +102,7 @@ export function Login() {
         <FormControlLabel labelPlacement='start' control={<Checkbox checked={saveInfo} onChange={() => setSaveInfo(!saveInfo)}/>} label={menuWords.saveInformations[languageIdx]}/>
 
         <Box sx={{margin: 3}}>
-          <Button sx={{color: "red", textTransform: "none"}} onClick={() => movePage('/signup')}>{menuWords.signup[languageIdx]}</Button>
+          <Button sx={{color: "red", textTransform: "none"}} onClick={() => navigate('/signup')}>{menuWords.signup[languageIdx]}</Button>
           <CheckEmailDialog></CheckEmailDialog>
         </Box>
       </Box>

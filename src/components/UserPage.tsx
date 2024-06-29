@@ -12,6 +12,7 @@ import SendMessageForm from './SendMessageForm';
 import { getRepresentativeProblem, getSolvedProblem } from '../network/sampleProblem';
 import { loginWarning } from '../util/functions';
 import { LOGIN_PATH } from '../util/paths';
+import { LoadingPage } from './LoadingPage';
 
 export default function UserPage() {
   const { name } = useParams()
@@ -27,6 +28,7 @@ export default function UserPage() {
   const divider = <Divider orientation="horizontal" sx={{borderColor: "lightgray", my: "1%"}} />
   const [level, setLevel] = useState("")
   const [open, setOpen] = useState(0)
+  const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     if (!userInfo.name) {
@@ -60,6 +62,7 @@ export default function UserPage() {
       .then(s => {
         setSolved(s)
       })
+      setLoading(false)
     })
   }, [name])
 
@@ -143,6 +146,11 @@ const profile =
     navigate(`/problems/tier=0&level=0&creator=${name}&`)
   }
   
+  if (loading) {
+    return (
+      <LoadingPage></LoadingPage>
+    )
+  }
     
   return (
     <Box>

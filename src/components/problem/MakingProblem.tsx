@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react"
 import { Coordinate, UserInfo } from "../../util/types"
-import { COMMENT, LANGUAGE_IDX, LEVEL, MARGIN, TURN, USERINFO } from "../../util/constants"
-import { Box, Button, ButtonGroup, FormControl, InputLabel, MenuItem, Select, SelectChangeEvent, TextField, useMediaQuery } from "@mui/material"
+import { COMMENT, HOME, LANGUAGE_IDX, LEVEL, MARGIN, TURN, USERINFO } from "../../util/constants"
+import { Box, Button, ButtonGroup, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, FormControl, InputLabel, MenuItem, Select, SelectChangeEvent, TextField, useMediaQuery } from "@mui/material"
 import { isLegalBoard, loginWarning, makingEmptyBoard } from "../../util/functions"
 import { isOutside } from "../../gologic/logic"
 import FinalBoard from "../board/FinalBoard"
@@ -31,6 +31,8 @@ export function MakingProblem() {
     color: "b",
     level: 18,
   })  
+  const [openSuggestion, setOpenSuggestion] = useState(false)
+  const [problemIndex, setProblemIndex] = useState(0)
 
   useEffect(() => {
     if (!userInfo.name) {
@@ -48,6 +50,19 @@ export function MakingProblem() {
   
   const commentChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     changeInfo(COMMENT, e.target.value)
+  }
+
+  const dialogContent = (title: string, content: string) => {
+    return (
+      <>
+        <DialogTitle>{title}</DialogTitle>
+        <DialogContent>
+          <DialogContentText>
+            {content}
+          </DialogContentText>
+        </DialogContent>
+      </>
+    )
   }
 
   function addMove(coord: Coordinate) {
@@ -68,8 +83,10 @@ export function MakingProblem() {
       alert(menuWords.invalidBoardWarning[languageIdx])
       return
     }
-    await createProblem(info.comment, problem, creator, info.level, info.turn)
+    const newIdx = await createProblem(info.comment, problem, creator, info.level, info.turn)
+    setProblemIndex(newIdx)
     setProblem(emptyBoard)
+    setOpenSuggestion(true)
     changeInfo(COMMENT, "")
   }
 
@@ -105,53 +122,58 @@ export function MakingProblem() {
   <img src="/images/reset.svg" alt="reset"  width={isMobile? width / 20 : width / 30}/>
 
   const topMenu = 
-  <Box mt="5%" textAlign="center" justifyContent={isMobile? "space-evenly" : "center"} display={isMobile? "flex" : ""}>
-    <TextField sx={{margin: margin, width: isMobile? "20%" : "80%"}}
-    error={info.comment.length > 50? true : false}
-    helperText={info.comment.length > 50? menuWords.commentLengthWarning[languageIdx] : ""}
-    name={COMMENT}
-    label={menuWords.explanation[languageIdx]} 
-    variant='standard' 
-    value={info.comment}
-    onChange={commentChange}
-    />
-    <FormControl variant="standard" sx={{margin: margin, width: isMobile? "20%" : "80%", textAlign: "center"}}>
-      <InputLabel>{menuWords.boardSize[languageIdx]}</InputLabel>
-      <Select
-      value={String(boardSize)}
-      label={menuWords.boardSize[languageIdx]}
+  <Box>
+    <Box my="5%" textAlign="center" justifyContent={isMobile? "space-between" : "center"} display={isMobile? "flex" : ""}>
+      <FormControl variant="standard" sx={{margin: margin, width: isMobile? "30%" : "80%", textAlign: "center"}}>
+        <InputLabel>{menuWords.boardSize[languageIdx]}</InputLabel>
+        <Select
+        value={String(boardSize)}
+        label={menuWords.boardSize[languageIdx]}
+        variant="standard"
+        onChange={handleBoardSizeChange}
+        >
+          {boardSizeArray.map(size => {
+            return (<MenuItem key={size} value={size}>{size}</MenuItem>)
+          })}
+        </Select>
+      </FormControl>
+      <FormControl variant="standard" sx={{margin: margin, width: isMobile? "30%" : "80%"}}>
+        <InputLabel>{menuWords.turn[languageIdx]}</InputLabel>
+        <Select
+        value={info.turn}
+        label={menuWords.turn[languageIdx]}
+        onChange={handleTurnChange}
+        >
+          <MenuItem value={"b"}>{menuWords.blackTurn[languageIdx]}</MenuItem>
+          <MenuItem value={"w"}>{menuWords.whiteTurn[languageIdx]}</MenuItem>
+        </Select>
+      </FormControl>
+      <FormControl sx={{margin: margin, width: isMobile? "30%" : "80%"}} variant="standard">
+        <InputLabel>{menuWords.level[languageIdx]}</InputLabel>
+        <Select
+          value={String(info.level)}
+          label={menuWords.level[languageIdx]}
+          onChange={levelChange}
+        >
+          {levelArray.map(level => {
+            return <MenuItem key={level} value={level}>{Math.abs(level)}{level > 0? menuWords.K[languageIdx] : menuWords.D[languageIdx]}</MenuItem>
+          })}
+        </Select>
+      </FormControl>
+    </Box>
+    <Box textAlign="center">
+      <TextField sx={{margin: margin, justifyContent: "center", width: isMobile? "100%" : "80%", alignSelf: "center"}}
+      error={info.comment.length > 50? true : false}
+      helperText={info.comment.length > 50? menuWords.commentLengthWarning[languageIdx] : ""}
+      name={COMMENT}
+      label={menuWords.explanation[languageIdx]} 
       variant="standard"
-      onChange={handleBoardSizeChange}
-      >
-        {boardSizeArray.map(size => {
-          return (<MenuItem key={size} value={size}>{size}</MenuItem>)
-        })}
-      </Select>
-    </FormControl>
-    <FormControl variant="standard" sx={{margin: margin, width: isMobile? "20%" : "80%"}}>
-      <InputLabel>{menuWords.turn[languageIdx]}</InputLabel>
-      <Select
-      value={info.turn}
-      label={menuWords.turn[languageIdx]}
-      onChange={handleTurnChange}
-      >
-        <MenuItem value={"b"}>{menuWords.blackTurn[languageIdx]}</MenuItem>
-        <MenuItem value={"w"}>{menuWords.whiteTurn[languageIdx]}</MenuItem>
-      </Select>
-    </FormControl>
-    <FormControl sx={{margin: margin, width: isMobile? "20%" : "80%"}} variant="standard">
-      <InputLabel>{menuWords.level[languageIdx]}</InputLabel>
-      <Select
-        value={String(info.level)}
-        label={menuWords.level[languageIdx]}
-        onChange={levelChange}
-      >
-        {levelArray.map(level => {
-          return <MenuItem key={level} value={level}>{Math.abs(level)}{level > 0? menuWords.K[languageIdx] : menuWords.D[languageIdx]}</MenuItem>
-        })}
-      </Select>
-    </FormControl>
+      value={info.comment}
+      onChange={commentChange}
+      />
+    </Box>
   </Box>
+
 
   const mobileBottomMenu = 
   <Box display="flex" justifyContent="space-around" alignItems="center">
@@ -202,6 +224,17 @@ export function MakingProblem() {
       <Box>
         {isMobile? mobileBottomMenu : <></>}
       </Box>
+      <Dialog open={openSuggestion} onClose={() => setOpenSuggestion(false)}>
+        {dialogContent(menuWords.registrationComplete[languageIdx], menuWords.variationSuggestion[languageIdx])}
+        <DialogActions>
+          <Button onClick={() => navigate(`/modify/${problemIndex}`)} sx={{textTransform: "none"}} color="primary" autoFocus>
+            {menuWords.confirm[languageIdx]}
+          </Button>
+          <Button onClick={() => setOpenSuggestion(false)} sx={{textTransform: "none"}} color="primary">
+            {menuWords.cancel[languageIdx]}
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   )
 }

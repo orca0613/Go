@@ -1,5 +1,5 @@
 import { useState, useEffect, ChangeEvent } from 'react';
-import { Box, FormControl, InputLabel, MenuItem, Pagination, Select, SelectChangeEvent, Stack } from '@mui/material';
+import { Box, Divider, FormControl, InputLabel, MenuItem, Pagination, Select, SelectChangeEvent, Stack, Typography } from '@mui/material';
 import { SampleProblemInformation, UserInfo } from '../../util/types';
 import SampleProblemBox from './SampleProblemBox';
 import { useNavigate, useParams } from 'react-router-dom';
@@ -9,6 +9,7 @@ import { loginWarning, setProblemIndicies, sortingProblemList } from '../../util
 import { initialUserInfo, sortingMethods } from '../../util/initialForms';
 import { getSampleProblemByIndexList } from '../../network/sampleProblem';
 import { LOGIN_PATH } from '../../util/paths';
+import { LoadingPage } from '../LoadingPage';
 
 export default function MyPageProblems() {
   const { part } = useParams()
@@ -19,7 +20,11 @@ export default function MyPageProblems() {
   const [sortingIdx, setSortingIdx] = useState(Number(sessionStorage.getItem(SORTING_IDX)))
   const methods = sortingMethods[languageIdx]
   const [page, setPage] = useState(Number(sessionStorage.getItem(PAGE)))
+  const [pageName, setPageName] = useState("")
+  const divider = <Divider orientation="horizontal" sx={{borderColor: "inherit", my: 2, mx: 2}} />
+  const [loading, setLoading] = useState(true)
   const navigate = useNavigate()
+
 
   function sorting(e: SelectChangeEvent) {
     const p = Number(e.target.value)
@@ -40,18 +45,23 @@ export default function MyPageProblems() {
     switch (part) {
       case (CREATED):
         idxList = userInfo.created
+        setPageName(menuWords.created[languageIdx])
         break
       case (SOLVED):
         idxList = userInfo.solved
+        setPageName(menuWords.solved[languageIdx])
         break
       case (UNRESOLVED):
         idxList = userInfo.tried.filter(element => !userInfo.solved.includes(element))
+        setPageName(menuWords.unresolved[languageIdx])
         break
       case (LIKED):
         idxList = userInfo.liked
+        setPageName(menuWords.liked[languageIdx])
         break
       case (WITHQUESTIONS):
         idxList = userInfo.withQuestions
+        setPageName(menuWords.requestsReceived[languageIdx])
         break
       default:
         break
@@ -63,7 +73,8 @@ export default function MyPageProblems() {
       setProblems(sorted)
       setPage(newPage)
     })
-    }, [part])
+    setLoading(false)
+  }, [part])
     
   function handlePageChange(event: ChangeEvent<unknown>, val: number): void {
     setPage(val)
@@ -76,8 +87,16 @@ export default function MyPageProblems() {
     return showProblems
   }
 
+  if (loading) {
+    return (
+      <LoadingPage></LoadingPage>
+    )
+  }
+
   return (
     <Box textAlign="center">
+      <Typography sx={{mt: 2}}>{pageName}</Typography>
+      {divider}
       <FormControl variant="standard" sx={{width: "250px"}}>
         <InputLabel id="sorting-method">{menuWords.sortingMethod[languageIdx]}</InputLabel>
         <Select

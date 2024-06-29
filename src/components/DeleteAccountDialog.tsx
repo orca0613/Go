@@ -5,36 +5,37 @@ import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
 import DialogContentText from '@mui/material/DialogContentText';
 import { useState } from 'react';
-import { checkPassword } from '../network/user';
+import { deleteAccount } from '../network/user';
 import { LANGUAGE_IDX, USERINFO } from '../util/constants';
 import { UserInfo } from '../util/types';
 import { useNavigate } from 'react-router-dom';
 import { menuWords } from '../util/menuWords';
 import React from 'react';
 import { initialUserInfo } from '../util/initialForms';
+import { LOGIN_PATH } from '../util/paths';
 
-interface CPDProps {
+interface DADProps {
   languageIdx: number
 }
 
-export default function CheckPasswordDialog({ languageIdx }: CPDProps) {
+export default function DeleteAccountDialog({ languageIdx }: DADProps) {
   const userInfo: UserInfo = JSON.parse(sessionStorage.getItem(USERINFO) || initialUserInfo)
   const navigate = useNavigate()
   const [open, setOpen] = useState(false);
 
-  async function checkPasswordAndMovePage(password: string) {
-    const id = await checkPassword(userInfo.name, password)
-    if (id) {
-      return navigate(`/change-password/${id}`)
+
+  async function deleteAccountAndMovePage(email: string, password: string) {
+    const result = await deleteAccount(userInfo.name, email, password)
+    if (result) {
+      sessionStorage.clear()
+      navigate(LOGIN_PATH)
     }
-    alert(menuWords.incorrectPasswordWarning[languageIdx])
-    return
   }
 
   return (
     <React.Fragment>
-      <Button variant='contained' sx={{width: "100%", backgroundColor: "tomato", textTransform: "none"}} onClick={() => setOpen(true)}>
-        {menuWords.changePassword[languageIdx]}
+      <Button variant='contained' sx={{width: "100%", backgroundColor: "red", textTransform: "none"}} onClick={() => setOpen(true)}>
+        {menuWords.deleteAccount[languageIdx]}
       </Button>
       <Dialog
         open={open}
@@ -46,11 +47,26 @@ export default function CheckPasswordDialog({ languageIdx }: CPDProps) {
             const formData = new FormData(event.currentTarget);
             const formJson = Object.fromEntries((formData as any).entries());
             const password = formJson.password;
-            checkPasswordAndMovePage(password)
+            const email = formJson.email;
+            deleteAccountAndMovePage(email, password)
             setOpen(false);
           },
         }}
       >
+        <DialogContent>
+          <DialogContentText>
+            {menuWords.eMail[languageIdx]}
+          </DialogContentText>
+          <TextField
+            sx={{width: "100%"}}
+            margin="dense"
+            id="email"
+            name="email"
+            type="email"
+            autoComplete="off"
+            variant="standard"
+          />
+        </DialogContent>
         <DialogContent>
           <DialogContentText>
             {menuWords.curPasswordNotice[languageIdx]}

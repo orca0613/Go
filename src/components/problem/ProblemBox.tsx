@@ -19,6 +19,7 @@ import { ReplyBox } from '../ReplyBox'
 import { initIndices, initialProblemInfo, initialUserInfo, initialVariations } from '../../util/initialForms'
 import { mobileButtonStyle, wideButtonStyle } from '../../util/styles'
 import { LOGIN_PATH } from '../../util/paths'
+import { LoadingPage } from '../LoadingPage'
 
 export function ProblemBox() {
 
@@ -46,8 +47,8 @@ export function ProblemBox() {
   const {width, height} = useWindowSize()
   const isMobile = height > width * 2 / 3 || width < 1000
   const languageIdx = Number(localStorage.getItem(LANGUAGE_IDX))
-
   const [mode, setMode] = useState(TRY)
+  const [loading, setLoading] = useState(true)
   const [alertInfo, setAlertInfo] = useState({
     open: false,
     answer: false,
@@ -102,10 +103,7 @@ export function ProblemBox() {
       <DialogContentText>{dialogInfo.contents}</DialogContentText>
     </DialogContent>
     <DialogActions>
-      <Button onClick={handleDialogOpen}
-      >
-        {menuWords.cancel[languageIdx]}
-      </Button>
+      <Button onClick={handleDialogOpen}>{menuWords.cancel[languageIdx]}</Button>
       <Button onClick={() => request()}>{menuWords.requestVariation[languageIdx]}</Button>
     </DialogActions>
 
@@ -153,6 +151,7 @@ export function ProblemBox() {
         p.color
       ))
       setSolved(userInfo.solved.includes(problemIdx))
+      setLoading(false)
     })
     modeChange(TRY)
   }, [problemIdx])
@@ -386,6 +385,12 @@ export function ProblemBox() {
     }
     <Like problemIdx={problemInfo.problemIdx} username={username} creator={problemInfo.creator}></Like>
   </Box>
+
+  if (loading) {
+    return (
+      <LoadingPage></LoadingPage>
+    )
+  }
   
   return (
     <Box display={isMobile? "grid" : "flex"} justifyContent="center">

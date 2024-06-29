@@ -18,12 +18,12 @@ export async function createProblem(comment: string, problem: Board, creator: st
   const requestForm = getRequestForm(POST, token, JSON.stringify({initialState, creator, variations, answers, questions, level, comment, color}))
   const response = await fetch(`${API_URL}${PROBLEM_DB_PATH}/create`, requestForm)
   if (response.ok) {
-    alert(menuWords.registered[languageIdx])
-    return
+    const r = await response.json()
+    return Number(r.problemIndex)
   }
   if (response.status === 401 || response.status === 403) {
     sessionStorage.clear()
-    return
+    return 0
   }
   throw new Error(`Error: ${response.status}`)
 }
