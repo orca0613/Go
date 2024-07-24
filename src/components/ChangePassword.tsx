@@ -6,6 +6,7 @@ import { menuWords } from '../util/menuWords';
 import { useWindowSize } from 'react-use';
 import { LANGUAGE_IDX } from '../util/constants';
 import { LOGIN_PATH } from '../util/paths';
+import { getLanguageIdx } from '../util/functions';
 
 export default function ChangePassword() {
   const { userId } = useParams()
@@ -14,7 +15,7 @@ export default function ChangePassword() {
   const [password, setPassword] = useState("")
   const [repeat, setRepeat] = useState("")
   const {width, height} = useWindowSize()
-  const languageIdx = Number(localStorage.getItem(LANGUAGE_IDX))
+  const languageIdx = getLanguageIdx()
 
   const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setPassword(e.target.value)

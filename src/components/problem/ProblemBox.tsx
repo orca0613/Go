@@ -1,12 +1,11 @@
 import { useEffect, useState } from 'react'
 import { Coordinate, BoardInfo, UserInfo } from '../../util/types'
 import _ from 'lodash'
-import { addCurrentVariation, loginWarning } from '../../util/functions'
-import { ANSWER, HOME, LANGUAGE_IDX, MARGIN, PROBLEM_INDEX, PROBLEM_INDICES, QUESTIONS, SELF, SOLVED, TRIED, TRY, USERINFO } from '../../util/constants'
+import { addCurrentVariation, addView, getAdjacentProblemIndex, getLanguageIdx, handleResult, loginWarning } from '../../util/functions'
+import { ANSWER, HOME, MARGIN, PROBLEM_INDEX, PROBLEM_INDICES, QUESTIONS, SELF, SOLVED, TRIED, TRY, USERINFO } from '../../util/constants'
 import FinalBoard from '../board/FinalBoard'
 import { Alert, Box, Button, ButtonGroup, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, Snackbar, Typography } from '@mui/material'
 import { menuWords } from '../../util/menuWords'
-import { addCorrectUser, addWrong, changeCount } from '../../network/problemInformation'
 import { addElement } from '../../network/userDetail'
 import { getProblemByIdx, updateVariations } from '../../network/problem'
 import { useNavigate, useParams } from 'react-router-dom'
@@ -16,7 +15,7 @@ import { Game } from '../../gologic/goGame'
 import { useWindowSize } from 'react-use'
 import { sendRequest } from '../../network/requests'
 import { ReplyBox } from '../ReplyBox'
-import { initIndices, initialProblemInfo, initialUserInfo, initialVariations } from '../../util/initialForms'
+import { initialProblemInfo, initialUserInfo, initialVariations } from '../../util/initialForms'
 import { mobileButtonStyle, wideButtonStyle } from '../../util/styles'
 import { LOGIN_PATH } from '../../util/paths'
 import { LoadingPage } from '../LoadingPage'
@@ -43,10 +42,9 @@ export function ProblemBox() {
   const username = userInfo.name
   const userLevel = userInfo.level
   const creator = problemInfo.creator
-  const [solved, setSolved] = useState(userInfo.solved.includes(problemIdx))
   const {width, height} = useWindowSize()
   const isMobile = height > width * 2 / 3 || width < 1000
-  const languageIdx = Number(localStorage.getItem(LANGUAGE_IDX))
+  const languageIdx = getLanguageIdx()
   const [mode, setMode] = useState(TRY)
   const [loading, setLoading] = useState(true)
   const [alertInfo, setAlertInfo] = useState({
@@ -132,13 +130,8 @@ export function ProblemBox() {
         alert(menuWords.wrongIndexWarning[languageIdx])
         return navigate(HOME)
       } 
-      await changeCount(problemIdx, "view", username, 1)
+      addView(problemIdx, username)
       setProblemInfo(p)
-      if (!userInfo.tried.includes(problemIdx)) {
-        await addElement(problemIdx, username, TRIED)
-        userInfo.tried.push(problemIdx)
-        sessionStorage.setItem(USERINFO, JSON.stringify(userInfo))
-      }
       setInfo({
         board: p.initialState,
         color: p.color,
@@ -150,7 +143,6 @@ export function ProblemBox() {
         p.variations,
         p.color
       ))
-      setSolved(userInfo.solved.includes(problemIdx))
       setLoading(false)
     })
     modeChange(TRY)
@@ -260,14 +252,12 @@ export function ProblemBox() {
   }
 
   function moveToAdjacentProblem(num: number) {
-    const problemList: number[] = JSON.parse(sessionStorage.getItem(PROBLEM_INDICES) || initIndices)
-    const newIndex = Number(sessionStorage.getItem(PROBLEM_INDEX)) + num
-    if (newIndex < 0 || newIndex >= problemList.length) {
+    const isNext = num > 0
+    const nextProblemIdx = getAdjacentProblemIndex(isNext)
+    if (!nextProblemIdx) {
       alert(menuWords.noProblemWarning[languageIdx])
       return
     }
-    sessionStorage.setItem(PROBLEM_INDEX, String(newIndex))
-    const nextProblemIdx = problemList[newIndex]
     navigate(`/problem/${nextProblemIdx}`)
   }
 
@@ -279,7 +269,6 @@ export function ProblemBox() {
       await addElement(problemIdx, username, SOLVED)
       modeChange(ANSWER)
       addSolved(problemInfo.problemIdx)
-      setSolved(true)
     }
   }
 
@@ -290,10 +279,7 @@ export function ProblemBox() {
       text: menuWords.wrong[languageIdx]
     }
     setAlertInfo(newAlertInfo)
-    if (solved) {
-      return
-    }
-    await addWrong(problemInfo.problemIdx, username, userLevel, problemInfo.level)
+    handleResult(problemIdx, username, userLevel, problemInfo.level, false)
   }
 
   async function requestSuggestion() {
@@ -303,10 +289,7 @@ export function ProblemBox() {
       contents: menuWords.requestSuggestion[languageIdx]
     }
     setDialogInfo(newDialogInfo)
-    if (solved) {
-      return
-    }
-    await addWrong(problemInfo.problemIdx, username, userLevel, problemInfo.level)
+    handleResult(problemIdx, username, userLevel, problemInfo.level, false)
   }
 
   function addSolved(idx: number) {
@@ -322,11 +305,7 @@ export function ProblemBox() {
       text: menuWords.correct[languageIdx]
     }
     setAlertInfo(newAlertInfo)
-    if (!solved) {
-      await addCorrectUser(problemInfo.problemIdx, username, userLevel, problemInfo.level)
-      setSolved(true)
-      addSolved(problemIdx)
-    }
+    handleResult(problemIdx, username, userLevel, problemInfo.level, true)
     if (auto) {
       moveToAdjacentProblem(1)
     }

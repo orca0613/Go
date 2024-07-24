@@ -14,8 +14,7 @@ interface EmptyBoardProps {
 }
 
 const EmptyBoard = ({ lines, cellSize, offset, lineWidth, style, boardWidth}: EmptyBoardProps) => {
-
-  const starPoints = flowerPointPosition[lines - 1]
+  const starPoints = lines? flowerPointPosition[lines - 1] : []
   const starPointSize = Math.min(5, cellSize / 10)
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const gap = offset + cellSize / 2

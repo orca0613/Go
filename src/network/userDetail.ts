@@ -1,12 +1,10 @@
-import { API_URL, LANGUAGE_IDX, PATCH, USERINFO, } from "../util/constants"
+import { API_URL, PATCH, TOKEN, } from "../util/constants"
 import { getRequestForm } from "../util/functions"
-import { initialUserInfo } from "../util/initialForms"
 import { USERDETAIL_DB_PATH } from "../util/paths"
-import { CreatorInfo, UserDetailFromServer, UserInfo } from "../util/types"
+import { UserDetailFromServer, UserInfo } from "../util/types"
 
 export async function addElement(element: number, name: string, where: string) {
-  const userInfo: UserInfo = JSON.parse(sessionStorage.getItem(USERINFO) || initialUserInfo)
-  const token = userInfo.token
+  const token = sessionStorage.getItem(TOKEN) || ""
   const requestForm = getRequestForm(PATCH, token, JSON.stringify({element, name, where}))
   const response = await fetch(`${API_URL}${USERDETAIL_DB_PATH}/add-element`, requestForm)
   if (response.ok) {
@@ -20,41 +18,35 @@ export async function addElement(element: number, name: string, where: string) {
 
 }
 
-export async function getUserDetail(name: string): Promise<UserDetailFromServer> {
-  const response = await fetch(`${API_URL}${USERDETAIL_DB_PATH}/get/${name}`)
-  if (!response.ok) {
-    throw new Error(`Error: ${response.status}`)
+export async function addTried(problemIndex: number, name: string) {
+  const token = sessionStorage.getItem(TOKEN) || ""
+  const requestForm = getRequestForm(PATCH, token, JSON.stringify({problemIndex, name}))
+  const response = await fetch(`${API_URL}${USERDETAIL_DB_PATH}/add-tried`, requestForm)
+  if (response.ok) {
+    return
   }
-  const detail = await response.json()
-  return detail
+  if (response.status === 401 || 403) {
+    sessionStorage.clear()
+    return
+  }
+  throw new Error(`Error: ${response.status}`)
+
 }
 
-export async function getAllCreators(): Promise<string[]> {
-  const result: string[] = []
-  const response = await fetch(`${API_URL}${USERDETAIL_DB_PATH}/get-creators`)
-  if (!response.ok) {
-    throw new Error(`Error: ${response.status}`)
+
+export async function addSolved(problemIndex: number, name: string) {
+  const token = sessionStorage.getItem(TOKEN) || ""
+  const requestForm = getRequestForm(PATCH, token, JSON.stringify({problemIndex, name}))
+  const response = await fetch(`${API_URL}${USERDETAIL_DB_PATH}/add-solved`, requestForm)
+  if (response.ok) {
+    return
   }
-  const creators: CreatorInfo[] = await response.json()
-  creators.map(c => {
-    result.push(c.name)
-  })
-  return result 
+  if (response.status === 401 || 403) {
+    sessionStorage.clear()
+    return
+  }
+  throw new Error(`Error: ${response.status}`)
+
 }
 
-export async function settingChange(language: number, level: number, auto: boolean) {
-  const userInfo: UserInfo = JSON.parse(sessionStorage.getItem(USERINFO) || initialUserInfo)
-  const name = userInfo.name
-  const token = userInfo.token
-  const requestForm = getRequestForm(PATCH, token, JSON.stringify({name, language, level, auto}))
-  const update = await fetch(`${API_URL}${USERDETAIL_DB_PATH}/setting`, requestForm)
-  if (update.ok) {
-    localStorage.setItem(LANGUAGE_IDX, String(language))
-    userInfo.auto = auto
-    userInfo.level = level
-    userInfo.language = language
-    sessionStorage.setItem(USERINFO, JSON.stringify(userInfo))
-    return true
-  }
-  throw new Error(`Error: ${update.status}`)
-}
+

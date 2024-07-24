@@ -6,12 +6,13 @@ import { menuWords } from '../util/menuWords';
 import { HOME, LANGUAGE_IDX, mobileFontSize } from '../util/constants';
 import { useMediaQuery } from '@mui/material';
 import { useState } from 'react';
+import { getLanguageIdx } from '../util/functions';
 
 export default function Language() {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const open = Boolean(anchorEl);
   const isMobile = useMediaQuery("(max-width: 400px)")
-  const languageIdx = Number(localStorage.getItem(LANGUAGE_IDX))
+  const languageIdx = getLanguageIdx()
   const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
     setAnchorEl(event.currentTarget);
   };

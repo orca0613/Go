@@ -1,4 +1,4 @@
-import { Coordinate, Filter, ProblemAndVariations } from "./types"
+import { BoardInfo, Coordinate, Filter, ProblemAndVariations } from "./types"
 
 export const flowerPointPosition: Coordinate[][] = [
   [],
@@ -66,3 +66,9 @@ export const detailLevel = [
   [0, 12, 11, 10, 9, 8, 7],
   [0, 18, 17, 16, 15, 14, 13]
 ]
+
+export const initBoardInfo: BoardInfo = {
+  board: [],
+  color: "b",
+  key: "0"
+}

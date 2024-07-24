@@ -1,16 +1,16 @@
 import Switch from '@mui/material/Switch';
 import { HOME, LANGUAGE_IDX, USERINFO, languageList } from '../util/constants';
-import { UserInfo } from '../util/types';
+import { ChangeSettingForm, UserInfo } from '../util/types';
 import { ChangeEvent, useEffect, useState } from 'react';
 import { Box, Button, FormControl, FormControlLabel, FormLabel, InputLabel, MenuItem, Radio, RadioGroup, Select, SelectChangeEvent, useMediaQuery } from '@mui/material';
 import { menuWords } from '../util/menuWords';
-import { settingChange } from '../network/userDetail';
 import { useNavigate } from 'react-router-dom';
 import CheckPasswordDialog from './CheckPasswordDialog';
 import { initialUserInfo, levelArray } from '../util/initialForms';
-import { loginWarning } from '../util/functions';
+import { getLevelText, loginWarning, saveChanging } from '../util/functions';
 import { LOGIN_PATH } from '../util/paths';
 import DeleteAccountDialog from './DeleteAccountDialog';
+import { useChangeSettingMutation } from '../slices/userDetailApiSlice';
 
 export default function Setting() {
   const userInfo: UserInfo = JSON.parse(sessionStorage.getItem(USERINFO) || initialUserInfo)
@@ -18,6 +18,7 @@ export default function Setting() {
   const [language, setLanguage] = useState(languageIdx)
   const [auto, setAuto] = useState(userInfo.auto? userInfo.auto : false)
   const [level, setLevel] = useState(userInfo.level)
+  const [changeSetting, { isLoading: csLoading }] = useChangeSettingMutation()
   const margin = 5
   const navigate = useNavigate()
 
@@ -41,11 +42,16 @@ export default function Setting() {
   }, [])
 
   async function handleSettingChange() {
-    const update = await settingChange(language, level, auto)
-    if (update) {
-      alert(menuWords.modifiedNotice[language])
-      navigate(HOME)
+    const form: ChangeSettingForm = {
+      name: userInfo.name,
+      language: language,
+      level: level,
+      auto: auto
     }
+    await changeSetting(form).unwrap()
+    saveChanging(language, level, auto)
+    alert(menuWords.modifiedNotice[language])
+    navigate(HOME)
   }
 
   return (
@@ -89,7 +95,7 @@ export default function Setting() {
           variant={"standard"}
         >
           {levelArray.map(level => {
-            return <MenuItem key={level} value={level}>{Math.abs(level)}{level > 0? menuWords.K[language] : menuWords.D[language]}</MenuItem>
+            return <MenuItem key={level} value={level}>{getLevelText(level)}</MenuItem>
           })}
         </Select>
         <Button color='info' onClick={handleSettingChange} variant='contained' sx={{width: "100%", mb: margin, textTransform: "none"}}>{menuWords.change[language]}</Button>

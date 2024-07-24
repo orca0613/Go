@@ -7,14 +7,15 @@ import { getProblemInformations } from "../../network/problemInformation";
 import { useWindowSize } from "react-use";
 import { useNavigate } from "react-router-dom";
 import { nameButtonStyle } from "../../util/styles";
+import { getLanguageIdx, getLevelText } from "../../util/functions";
+import { LoadingPage } from "../LoadingPage";
 
 interface PIProps {
   problemInfo: ProblemAndVariations
 }
 
 export function ProblemInformation({ problemInfo }: PIProps) {
-
-  const languageIdx = Number(localStorage.getItem(LANGUAGE_IDX))
+  const languageIdx = getLanguageIdx()
   const navigate = useNavigate()
   const {width, height} = useWindowSize()
   const isMobile = height > width * 2 / 3 || width < 1000
@@ -48,13 +49,15 @@ export function ProblemInformation({ problemInfo }: PIProps) {
     })
   }, [problemInfo])
 
+  if (!problemInfo.creator) return <LoadingPage></LoadingPage>
+
   const mobileVersion = 
   <Box textAlign="center" display="grid">
     <Box textAlign="center" display="flex" justifyContent="space-around" alignItems="center">
       <Typography 
       sx={{margin: margin}} 
       variant="body1">
-        {info.color === "b"? menuWords.blackTurn[languageIdx] : menuWords.whiteTurn[languageIdx]} / {info.level > 0? `${info.level}${menuWords.K[languageIdx]}` : `${Math.abs(info.level)}${menuWords.D[languageIdx]}`}
+        {info.color === "b"? menuWords.blackTurn[languageIdx] : menuWords.whiteTurn[languageIdx]} / {getLevelText(info.level)}
       </Typography>
       <Typography 
       sx={{margin: margin}} 

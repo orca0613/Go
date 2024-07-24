@@ -50,7 +50,6 @@ export type BoardInfo = {
 
 export type UserInfo = {
   name: string,
-  token: string,
   level: number,
   point: number,
   created: number[],
@@ -130,4 +129,49 @@ export type SampleProblemInformation = {
   creator: string,
   time: Date,
   liked: number,
+}
+
+export type LoginRequest = {
+  email: string,
+  password: string,
+}
+
+export type LoginResponse = {
+  name: string,
+  level: number;
+  token: string;
+  language: number;
+}
+
+export type CreateProblemForm = {
+  comment: string,
+  initialState: Board,
+  creator: string,
+  level: number,
+  color: string,
+}
+
+export type DeleteProblemFrom = {
+  problemIdx: number,
+  creator: string, 
+  level: number,
+}
+
+export type ChangeSettingForm = {
+  name: string,
+  language: number,
+  level: number,
+  auto: boolean,
+}
+
+export type AddProblemIndexForm = {
+  problemIndex: number,
+  name: string,
+}
+
+export type ChangeCountForm = {
+  problemIdx: number,
+  where: string,
+  name: string,
+  count: number,
 }

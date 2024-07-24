@@ -21,7 +21,8 @@
     "react-router-dom": "^6.23.1",
     "react-use": "^17.5.0",
     "redux": "^5.0.1",
-    "redux-persist": "^6.0.0"
+    "redux-persist": "^6.0.0",
+    "zod": "^3.23.8"
   },
   "scripts": {
     "start": "vite",

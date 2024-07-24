@@ -7,6 +7,7 @@ import FinalBoard from "../board/FinalBoard"
 import { menuWords } from "../../util/menuWords"
 import { CheckCircleOutline, FavoriteBorder, HelpOutline } from "@mui/icons-material"
 import { initialUserInfo } from "../../util/initialForms"
+import { getLanguageIdx } from "../../util/functions"
 
 interface SampleProblemBoxProps {
   problems: ProblemInformation[] | SampleProblemInformation[]
@@ -16,7 +17,7 @@ interface SampleProblemBoxProps {
 
 export default function SampleProblemBox({ problems, request, page }: SampleProblemBoxProps) {
   const userInfo: UserInfo = JSON.parse(sessionStorage.getItem(USERINFO) || initialUserInfo)
-  const languageIdx = Number(localStorage.getItem(LANGUAGE_IDX))
+  const languageIdx = getLanguageIdx()
   const navigate = useNavigate()
   const {width, height} = useWindowSize()
   const isMobile = useMediaQuery("(max-width: 700px)")

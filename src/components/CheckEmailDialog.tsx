@@ -10,9 +10,10 @@ import { checkMailAndSendUrl } from '../network/user';
 import { HOME, LANGUAGE_IDX } from '../util/constants';
 import { useNavigate } from 'react-router-dom';
 import { menuWords } from '../util/menuWords';
+import { getLanguageIdx } from '../util/functions';
 
 export default function CheckEmailDialog() {
-  const languageIdx = Number(localStorage.getItem(LANGUAGE_IDX))
+  const languageIdx = getLanguageIdx()
   const navigate = useNavigate()
   const [open, setOpen] = useState(false);
 

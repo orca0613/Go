@@ -1,14 +1,13 @@
-import { API_URL, LANGUAGE_IDX, PATCH, POST, USERINFO } from "../util/constants"
-import { getRequestForm } from "../util/functions"
+import { API_URL, LANGUAGE_IDX, PATCH, POST, TOKEN, USERINFO } from "../util/constants"
+import { getLanguageIdx, getRequestForm } from "../util/functions"
 import { initialUserInfo } from "../util/initialForms"
 import { menuWords } from "../util/menuWords"
 import { REPLY_DB_PATH } from "../util/paths"
 import { ReplyForm, UserInfo } from "../util/types"
 
 export async function addReply(problemId: string, comment: string, name: string) {
-  const languageIdx = Number(localStorage.getItem(LANGUAGE_IDX))
-  const userInfo: UserInfo = JSON.parse(sessionStorage.getItem(USERINFO) || initialUserInfo)
-  const token = userInfo.token
+  const languageIdx = getLanguageIdx()
+  const token = sessionStorage.getItem(TOKEN) || ""
   const requestForm = getRequestForm(POST, token, JSON.stringify({problemId, comment, name}))
   const response = await fetch(`${API_URL}${REPLY_DB_PATH}/add`, requestForm)
   if (response.ok) {
@@ -23,8 +22,7 @@ export async function addReply(problemId: string, comment: string, name: string)
 }
 
 export async function hideReply(id: string, name: string) {
-  const userInfo: UserInfo = JSON.parse(sessionStorage.getItem(USERINFO) || initialUserInfo)
-  const token = userInfo.token
+  const token = sessionStorage.getItem(TOKEN) || ""
   const requestForm = getRequestForm(PATCH, token, JSON.stringify({id, name}))
   const response = await fetch(`${API_URL}${REPLY_DB_PATH}/hide`, requestForm)
   if (response.ok) {

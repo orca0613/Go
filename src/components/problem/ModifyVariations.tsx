@@ -1,12 +1,12 @@
 import { useEffect, useState } from 'react'
-import { BoardInfo, Coordinate, UserInfo, Variations } from '../../util/types'
+import { BoardInfo, Coordinate, DeleteProblemFrom, UserInfo, Variations } from '../../util/types'
 import _ from 'lodash'
-import { addCurrentVariation, loginWarning, removeCurrentVariation } from '../../util/functions'
+import { addCurrentVariation, getLanguageIdx, removeCurrentVariation } from '../../util/functions'
 import { Box, Button, ButtonGroup, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle } from '@mui/material'
-import { ANSWERS, HOME, LANGUAGE_IDX, MARGIN, QUESTIONS, USERINFO, VARIATIONS } from '../../util/constants'
+import { ANSWERS, HOME, MARGIN, QUESTIONS, USERINFO, VARIATIONS } from '../../util/constants'
 import FinalBoard from '../board/FinalBoard'
 import { menuWords } from '../../util/menuWords'
-import { deleteProblem, getProblemByIdx, updateVariations } from '../../network/problem'
+import { getProblemByIdx, updateVariations } from '../../network/problem'
 import { Game } from '../../gologic/goGame'
 import { ProblemInformation } from '../problem/ProblemInformation'
 import { useNavigate, useParams } from 'react-router-dom'
@@ -15,6 +15,7 @@ import { checkRequest } from '../../network/requests'
 import { initialProblemInfo, initialUserInfo } from '../../util/initialForms'
 import { mobileButtonStyle, wideButtonStyle } from '../../util/styles'
 import { LOGIN_PATH } from '../../util/paths'
+import { useDeleteProblemMutation } from '../../slices/problemApiSlice'
 
 export function ModifyVariations() {
 
@@ -26,9 +27,10 @@ export function ModifyVariations() {
   const username = userInfo.name
   const navigate = useNavigate()
   const {width, height} = useWindowSize()
+  const [del, { isLoading: dpLoading }] = useDeleteProblemMutation()
   const isMobile = height > width * 2 / 3 || width < 1000
   const margin = isMobile? 0 : MARGIN
-  const languageIdx = Number(localStorage.getItem(LANGUAGE_IDX))
+  const languageIdx = getLanguageIdx()
   const initInfo: BoardInfo = {
     board: problemInfo.initialState,
     color: problemInfo.color,
@@ -171,7 +173,13 @@ export function ModifyVariations() {
   }
 
   async function deleteProblemAndGoHome() {
-    await deleteProblem(problemIdx, username, problemInfo.level)
+    const form: DeleteProblemFrom = {
+      problemIdx: problemIdx,
+      creator: username,
+      level: problemInfo.level,
+    }
+    await del(form).unwrap()
+    alert(menuWords.deletedProblemWarning[languageIdx])
     setOpenWarning(false)
     navigate(HOME)
   }

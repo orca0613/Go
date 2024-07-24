@@ -6,11 +6,12 @@ import { HomeForm } from './HomeForm';
 import { menuWords } from '../util/menuWords';
 import { HOME, LANGUAGE_IDX } from '../util/constants';
 import { LOGIN_PATH } from '../util/paths';
+import { getLanguageIdx } from '../util/functions';
 
 export default function VerifyMail() {
   const { userId } = useParams()
   const navigate = useNavigate()
-  const languageIdx = Number(localStorage.getItem(LANGUAGE_IDX))
+  const languageIdx = getLanguageIdx()
 
 
   useEffect(() => {

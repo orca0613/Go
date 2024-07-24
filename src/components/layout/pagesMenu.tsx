@@ -1,19 +1,19 @@
 import { Box, Button, useMediaQuery } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import { NavButton } from "./NavButton";
-import { HOME, LANGUAGE_IDX, USERINFO, SITE_NAME, mobileFontSize } from "../../util/constants";
+import { HOME, USERINFO, mobileFontSize } from "../../util/constants";
 import { menuWords } from "../../util/menuWords";
 import Language from "../Language";
 import { Menu } from "../Menu";
 import { Filter, UserInfo } from "../../util/types";
-import { getTier, ownStringify, resetSortingForm } from "../../util/functions";
+import { getLanguageIdx, getTier, ownStringify, resetSortingForm } from "../../util/functions";
 import { CREATE_PATH, LOGIN_PATH, PROBLEM_PATH } from "../../util/paths";
 import { initialUserInfo } from "../../util/initialForms";
 
 
 export function PagesMenu() {
   const navigate = useNavigate();
-  const languageIdx = Number(localStorage.getItem(LANGUAGE_IDX))
+  const languageIdx = getLanguageIdx()
   const isMobile = useMediaQuery("(max-width: 400px)")
   const userInfo: UserInfo = JSON.parse(sessionStorage.getItem(USERINFO) || initialUserInfo)
 
@@ -25,9 +25,15 @@ export function PagesMenu() {
       creator: ""
     }
     const F = ownStringify(filter)
+    sessionStorage.setItem("initFilter", F)
     resetSortingForm(1, 0)
-    navigate(`${PROBLEM_PATH}/${F}`)
+    navigate(`${PROBLEM_PATH}/init`)
   }
+
+  const logo = 
+  <img src="/AppIcon.png" alt="logo" width="50" height="50"/>
+  const roundLogo = 
+  <img src="/AppIcon-round.png" alt="logo" width="50" height="50"/>
   
 
   const problems = 
@@ -51,17 +57,11 @@ export function PagesMenu() {
   return (
     <>
       <Button sx={{
-        fontWeight: 700,
-        fontSize: isMobile? 15 : 20,
-        textDecoration: "none",
-        color: "inherit",
-        mr: "2%",
-        padding: 0,
+        padding: 1,
       }}
       onClick={() =>navigate(HOME)}
-      
       >
-        {SITE_NAME}
+        {roundLogo}
       </Button>
 
       <Box sx={{ flexGrow: 1, display: "flex" }}>

@@ -8,13 +8,19 @@ import Layout from "./components/layout";
 import { ProblemBox } from "./components/problem/ProblemBox";
 import { ModifyVariations } from "./components/problem/ModifyVariations";
 import VerifyMail from "./components/VerifyMail";
-import MyPageProblems from "./components/problem/MyPageProblems";
+// import MyPageProblems from "./components/problem/MyPageProblems";
 import { ModifyProblem } from "./components/problem/ModifyProblem";
 import ChangePassword from "./components/ChangePassword";
 import Setting from "./components/Setting";
 import FilteredProblems from "./components/problem/FilteredProblems";
 import MessageList from "./components/MessageList";
 import UserPage from "./components/UserPage";
+import BasicFilterProblems from "./components/problem/BasicFilterProblems";
+import CreatedProblem from "./components/problem/myPageProblem/CreatedProblem";
+import SolvedProblem from "./components/problem/myPageProblem/SolvedProblem";
+import UnsolvedProblem from "./components/problem/myPageProblem/UnsolvedProblem";
+import LikedProblem from "./components/problem/myPageProblem/LikedProblem";
+import RequestProblem from "./components/problem/myPageProblem/RequestProblem";
 
 function App() {
   return (
@@ -26,7 +32,11 @@ function App() {
           <Route path="/*" element={<NotFound/>} />
           <Route path="/signup" element={<Signup/>} />
           <Route path="/create" element={<MakingProblem />} />
-          <Route path="/mypage/:part" element={<MyPageProblems></MyPageProblems>} />
+          <Route path="/mypage/created" element={<CreatedProblem></CreatedProblem>} />
+          <Route path="/mypage/solved" element={<SolvedProblem></SolvedProblem>} />
+          <Route path="/mypage/unresolved" element={<UnsolvedProblem></UnsolvedProblem>} />
+          <Route path="/mypage/liked" element={<LikedProblem></LikedProblem>} />
+          <Route path="/mypage/requests" element={<RequestProblem></RequestProblem>} />
           <Route path="/problem/:param" element={<ProblemBox />} />
           <Route path="/modify/:param" element={<ModifyVariations />} />
           <Route path="/verify/:userId" element={<VerifyMail />} />
@@ -34,6 +44,7 @@ function App() {
           <Route path="/change-password/:userId" element={<ChangePassword />} />
           <Route path="/setting" element={<Setting/>} />
           <Route path="/problems/:params" element={<FilteredProblems />} />
+          <Route path="/problems/init" element={<BasicFilterProblems />} />
           <Route path="/message" element={<MessageList />} />
           <Route path="/userpage/:name" element={<UserPage/>}/>
           

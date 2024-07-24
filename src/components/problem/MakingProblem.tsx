@@ -1,30 +1,30 @@
 import { useEffect, useState } from "react"
-import { Coordinate, UserInfo } from "../../util/types"
-import { COMMENT, HOME, LANGUAGE_IDX, LEVEL, MARGIN, TURN, USERINFO } from "../../util/constants"
-import { Box, Button, ButtonGroup, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, FormControl, InputLabel, MenuItem, Select, SelectChangeEvent, TextField, useMediaQuery } from "@mui/material"
-import { isLegalBoard, loginWarning, makingEmptyBoard } from "../../util/functions"
+import { Coordinate, CreateProblemForm, UserInfo } from "../../util/types"
+import { COMMENT, LEVEL, MARGIN, TURN, USERINFO } from "../../util/constants"
+import { Box, Button, ButtonGroup, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, FormControl, InputLabel, MenuItem, Select, SelectChangeEvent, TextField } from "@mui/material"
+import { getLanguageIdx, getLevelText, isLegalBoard, loginWarning, makingEmptyBoard } from "../../util/functions"
 import { isOutside } from "../../gologic/logic"
 import FinalBoard from "../board/FinalBoard"
 import { menuWords } from "../../util/menuWords"
-import { createProblem } from "../../network/problem"
 import { useWindowSize } from "react-use"
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 import { boardSizeArray, initialUserInfo, levelArray } from "../../util/initialForms"
 import { mobileButtonStyle } from "../../util/styles"
 import { useNavigate } from "react-router-dom"
 import { LOGIN_PATH } from "../../util/paths"
+import { useCreateProblemMutation } from "../../slices/problemApiSlice"
 
 export function MakingProblem() {
   const userInfo: UserInfo = JSON.parse(sessionStorage.getItem(USERINFO) || initialUserInfo)
-  const creator = userInfo.name
   const navigate = useNavigate()
   const [boardSize, setBoardSize] = useState(9)
   let emptyBoard = makingEmptyBoard(boardSize)
+  const [create, { isLoading: cpLoading }] = useCreateProblemMutation()
   const [problem, setProblem] = useState(emptyBoard)
   const {width, height} = useWindowSize()
   const isMobile = height > width * 2 / 3 || width < 1000
   const margin = isMobile? 0 : MARGIN
-  const languageIdx = Number(localStorage.getItem(LANGUAGE_IDX))
+  const languageIdx = getLanguageIdx()
   const [info, setInfo] = useState({
     comment: "",
     turn: "b",
@@ -68,7 +68,7 @@ export function MakingProblem() {
   function addMove(coord: Coordinate) {
     const y = coord[0], x = coord[1]
     const newProblem = [...problem]
-    newProblem[y][x] = info.color
+    newProblem[y][x] = problem[y][x] === info.color? "." : info.color
     setProblem(newProblem)
   }
 
@@ -83,7 +83,17 @@ export function MakingProblem() {
       alert(menuWords.invalidBoardWarning[languageIdx])
       return
     }
-    const newIdx = await createProblem(info.comment, problem, creator, info.level, info.turn)
+    const form: CreateProblemForm = {
+      comment: info.comment,
+      initialState: problem,
+      creator: userInfo.name,
+      level: info.level,
+      color: info.turn
+    }
+    const newIdx = await create(form).unwrap()
+    if (!newIdx) {
+      return
+    }
     setProblemIndex(newIdx)
     setProblem(emptyBoard)
     setOpenSuggestion(true)
@@ -156,7 +166,7 @@ export function MakingProblem() {
           onChange={levelChange}
         >
           {levelArray.map(level => {
-            return <MenuItem key={level} value={level}>{Math.abs(level)}{level > 0? menuWords.K[languageIdx] : menuWords.D[languageIdx]}</MenuItem>
+            return <MenuItem key={level} value={level}>{getLevelText(level)}</MenuItem>
           })}
         </Select>
       </FormControl>

@@ -4,9 +4,9 @@ import { LANGUAGE_IDX, PAGE } from "../util/constants"
 import { useEffect, useState } from "react"
 import { Filter } from "../util/types"
 import { detailLevel, tiersList } from "../util/initialForms"
-import { ownStringify } from "../util/functions"
+import { getLanguageIdx, getLevelText, ownStringify } from "../util/functions"
 import { useNavigate } from "react-router-dom"
-import { getAllCreators } from "../network/userDetail"
+import { useGetAllCreatorsQuery } from "../slices/userDetailApiSlice"
 
 interface FilterBoxProps {
   width: number
@@ -15,7 +15,7 @@ interface FilterBoxProps {
 
 export default function FilterBox({ width, f }: FilterBoxProps) {
 
-  const languageIdx = Number(localStorage.getItem(LANGUAGE_IDX))
+  const languageIdx = getLanguageIdx()
   const navigate = useNavigate()
   const isMobile = useMediaQuery("(max-width: 800px)")
   const mobileIconSize = width / 15
@@ -27,25 +27,20 @@ export default function FilterBox({ width, f }: FilterBoxProps) {
   const [detail, setDetail] = useState(detailLevel[filter.tier])
   const initIdx = f.level === 0 ? 0 : detail.indexOf((f.level))
   const [levelIdx, setLevelIdx] = useState(initIdx)
-  const [options, setOptions] = useState<string[]>([])
+  const { data: options, isLoading: gacLoading } = useGetAllCreatorsQuery()
+  const [emphasize, setEmphasize] = useState(false)
   const searchIcon = 
-  <img src="/images/search.svg" alt="pre" width={isMobile? mobileIconSize : IconSize} height={isMobile? mobileIconSize : IconSize}/>
-
+  <img src="/images/search_icon.svg" alt="search" width={isMobile? mobileIconSize : IconSize} height={isMobile? mobileIconSize : IconSize}/>
+  const disabledSearchIcon = 
+  <img src="/images/search_disabled.svg" alt="disabled" width={isMobile? mobileIconSize : IconSize} height={isMobile? mobileIconSize : IconSize}/>
 
   useEffect(() => {
-    const creators = getAllCreators()
-    const newOptions: string[] = []
-    creators.then(r => {
-      r.sort()
-      r.map(creator => {
-        newOptions.push(creator)
-      })
-      setOptions(newOptions)
       setFilter(f)
       setDetail(detailLevel[f.tier])
       const newLevelidx = f.level === 0 ? 0 : levelIdx
       setLevelIdx(newLevelidx)
-    })
+      setEmphasize(false)
+    
   }, [f])
 
   function changeTier(e: SelectChangeEvent) {
@@ -56,6 +51,7 @@ export default function FilterBox({ width, f }: FilterBoxProps) {
     })
     setDetail(detailLevel[Number(e.target.value)])
     setLevelIdx(0)
+    setEmphasize(true)
   }
 
   function changeLevel(e: SelectChangeEvent) {
@@ -65,6 +61,7 @@ export default function FilterBox({ width, f }: FilterBoxProps) {
       ...filter,
       level: level
     })
+    setEmphasize(true)
   }
 
   function changeCreator(newValue: string | null): void {
@@ -73,6 +70,7 @@ export default function FilterBox({ width, f }: FilterBoxProps) {
       ...filter,
       creator: creator
     })
+    setEmphasize(true)
   }
 
   function changeFilter() {
@@ -110,7 +108,7 @@ export default function FilterBox({ width, f }: FilterBoxProps) {
           {detail.map((t, idx) => {
             return (
               <MenuItem key={idx} value={idx}>
-                {t === 0? menuWords.allLevel[languageIdx] : t > 0? `${t}${menuWords.K[languageIdx]}` : `${Math.abs(t)}${menuWords.D[languageIdx]}`}
+                {t === 0? menuWords.allLevel[languageIdx] : getLevelText(t)}
               </MenuItem>
             ) 
           })}
@@ -121,14 +119,17 @@ export default function FilterBox({ width, f }: FilterBoxProps) {
       <Autocomplete
         freeSolo
         sx={{...dropDownStyle, width: "60%"}}
-        options={options}
+        options={options || []}
         value={filter.creator}
         onChange={(event, newValue) => changeCreator(newValue)}
         renderInput={(params) => (
           <TextField {...params} label={menuWords.creator[languageIdx]} variant="standard" />
         )}
       />
-      <Button onClick={changeFilter}>{searchIcon}</Button>
+      {emphasize?
+        <Button onClick={changeFilter}>{searchIcon}</Button> :
+        <Button disabled>{disabledSearchIcon}</Button>
+      }
     </Box>
   </Box>
 
@@ -159,7 +160,7 @@ const filterBox =
       {detail.map((t, idx) => {
         return (
           <MenuItem key={idx} value={idx}>
-            {t === 0? menuWords.allLevel[languageIdx] : t > 0? `${t}${menuWords.K[languageIdx]}` : `${Math.abs(t)}${menuWords.D[languageIdx]}`}
+            {t === 0? menuWords.allLevel[languageIdx] : getLevelText(t)}
           </MenuItem>
         ) 
       })}
@@ -168,14 +169,17 @@ const filterBox =
   <Autocomplete
     freeSolo
     sx={dropDownStyle}
-    options={options}
+    options={options || []}
     value={filter.creator}
     onChange={(event, newValue) => changeCreator(newValue)}
     renderInput={(params) => (
       <TextField {...params} label={menuWords.creator[languageIdx]} variant="standard" />
     )}
   />
-  <Button onClick={changeFilter}>{searchIcon}</Button>
+  {emphasize?
+    <Button onClick={changeFilter}>{searchIcon}</Button> :
+    <Button onClick={changeFilter} disabled>{disabledSearchIcon}</Button>
+  }
 </Box>
 
 

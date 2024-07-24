@@ -2,14 +2,18 @@ import { Box, Button, Checkbox, FormControlLabel, TextField } from '@mui/materia
 import React, { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { menuWords } from '../util/menuWords'
-import { logIn } from '../network/user'
-import { HOME, LANGUAGE_IDX, expires } from '../util/constants'
+// import { logIn } from '../network/user'
+import { HOME, LANGUAGE_IDX, TOKEN, USERINFO, expires } from '../util/constants'
 import { useWindowSize } from 'react-use'
 import CheckEmailDialog from './CheckEmailDialog'
 import { isValidEmail } from '../util/functions'
+import { useLoginMutation } from '../slices/userApiSlice'
+import { UserInfo } from '../util/types'
+import { initialUserInfo } from '../util/initialForms'
 
 export function Login() {
 	const navigate = useNavigate()
+  const [login, { isLoading: loginLoading }] = useLoginMutation()
 
   function setCookie(name: string, val: string) {
     let date = new Date()
@@ -54,10 +58,24 @@ export function Login() {
       setEmailErrorMessage(menuWords.invalidEmailFormWarning[languageIdx])
       return
     }
-    const username = await logIn(email, password)
-    if (!username) {
+    const data = {
+      email: email,
+      password: password
+    }
+    const res = await login(data).unwrap();
+    if (!res) {
       return
     }
+    const userInfo: UserInfo = JSON.parse(sessionStorage.getItem(USERINFO) || initialUserInfo)
+    const newUserInfo: UserInfo = {
+      ...userInfo,
+      name: res.name,
+      level: res.level,
+      language: res.language
+    }
+    localStorage.setItem(LANGUAGE_IDX, String(res.language))
+    sessionStorage.setItem(USERINFO, JSON.stringify(newUserInfo))
+    sessionStorage.setItem(TOKEN, res.token)
     if (saveInfo) {
       setCookie("email", email)
       setCookie("pw", password)

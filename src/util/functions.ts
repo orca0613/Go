@@ -1,9 +1,13 @@
-
 import { getDeadGroup, handleMove } from "../gologic/logic"
-import { LANGUAGE_IDX, PAGE, PROBLEM_INDICES, SORTING_IDX } from "./constants"
+import { LANGUAGE_IDX, PAGE, PROBLEM_INDEX, PROBLEM_INDICES, SORTING_IDX, USERINFO } from "./constants"
+import { initIndices, initialUserInfo } from "./initialForms"
 import { menuWords } from "./menuWords"
-import { Board, Coordinate, Filter, SampleProblemInformation, Variations } from "./types"
+import { Board, ChangeCountForm, Coordinate, Filter, SampleProblemInformation, UserInfo, Variations } from "./types"
 import _ from 'lodash'
+import { useChangeCountMutation } from "../slices/problemInformationApiSlice"
+import { addCorrectUser, addWrongUser, changeCount } from "../network/problemInformation"
+import { number } from "zod"
+import { addTried } from "../network/userDetail"
 
 export function playMoveAndReturnNewBoard(board: Board, coord: Coordinate, color: string) {
   const newBoard = handleMove(board, color, coord)
@@ -116,7 +120,7 @@ export function isValidEmail(email: string): boolean {
 }
 
 export function loginWarning() {
-  const languageIdx = Number(localStorage.getItem(LANGUAGE_IDX))
+  const languageIdx = getLanguageIdx()
   alert(menuWords.loginWarning[languageIdx])
 }
 
@@ -172,8 +176,8 @@ export function ownParse(param: string) {
   return filter
 }
 
-export function sortingProblemList(problemList: SampleProblemInformation[], option: number) {
-  const newProblemList = problemList
+export function sortingProblemList(problemList: SampleProblemInformation[] | undefined, option: number) {
+  const newProblemList = problemList? problemList : []
   switch (option) {
     case 0:
       newProblemList.sort((a, b) => b.problemIndex - a.problemIndex)
@@ -242,8 +246,11 @@ export function getGreetings(name: string, language: number) {
   }
 }
 
-export function ExcludeSolvedProblems(problemList: SampleProblemInformation[], solved: number[]) {
+export function excludeSolvedProblems(problemList: SampleProblemInformation[] | undefined, solved: number[]): SampleProblemInformation[] {
   const newProblemList: SampleProblemInformation[] = []
+  if (!problemList) {
+    return newProblemList
+  }
   problemList.map(p => {
     if (!solved.includes(p.problemIndex)) {
       newProblemList.push(p)
@@ -262,5 +269,106 @@ export function getRequestForm(method: string, token: string, body: string) {
     body: body,
   }
   return requestForm
+}
+
+export function saveChanging(language: number, level: number, auto: boolean) {
+  const userInfo: UserInfo = JSON.parse(sessionStorage.getItem(USERINFO) || initialUserInfo)
+  localStorage.setItem(LANGUAGE_IDX, String(language))
+  userInfo.auto = auto,
+  userInfo.level = level,
+  userInfo.language = language
+  sessionStorage.setItem(USERINFO, JSON.stringify(userInfo))
+}
+
+export function getUnsolvedIdxArray(tried: number[] | undefined, solved: number[] | undefined) {
+  const newTried = tried? tried : []
+  const newSolved = solved? solved : []
+  const unsolved = newTried.filter(idx => !newSolved.includes(idx))
+  return unsolved
+}
+
+// export function getUserInfo(): UserInfo {
+//   const userInfo: UserInfo = JSON.parse(sessionStorage.getItem(USERINFO) || initialUserInfo)
+//   return userInfo
+// }
+
+
+export function getLanguageIdx(): number {
+  const languageIdx = Number(localStorage.getItem(LANGUAGE_IDX))
+  return languageIdx
+}
+
+export function getLevelText(level: number, lang?: number): string {
+  const languageIdx = lang? lang : getLanguageIdx()
+  let levelText = String(Math.abs(level))
+  levelText += level > 0? menuWords.K[languageIdx] : menuWords.D[languageIdx]
+  return levelText
+}
+
+export function getAdjacentProblemIndex(isNext: boolean): number {
+  const problemList: number[] = JSON.parse(sessionStorage.getItem(PROBLEM_INDICES) || "[]")
+  const newIndex = isNext? Number(sessionStorage.getItem(PROBLEM_INDEX)) + 1 : Number(sessionStorage.getItem(PROBLEM_INDEX)) - 1
+  if (newIndex < 0 || newIndex >= problemList.length) {
+    return 0
+  }
+  sessionStorage.setItem(PROBLEM_INDEX, String(newIndex))
+  const nextProblemIdx = problemList[newIndex]
+  return nextProblemIdx
+}
+
+export async function addView(problemIndex: number, name: string) {
+  const userInfo: UserInfo = JSON.parse(sessionStorage.getItem(USERINFO) || initialUserInfo)
+  if (!userInfo.tried.includes(problemIndex)) {
+    addProblemIndexToUserInfo(1, problemIndex)
+    await addTried(problemIndex, name)
+  }
+
+  await changeCount(problemIndex, "view", name, 1)
+}
+
+export function handleResult(problemIndex: number, name: string, level: number, problemLevel: number, correct: boolean) {
+  const userInfo: UserInfo = JSON.parse(sessionStorage.getItem(USERINFO) || initialUserInfo)
+  if (userInfo.solved.includes(problemIndex)) {
+    return
+  }
+  if (correct) {
+    addProblemIndexToUserInfo(2, problemIndex)
+    addCorrectUser(problemIndex, name, level, problemLevel)
+  } else {
+    addWrongUser(problemIndex, name, level, problemLevel)
+  }
+}
+
+export function addProblemIndexToUserInfo(where: number, problemIndex: number) {
+  const userInfo: UserInfo = JSON.parse(sessionStorage.getItem(USERINFO) || initialUserInfo)
+  switch (where) {
+    case 0:
+      userInfo.created.push(problemIndex)
+      break
+    case 1:
+      userInfo.tried.push(problemIndex)
+      break
+    case 2:
+      userInfo.solved.push(problemIndex)
+      break
+    case 3:
+      userInfo.liked.push(problemIndex)
+      break
+    case 4:
+      const idx = userInfo.liked.indexOf(problemIndex)
+      userInfo.liked.splice(idx, 1)
+      break
+    default:
+      break
+  }
+  sessionStorage.setItem(USERINFO, JSON.stringify(userInfo))
+}
+
+export function handleSeeAnswer(problemIndex: number) {
+  const userInfo: UserInfo = JSON.parse(sessionStorage.getItem(USERINFO) || initialUserInfo)
+  if (userInfo.solved.includes(problemIndex)) {
+    return
+  }
+  addProblemIndexToUserInfo(2, problemIndex)
 }
 

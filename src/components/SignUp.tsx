@@ -4,7 +4,7 @@ import { LANGUAGE_IDX, languageList } from '../util/constants'
 import { useNavigate } from 'react-router-dom'
 import { menuWords } from '../util/menuWords'
 import { checkMail, checkUserName, createUser } from '../network/user'
-import { isValidEmail } from '../util/functions'
+import { getLevelText, isValidEmail } from '../util/functions'
 import { useWindowSize } from 'react-use'
 import { levelArray } from '../util/initialForms'
 
@@ -195,7 +195,7 @@ export function Signup() {
           variant={variant}
         >
           {levelArray.map(level => {
-            return <MenuItem key={level} value={level}>{Math.abs(level)}{level > 0? menuWords.K[language] : menuWords.D[language]}</MenuItem>
+            return <MenuItem key={level} value={level}>{getLevelText(level, language)}</MenuItem>
           })}
         </Select>
       </FormControl>

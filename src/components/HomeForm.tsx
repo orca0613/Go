@@ -9,22 +9,21 @@ import { useWindowSize } from 'react-use'
 import { useNavigate } from 'react-router-dom'
 import { LOGIN_PATH } from '../util/paths'
 import FinalBoard from './board/FinalBoard'
-import { getGreetings } from '../util/functions'
-import { getNewest, getRecommended } from '../network/sampleProblem'
+import { getGreetings, getLanguageIdx } from '../util/functions'
 import { LoadingPage } from './LoadingPage'
+import { useGetNewestQuery, useGetRecommendedQuery } from '../slices/sampleProblemApiSlice'
 
 export function HomeForm() {
 
   const userInfo: UserInfo = JSON.parse(sessionStorage.getItem(USERINFO) || initialUserInfo)
   const username = userInfo.name
-  const languageIdx = Number(localStorage.getItem(LANGUAGE_IDX))
-  const [recommended, setRecommended] = useState<SampleProblemInformation[]>([])
-  const [newest, setNewest] = useState<SampleProblemInformation[]>([])
+  const languageIdx = getLanguageIdx()
   const [greetings, setGreetings] = useState("")
-  const [loading, setLoading] = useState(true)
   const {width, height} = useWindowSize()
   const isMobile = useMediaQuery("(max-width: 800px)")
   const navigate = useNavigate()
+  const { data: recommended, isLoading: grLoading } = useGetRecommendedQuery(username)
+  const { data: newest, isLoading: gnLoading } = useGetNewestQuery()
 
   useEffect(() => {
     if (!username) {
@@ -32,15 +31,7 @@ export function HomeForm() {
     }
     const newGreetings = getGreetings(username, languageIdx)
     setGreetings(newGreetings)
-    getNewest()
-    .then(n => {
-      setNewest(n)
-    })
-    getRecommended(username)
-    .then(r => {
-      setRecommended(r)
-    })
-    setLoading(false)
+    // useGetRecommendedQuery(username)
   }, [username])
 
   function setIdexAndOpenProblem(index: number, problemIdx: number, problemList: SampleProblemInformation[]) {
@@ -53,7 +44,7 @@ export function HomeForm() {
     navigate(`/problem/${problemIdx}`)
   }
   
-  if (loading) {
+  if (grLoading || gnLoading) {
     return (
       <LoadingPage></LoadingPage>
     )
@@ -64,7 +55,7 @@ export function HomeForm() {
       <Box>
         <Typography sx={{m: isMobile? "2%" : "1%"}} variant={isMobile? 'h6' : "h4"}>{greetings}</Typography>
         <Box sx={{display: "flex", flexWrap: "wrap", justifyContent: "space-between"}}>
-          {recommended.map((r, idx) => {
+          {recommended? recommended.map((r, idx) => {
             return (
               <Box key={idx} onClick={() => setIdexAndOpenProblem(idx, r.problemIndex, recommended)} m={isMobile? "2%" : "1%"}>
 
@@ -75,13 +66,13 @@ export function HomeForm() {
                 />
               </Box>
             )
-          })}
+          }) : <></>}
         </Box>
       </Box>
       <Box>
         <Typography sx={{m: isMobile? "2%" : "1%"}} variant={isMobile? 'h6' : "h4"}>{menuWords.newestProblem[languageIdx]}</Typography>
         <Box sx={{display: "flex", flexWrap: "wrap", justifyContent: "space-between"}}>
-          {newest.map((n, idx) => {
+          {newest? newest.map((n, idx) => {
             return (
               <Box key={idx} onClick={() => setIdexAndOpenProblem(idx, n.problemIndex, newest)} m={isMobile? "2%" : "1%"}>
                 <FinalBoard 
@@ -91,7 +82,7 @@ export function HomeForm() {
                 />
               </Box>
             )
-          })}
+          }) : <></>}
         </Box>
       </Box>
     </Box>

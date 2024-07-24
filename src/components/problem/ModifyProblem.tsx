@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react"
 import { Coordinate, UserInfo } from "../../util/types"
-import { COMMENT, HOME, LANGUAGE_IDX, LEVEL, MARGIN, TURN, USERINFO } from "../../util/constants"
+import { COMMENT, HOME, LEVEL, MARGIN, TURN, USERINFO } from "../../util/constants"
 import { Box, Button, ButtonGroup, FormControl, InputLabel, MenuItem, Select, SelectChangeEvent, TextField } from "@mui/material"
-import { isLegalBoard, loginWarning, makingEmptyBoard } from "../../util/functions"
+import { getLanguageIdx, getLevelText, isLegalBoard, loginWarning, makingEmptyBoard } from "../../util/functions"
 import { isOutside } from "../../gologic/logic"
 import FinalBoard from "../board/FinalBoard"
 import { menuWords } from "../../util/menuWords"
@@ -24,7 +24,7 @@ export function ModifyProblem() {
   const navigate = useNavigate()
   const isMobile = height > width * 2 / 3 || width < 1000
   const margin = MARGIN
-  const languageIdx = Number(localStorage.getItem(LANGUAGE_IDX))
+  const languageIdx = getLanguageIdx()
   const [info, setInfo] = useState({
     creator: "",
     comment: "",
@@ -168,7 +168,7 @@ export function ModifyProblem() {
         onChange={levelChange}
       >
         {levelArray.map(level => {
-          return <MenuItem key={level} value={level}>{Math.abs(level)}{level > 0? menuWords.K[languageIdx] : menuWords.D[languageIdx]}</MenuItem>
+          return <MenuItem key={level} value={level}>{getLevelText(level)}</MenuItem>
         })}
       </Select>
     </FormControl>
