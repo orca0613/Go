@@ -77,6 +77,12 @@ const sampleProblemApiSlice = apiSlice.injectEndpoints({
       },
       providesTags: [LIKED_TAG]
     }),
+    getSampleRequests: builder.query<SampleProblemInformation[], string>({
+      query: (problemIndexList) => `${SAMPLE_PATH}/get-by-idx-list/${problemIndexList}`,
+      transformResponse: (res: SampleProblemInformation[]) => {
+        return res
+      },
+    })
   })
 
 })
@@ -91,4 +97,5 @@ export const {
   useGetSampleSolvedQuery,
   useGetSampleUnsolvedQuery,
   useGetSampleLikedQuery,
+  useGetSampleRequestsQuery,
  } = sampleProblemApiSlice

@@ -23,14 +23,13 @@ const userDetailApiSlice = apiSlice.injectEndpoints({
     getUserDetail: builder.query<UserDetailFromServer, string>({
       query: (name) => `${USERDETAIL_DB_PATH}/get/${name}`,
       transformResponse: (res: UserDetailFromServer) => {
-        sessionStorage.setItem(USERINFO, JSON.stringify(res))
         return res
       },
       providesTags: [USER_DETAIL_TAG]
     }),
     addTried: builder.mutation<void, AddProblemIndexForm>({
       query: (body) => ({
-        url: `${USERDETAIL_DB_PATH}/add-element`,
+        url: `${USERDETAIL_DB_PATH}/add-tried`,
         method: PATCH,
         body,
       }),
@@ -38,7 +37,7 @@ const userDetailApiSlice = apiSlice.injectEndpoints({
     }),
     addSolved: builder.mutation<void, AddProblemIndexForm>({
       query: (body) => ({
-        url: `${USERDETAIL_DB_PATH}/add-element`,
+        url: `${USERDETAIL_DB_PATH}/add-solved`,
         method: PATCH,
         body,
       }),

@@ -1,6 +1,5 @@
 import { Box, Button, Typography } from "@mui/material";
 import { menuWords } from "../../util/menuWords";
-import { LANGUAGE_IDX } from "../../util/constants";
 import { ProblemAndVariations } from "../../util/types";
 import { useEffect, useState } from "react";
 import { getProblemInformations } from "../../network/problemInformation";

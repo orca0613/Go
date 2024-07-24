@@ -6,7 +6,7 @@ import DialogContent from '@mui/material/DialogContent';
 import DialogContentText from '@mui/material/DialogContentText';
 import { useState } from 'react';
 import { checkPassword } from '../network/user';
-import { LANGUAGE_IDX, USERINFO } from '../util/constants';
+import { USERINFO } from '../util/constants';
 import { UserInfo } from '../util/types';
 import { useNavigate } from 'react-router-dom';
 import { menuWords } from '../util/menuWords';

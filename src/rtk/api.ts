@@ -1,7 +1,6 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
-import { API_URL, TOKEN, USERINFO } from "../util/constants";
+import { API_URL, TOKEN } from "../util/constants";
 
-export const PROBLEM_TAG = "Problem"
 export const RECOMMENDED_TAG = "Recommended"
 export const NEWEST_TAG = "Newest"
 export const FILTER_TAG = "Filter"
@@ -30,7 +29,6 @@ export const apiSlice = createApi({
   baseQuery: baseQuery,
   endpoints: () => ({}), // Endpoints are injected in features
   tagTypes: [
-    PROBLEM_TAG,
     RECOMMENDED_TAG,
     NEWEST_TAG,
     FILTER_TAG,

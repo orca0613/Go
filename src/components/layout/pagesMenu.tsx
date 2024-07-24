@@ -5,7 +5,7 @@ import { HOME, USERINFO, mobileFontSize } from "../../util/constants";
 import { menuWords } from "../../util/menuWords";
 import Language from "../Language";
 import { Menu } from "../Menu";
-import { Filter, UserInfo } from "../../util/types";
+import { FilterForm, UserInfo } from "../../util/types";
 import { getLanguageIdx, getTier, ownStringify, resetSortingForm } from "../../util/functions";
 import { CREATE_PATH, LOGIN_PATH, PROBLEM_PATH } from "../../util/paths";
 import { initialUserInfo } from "../../util/initialForms";
@@ -19,7 +19,7 @@ export function PagesMenu() {
 
   function resetPageAndMove() {
     const tier = getTier(userInfo.level)
-    const filter: Filter = {
+    const filter: FilterForm = {
       tier: tier,
       level: 0,
       creator: ""
@@ -27,7 +27,7 @@ export function PagesMenu() {
     const F = ownStringify(filter)
     sessionStorage.setItem("initFilter", F)
     resetSortingForm(1, 0)
-    navigate(`${PROBLEM_PATH}/init`)
+    navigate(`${PROBLEM_PATH}/${F}`)
   }
 
   const logo = 

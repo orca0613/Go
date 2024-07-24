@@ -88,7 +88,7 @@ export type UserDetailFromServer = {
   totalCorrect: number
 }
 
-export type Filter = {
+export type FilterForm = {
   tier: number,
   level: number,
   creator: string,
@@ -174,4 +174,30 @@ export type ChangeCountForm = {
   where: string,
   name: string,
   count: number,
+}
+
+export type UpdateVariationsForm = {
+  problemIdx: number,
+  name: string,
+  creator: string,
+  variations?: Variations,
+  answers?: Variations,
+  questions?: Variations
+}
+
+export type ModifyProblemForm = {
+  creator: string,
+  problemIdx: number, 
+  initialState: Board,
+  comment: string,
+  level: number, 
+  color: string,
+}
+
+export type CreateAccountForm = {
+  email: string,
+  password: string,
+  name: string,
+  level: number,
+  language: number,
 }

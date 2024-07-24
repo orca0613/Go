@@ -5,22 +5,18 @@ import { Signup } from "./components/SignUp";
 import { HomeForm } from "./components/HomeForm";
 import { MakingProblem } from "./components/problem/MakingProblem";
 import Layout from "./components/layout";
-import { ProblemBox } from "./components/problem/ProblemBox";
 import { ModifyVariations } from "./components/problem/ModifyVariations";
 import VerifyMail from "./components/VerifyMail";
-// import MyPageProblems from "./components/problem/MyPageProblems";
 import { ModifyProblem } from "./components/problem/ModifyProblem";
 import ChangePassword from "./components/ChangePassword";
 import Setting from "./components/Setting";
-import FilteredProblems from "./components/problem/FilteredProblems";
 import MessageList from "./components/MessageList";
 import UserPage from "./components/UserPage";
-import BasicFilterProblems from "./components/problem/BasicFilterProblems";
-import CreatedProblem from "./components/problem/myPageProblem/CreatedProblem";
-import SolvedProblem from "./components/problem/myPageProblem/SolvedProblem";
-import UnsolvedProblem from "./components/problem/myPageProblem/UnsolvedProblem";
-import LikedProblem from "./components/problem/myPageProblem/LikedProblem";
-import RequestProblem from "./components/problem/myPageProblem/RequestProblem";
+import { ProblemBox } from "./components/problem/ProblemBox";
+import { MyPageProblemBox } from "./components/problem/MyPageProblemBox";
+import FilteredProblemBox from "./components/problem/FilteredProblemBox";
+
+
 
 function App() {
   return (
@@ -32,19 +28,14 @@ function App() {
           <Route path="/*" element={<NotFound/>} />
           <Route path="/signup" element={<Signup/>} />
           <Route path="/create" element={<MakingProblem />} />
-          <Route path="/mypage/created" element={<CreatedProblem></CreatedProblem>} />
-          <Route path="/mypage/solved" element={<SolvedProblem></SolvedProblem>} />
-          <Route path="/mypage/unresolved" element={<UnsolvedProblem></UnsolvedProblem>} />
-          <Route path="/mypage/liked" element={<LikedProblem></LikedProblem>} />
-          <Route path="/mypage/requests" element={<RequestProblem></RequestProblem>} />
+          <Route path="/mypage/:param" element={<MyPageProblemBox></MyPageProblemBox>} />
           <Route path="/problem/:param" element={<ProblemBox />} />
           <Route path="/modify/:param" element={<ModifyVariations />} />
           <Route path="/verify/:userId" element={<VerifyMail />} />
           <Route path="/modify-problem/:param" element={<ModifyProblem />} />
           <Route path="/change-password/:userId" element={<ChangePassword />} />
           <Route path="/setting" element={<Setting/>} />
-          <Route path="/problems/:params" element={<FilteredProblems />} />
-          <Route path="/problems/init" element={<BasicFilterProblems />} />
+          <Route path="/problems/:params" element={<FilteredProblemBox />} />
           <Route path="/message" element={<MessageList />} />
           <Route path="/userpage/:name" element={<UserPage/>}/>
           

@@ -1,7 +1,7 @@
 
 import { Box, Typography, useMediaQuery } from '@mui/material'
 import { menuWords } from '../util/menuWords'
-import { LANGUAGE_IDX, PROBLEM_INDEX, PROBLEM_INDICES, USERINFO } from '../util/constants'
+import { USERINFO } from '../util/constants'
 import { SampleProblemInformation, UserInfo } from '../util/types'
 import { initialUserInfo } from '../util/initialForms'
 import { useEffect, useState } from 'react'
@@ -9,7 +9,7 @@ import { useWindowSize } from 'react-use'
 import { useNavigate } from 'react-router-dom'
 import { LOGIN_PATH } from '../util/paths'
 import FinalBoard from './board/FinalBoard'
-import { getGreetings, getLanguageIdx } from '../util/functions'
+import { getGreetings, getLanguageIdx, setProblemIndicies } from '../util/functions'
 import { LoadingPage } from './LoadingPage'
 import { useGetNewestQuery, useGetRecommendedQuery } from '../slices/sampleProblemApiSlice'
 
@@ -35,12 +35,7 @@ export function HomeForm() {
   }, [username])
 
   function setIdexAndOpenProblem(index: number, problemIdx: number, problemList: SampleProblemInformation[]) {
-    const newIndices: number[] = []
-    problemList.map(p => {
-      newIndices.push(p.problemIndex)
-    })
-    sessionStorage.setItem(PROBLEM_INDICES, JSON.stringify(newIndices))
-    sessionStorage.setItem(PROBLEM_INDEX, String(index))
+    setProblemIndicies(problemList, index)
     navigate(`/problem/${problemIdx}`)
   }
   

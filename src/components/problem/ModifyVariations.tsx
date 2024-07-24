@@ -1,21 +1,21 @@
 import { useEffect, useState } from 'react'
-import { BoardInfo, Coordinate, DeleteProblemFrom, UserInfo, Variations } from '../../util/types'
+import { BoardInfo, Coordinate, DeleteProblemFrom, UpdateVariationsForm, UserInfo, Variations } from '../../util/types'
 import _ from 'lodash'
-import { addCurrentVariation, getLanguageIdx, removeCurrentVariation } from '../../util/functions'
+import { addCurrentVariation, addProblemIndexToUserInfo, getLanguageIdx, removeCurrentVariation } from '../../util/functions'
 import { Box, Button, ButtonGroup, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle } from '@mui/material'
 import { ANSWERS, HOME, MARGIN, QUESTIONS, USERINFO, VARIATIONS } from '../../util/constants'
 import FinalBoard from '../board/FinalBoard'
 import { menuWords } from '../../util/menuWords'
-import { getProblemByIdx, updateVariations } from '../../network/problem'
+import { getProblemByIdx } from '../../network/problem'
 import { Game } from '../../gologic/goGame'
 import { ProblemInformation } from '../problem/ProblemInformation'
 import { useNavigate, useParams } from 'react-router-dom'
 import { useWindowSize } from 'react-use'
 import { checkRequest } from '../../network/requests'
-import { initialProblemInfo, initialUserInfo } from '../../util/initialForms'
+import { initialProblemInfo, initialUserInfo, initialVariations } from '../../util/initialForms'
 import { mobileButtonStyle, wideButtonStyle } from '../../util/styles'
 import { LOGIN_PATH } from '../../util/paths'
-import { useDeleteProblemMutation } from '../../slices/problemApiSlice'
+import { useDeleteProblemMutation, useUpdateVariationsMutation } from '../../slices/problemApiSlice'
 
 export function ModifyVariations() {
 
@@ -28,6 +28,7 @@ export function ModifyVariations() {
   const navigate = useNavigate()
   const {width, height} = useWindowSize()
   const [del, { isLoading: dpLoading }] = useDeleteProblemMutation()
+  const [uv, { isLoading: uvLoading }] = useUpdateVariationsMutation()
   const isMobile = height > width * 2 / 3 || width < 1000
   const margin = isMobile? 0 : MARGIN
   const languageIdx = getLanguageIdx()
@@ -100,8 +101,23 @@ export function ModifyVariations() {
     navigate(LOGIN_PATH)
   }
 
-  async function update(problemIdx: number, where: string, vars: Variations, name: string, creator: string, save: boolean) {
-    await updateVariations(problemIdx, where, vars, name, creator, save)
+  async function update(problemIdx: number, name: string, creator: string, save: boolean, variatinos?: Variations, answers?: Variations, questions?: Variations) {
+    const form: UpdateVariationsForm = {
+      problemIdx: problemIdx,
+      variations: variatinos,
+      answers: answers,
+      questions: questions,
+      name: name,
+      creator: creator,
+    }
+    await uv(form).unwrap()
+    if (save) {
+      alert(menuWords.saved[languageIdx])
+    } else {
+      if (_.isEqual(questions, problemInfo.questions)) {
+        alert(menuWords.deletedNotice[languageIdx])
+      }
+    }
   }
 
   async function addVariationsAndSetVariations() {
@@ -115,7 +131,7 @@ export function ModifyVariations() {
       ...problemInfo,
       variations: newVariations
     })
-    update(problemIdx, VARIATIONS, newVariations, username, problemInfo.creator, true)
+    update(problemIdx, username, problemInfo.creator, true, newVariations)
   }
 
   function addAnswersAndSetAnswers() {
@@ -129,35 +145,20 @@ export function ModifyVariations() {
       ...problemInfo,
       answers: newAnswers
     })
-    update(problemIdx, ANSWERS, newAnswers, username, problemInfo.creator, true)
+    update(problemIdx, username, problemInfo.creator, true, undefined, newAnswers)
   }
 
   async function removeVariationsAndSetVariations(key: string) {
-    if (problemInfo.variations.hasOwnProperty(key) && problemInfo.variations[key].length === 0) {
-      const newVariations = removeCurrentVariation(key, problemInfo.variations)
-      setProblemInfo({
-        ...problemInfo,
-        variations: newVariations
-      })
-      update(problemIdx, VARIATIONS, newVariations, username, problemInfo.creator, false)
-    } else if (problemInfo.answers.hasOwnProperty(key) && problemInfo.answers[key].length === 0) {
-      const newAnswers = removeCurrentVariation(key, problemInfo.answers)
-      setProblemInfo({
-        ...problemInfo,
-        answers: newAnswers
-      })
-      update(problemIdx, ANSWERS, newAnswers, username, problemInfo.creator, false)
-    } else if (problemInfo.questions.hasOwnProperty(key) && problemInfo.questions[key].length === 0) {
-      const newQuestions = removeCurrentVariation(key, problemInfo.questions)
-      setProblemInfo({
-        ...problemInfo,
-        questions: newQuestions
-      })
-      update(problemIdx, QUESTIONS, newQuestions, username, problemInfo.creator, false)
-    } else {
-      alert(menuWords.invalidConditionWarning[languageIdx])
-      return
-    }
+    const newVariations = removeCurrentVariation(key, problemInfo.variations)
+    const newAnswers = removeCurrentVariation(key, problemInfo.answers)
+    const newQuestions = removeCurrentVariation(key, problemInfo.questions)
+    update(problemIdx, username, problemInfo.creator, false, newVariations, newAnswers, newQuestions)
+    setProblemInfo({
+      ...problemInfo,
+      variations: newVariations,
+      answers: newAnswers,
+      questions: newQuestions,
+    })
   }
 
 
@@ -251,7 +252,7 @@ export function ModifyVariations() {
   return (
     <Box display={isMobile? "grid" : "flex"} justifyContent="center">
       <Box display="grid" margin={margin} alignContent="start">
-        <ProblemInformation problemInfo={problemInfo}></ProblemInformation>
+        {problemInfo.problemIdx? <ProblemInformation problemInfo={problemInfo}></ProblemInformation> : <></>}
         {isMobile? mobileTopMenu : wideMenu}
       </Box>
       <Box my={3} mx={margin}>

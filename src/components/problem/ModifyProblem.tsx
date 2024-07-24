@@ -1,17 +1,18 @@
 import { useEffect, useState } from "react"
-import { Coordinate, UserInfo } from "../../util/types"
+import { Coordinate, ModifyProblemForm, UserInfo } from "../../util/types"
 import { COMMENT, HOME, LEVEL, MARGIN, TURN, USERINFO } from "../../util/constants"
 import { Box, Button, ButtonGroup, FormControl, InputLabel, MenuItem, Select, SelectChangeEvent, TextField } from "@mui/material"
 import { getLanguageIdx, getLevelText, isLegalBoard, loginWarning, makingEmptyBoard } from "../../util/functions"
 import { isOutside } from "../../gologic/logic"
 import FinalBoard from "../board/FinalBoard"
 import { menuWords } from "../../util/menuWords"
-import { getProblemByIdx, modifyProblem } from "../../network/problem"
+import { getProblemByIdx } from "../../network/problem"
 import { useWindowSize } from "react-use"
 import { useNavigate, useParams } from "react-router-dom"
 import { boardSizeArray, initialUserInfo, levelArray } from "../../util/initialForms"
 import { mobileButtonStyle } from "../../util/styles"
 import { LOGIN_PATH } from "../../util/paths"
+import { useModifyProblemMutation } from "../../slices/problemApiSlice"
 
 export function ModifyProblem() {
   const { param } = useParams()
@@ -20,6 +21,7 @@ export function ModifyProblem() {
   const [boardSize, setBoardSize] = useState(9)
   let emptyBoard = makingEmptyBoard(boardSize)
   const [problem, setProblem] = useState(emptyBoard)
+  const [mp, { isLoading: mpLoading }] = useModifyProblemMutation()
   const {width, height} = useWindowSize()
   const navigate = useNavigate()
   const isMobile = height > width * 2 / 3 || width < 1000
@@ -93,7 +95,16 @@ export function ModifyProblem() {
       alert(menuWords.invalidBoardWarning[languageIdx])
       return
     }
-    await modifyProblem(problemIdx, problem, info.comment, info.level, info.turn, info.creator)
+    const form: ModifyProblemForm = {
+      creator: info.creator,
+      problemIdx: problemIdx,
+      initialState: problem,
+      comment: info.comment,
+      level: info.level,
+      color: info.turn,
+    }
+    await mp(form).unwrap()
+    alert(menuWords.modifiedNotice[languageIdx])
   }
 
   useEffect(() => {

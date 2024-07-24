@@ -1,12 +1,12 @@
 import { getDeadGroup, handleMove } from "../gologic/logic"
-import { LANGUAGE_IDX, PAGE, PROBLEM_INDEX, PROBLEM_INDICES, SORTING_IDX, USERINFO } from "./constants"
+import { CREATED, LANGUAGE_IDX, LIKED, PAGE, PROBLEM_INDEX, PROBLEM_INDICES, REQUESTS, SOLVED, SORTING_IDX, UNRESOLVED, USERINFO, expires } from "./constants"
 import { initIndices, initialUserInfo } from "./initialForms"
 import { menuWords } from "./menuWords"
-import { Board, ChangeCountForm, Coordinate, Filter, SampleProblemInformation, UserInfo, Variations } from "./types"
+import { Board, ChangeCountForm, Coordinate, FilterForm, SampleProblemInformation, UserInfo, Variations } from "./types"
 import _ from 'lodash'
 import { useChangeCountMutation } from "../slices/problemInformationApiSlice"
 import { addCorrectUser, addWrongUser, changeCount } from "../network/problemInformation"
-import { number } from "zod"
+import { number, object } from "zod"
 import { addTried } from "../network/userDetail"
 
 export function playMoveAndReturnNewBoard(board: Board, coord: Coordinate, color: string) {
@@ -60,15 +60,21 @@ export function addCurrentVariation(currentKey: string, variations: Variations, 
 export function removeCurrentVariation(currentKey: string, variations: Variations) {
   const newVariations = _.cloneDeep(variations)
   let key = currentKey
+  const newKey = currentKey + "-"
   const l = currentKey.split("-")
   while (true) {
-    if (newVariations[key].length === 0 && key !== '0') {
+    if (newVariations.hasOwnProperty(key) && newVariations[key].length === 0 && key !== '0') {
       delete newVariations[key]
       const lastMove = l.pop()
       key = lastMove? key.slice(0, key.length - (lastMove.length + 1)) : key
       newVariations[key] = newVariations[key].filter(element => element !== lastMove)
     } else {
       break
+    }
+  }
+  for (const key in Object.keys(newVariations)) {
+    if (key.startsWith(newKey)) {
+      delete newVariations[key]
     }
   }
   return newVariations
@@ -150,7 +156,7 @@ export function getRangeByTier(tier: number): number[] {
   }
 }
 
-export function ownStringify(filter: Filter) {
+export function ownStringify(filter: FilterForm) {
   let r = ""
   const entries = Object.entries(filter)
   entries.forEach(([key, value]) => {
@@ -177,7 +183,7 @@ export function ownParse(param: string) {
 }
 
 export function sortingProblemList(problemList: SampleProblemInformation[] | undefined, option: number) {
-  const newProblemList = problemList? problemList : []
+  const newProblemList = problemList? [...problemList] : []
   switch (option) {
     case 0:
       newProblemList.sort((a, b) => b.problemIndex - a.problemIndex)
@@ -223,12 +229,13 @@ export function resetSortingForm(page: number, sortingIdx: number) {
   sessionStorage.setItem(SORTING_IDX, String(sortingIdx))
 }
 
-export function setProblemIndicies(problemList: SampleProblemInformation[]) {
+export function setProblemIndicies(problemList: SampleProblemInformation[], problemIndex?: number) {
   const indices: number[] = []
   problemList.map(p => {
     indices.push(p.problemIndex)
   })
   sessionStorage.setItem(PROBLEM_INDICES, JSON.stringify(indices))
+  if (problemIndex !== undefined) sessionStorage.setItem(PROBLEM_INDEX, String(problemIndex))
 }
 
 export function getGreetings(name: string, language: number) {
@@ -341,6 +348,7 @@ export function handleResult(problemIndex: number, name: string, level: number, 
 
 export function addProblemIndexToUserInfo(where: number, problemIndex: number) {
   const userInfo: UserInfo = JSON.parse(sessionStorage.getItem(USERINFO) || initialUserInfo)
+  let idx = NaN
   switch (where) {
     case 0:
       userInfo.created.push(problemIndex)
@@ -355,9 +363,14 @@ export function addProblemIndexToUserInfo(where: number, problemIndex: number) {
       userInfo.liked.push(problemIndex)
       break
     case 4:
-      const idx = userInfo.liked.indexOf(problemIndex)
+      idx = userInfo.liked.indexOf(problemIndex)
       userInfo.liked.splice(idx, 1)
       break
+    case 5:
+      idx = userInfo.withQuestions.indexOf(problemIndex)
+      userInfo.withQuestions.splice(idx, 1)
+      break
+
     default:
       break
   }
@@ -372,3 +385,45 @@ export function handleSeeAnswer(problemIndex: number) {
   addProblemIndexToUserInfo(2, problemIndex)
 }
 
+function setCookie(name: string, val: string) {
+  let date = new Date()
+  date.setTime(date.getTime() + expires)
+  document.cookie = `${name}=${val}; expires=${date.toUTCString()}; SameSite=None; Secure`
+}
+
+export function saveLoginInfo(email: string, pw: string, save: boolean) {
+  if (save) {
+    setCookie("email", email)
+    setCookie("pw", pw)
+    setCookie("saved", JSON.stringify(true))
+  } else {
+    setCookie("email", "")
+    setCookie("pw", "")
+    setCookie("saved", "")
+  }
+}
+
+export function getPageName(part: string) {
+  const languageIdx = getLanguageIdx()
+  let pageName = ""
+  switch (part) {
+    case CREATED:
+      pageName = menuWords.created[languageIdx]
+      break
+    case SOLVED:
+      pageName = menuWords.solved[languageIdx]
+      break
+    case UNRESOLVED:
+      pageName = menuWords.unresolved[languageIdx]
+      break
+    case LIKED:
+      pageName = menuWords.liked[languageIdx]
+      break
+    case REQUESTS: 
+      menuWords.requestsReceived[languageIdx]
+      break
+    default:
+      break
+  }
+  return pageName
+}
