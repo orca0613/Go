@@ -12,6 +12,8 @@ export const SOLVED_TAG = "Solved"
 export const UNSOLVED_TAG = "Unsolved"
 export const LIKED_TAG = "Liked"
 export const USER_DETAIL_TAG = "UserDetail"
+export const PROBLEM_TAG = "Problem"
+export const LIKE_COUNT_TAG = "LikeCount "
 
 const baseQuery = fetchBaseQuery({
   baseUrl: API_URL,
@@ -40,5 +42,8 @@ export const apiSlice = createApi({
     UNSOLVED_TAG,
     LIKED_TAG,
     USER_DETAIL_TAG,
+    PROBLEM_TAG,
+    LIKE_COUNT_TAG,
+    
   ],
 });

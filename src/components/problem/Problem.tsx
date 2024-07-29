@@ -1,14 +1,13 @@
 import { useEffect, useState } from 'react'
-import { Coordinate, BoardInfo, UserInfo, UpdateVariationsForm, ProblemAndVariations } from '../../util/types'
+import { Coordinate, BoardInfo, UserInfo, UpdateVariationsForm, ProblemAndVariations, ChangeCountForm, AddUserForm, ProblemInformation, AddProblemIndexForm } from '../../util/types/types'
 import _ from 'lodash'
-import { addCurrentVariation, getAdjacentProblemIndex, getLanguageIdx, handleResult } from '../../util/functions'
-import { ANSWER, MARGIN, QUESTIONS, SELF, SOLVED, TRY, USERINFO } from '../../util/constants'
+import { addCurrentVariation, addProblemIndexToUserInfo, getAdjacentProblemIndex, getLanguageIdx } from '../../util/functions'
+import { ANSWER, MARGIN, SELF, SOLVED, TRY, USERINFO } from '../../util/constants'
 import FinalBoard from '../board/FinalBoard'
 import { Box, Button, ButtonGroup, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, Typography } from '@mui/material'
 import { menuWords } from '../../util/menuWords'
-import { addElement } from '../../network/userDetail'
 import { useNavigate } from 'react-router-dom'
-import { ProblemInformation } from './ProblemInformation'
+import { ProblemInformationBox } from './ProblemInformationBox'
 import { Like } from '../Like'
 import { Game } from '../../gologic/goGame'
 import { useWindowSize } from 'react-use'
@@ -17,20 +16,27 @@ import { ReplyBox } from '../ReplyBox'
 import { initialUserInfo, initialVariations } from '../../util/initialForms'
 import { mobileButtonStyle, wideButtonStyle } from '../../util/styles'
 import { useUpdateVariationsMutation } from '../../slices/problemApiSlice'
-import { useAddTriedMutation } from '../../slices/userDetailApiSlice'
 import { ResultSnackbar } from '../ResultSnackbar'
+import { useAddCorrectUserMutation, useAddViewMutation, useAddWrongUserMutation } from '../../slices/problemInformationApiSlice'
+import { useAddSolvedMutation } from '../../slices/userDetailApiSlice'
 
 interface ProblemProps {
   pi: ProblemAndVariations
+  problemInformations: ProblemInformation
+  likeCount: number
 }
 
 
-export function Problem({ pi }: ProblemProps) {
+export function Problem({ pi, problemInformations, likeCount }: ProblemProps) {
 
+  const problemIdx = pi.problemIdx
   const [problemInfo, setProblemInfo] = useState(pi)
   const [result, setResult] = useState<boolean | undefined>(undefined)
   const [uv, { isLoading: uvLoading }] = useUpdateVariationsMutation()
-  const [addTried, { isLoading: atLoading }] = useAddTriedMutation()
+  const [addView, { isLoading: avLoading }] = useAddViewMutation()
+  const [addSolved, { isLoading: asLoading }] = useAddSolvedMutation()
+  const [addCorrectUser, { isLoading: acLoading }] = useAddCorrectUserMutation()
+  const [addWrongUser, { isLoading: awLoading }] = useAddWrongUserMutation()
 
   const initInfo: BoardInfo = {
     board: problemInfo.initialState,
@@ -56,6 +62,12 @@ export function Problem({ pi }: ProblemProps) {
     open: false,
     title: "",
     contents: "",
+  })
+  const [addUserForm, setAddUserForm] = useState<AddUserForm>({
+    problemIndex: problemIdx,
+    name: username,
+    level: userLevel,
+    problemLevel: problemInfo.level
   })
 
   const answerRegistered = !_.isEqual(problemInfo.answers, initialVariations)
@@ -104,6 +116,11 @@ export function Problem({ pi }: ProblemProps) {
 
   }
   useEffect(() => {
+    const form: ChangeCountForm = {
+      problemIdx: pi.problemIdx,
+      name: username,
+    }
+    addView(form).unwrap()
     setProblemInfo(pi)
     setGame(new Game(
       pi.initialState,
@@ -116,7 +133,12 @@ export function Problem({ pi }: ProblemProps) {
       color: pi.color,
       key: "0"
     })
-  }, [pi])
+    setAddUserForm({
+      ...addUserForm,
+      problemIndex: pi.problemIdx,
+      problemLevel: pi.level
+    })
+  }, [pi, mode])
 
   function reset() {
     setInfo(initInfo)
@@ -200,13 +222,13 @@ export function Problem({ pi }: ProblemProps) {
       questions: newQuestions
     })
     const form: UpdateVariationsForm = {
-      problemIdx: problemInfo.problemIdx,
+      problemIdx: problemIdx,
       name: username,
       creator: problemInfo.creator,
       questions: newQuestions
     }
     await uv(form).unwrap()
-    await sendRequest(problemInfo.problemIdx, problemInfo.creator, username, info.key)
+    await sendRequest(problemIdx, problemInfo.creator, username, info.key)
     setDialogInfo({
       ...dialogInfo,
       open: false
@@ -236,37 +258,45 @@ export function Problem({ pi }: ProblemProps) {
     if (mode === ANSWER) {
       modeChange(TRY)
       return
-    } else {
-      await addElement(problemInfo.problemIdx, username, SOLVED)
-      modeChange(ANSWER)
-      addSolved(problemInfo.problemIdx)
+    } 
+    if (!userInfo.solved.includes(problemIdx)) {
+      const form: AddProblemIndexForm = {
+        problemIndex: problemIdx,
+        name: username
+      }
+      await addSolved(form)
+      addProblemIndexToUserInfo(2, problemIdx)
+      userInfo.solved.push(problemIdx)
     }
+    modeChange(ANSWER)
   }
 
   async function handleWrong() {
+    if (!userInfo.solved.includes(problemIdx)) {
+      await addWrongUser(addUserForm).unwrap()
+    }
     setResult(false)
-    handleResult(problemInfo.problemIdx, username, userLevel, problemInfo.level, false)
   }
 
   async function requestSuggestion() {
+    if (!userInfo.solved.includes(problemIdx)) {
+      await addWrongUser(addUserForm).unwrap()
+    }
     const newDialogInfo = {
       open: true,
       title: menuWords.wrong[languageIdx],
       contents: menuWords.requestSuggestion[languageIdx]
     }
     setDialogInfo(newDialogInfo)
-    handleResult(problemInfo.problemIdx, username, userLevel, problemInfo.level, false)
   }
 
-  function addSolved(idx: number) {
-    if (!userInfo.solved.includes(idx)) {
-      userInfo.solved.push(idx)
-      sessionStorage.setItem(USERINFO, JSON.stringify(userInfo))
-    }
-  }
   async function handleCorrect() {
+    if (!userInfo.solved.includes(problemIdx)) {
+      await addCorrectUser(addUserForm).unwrap()
+      addProblemIndexToUserInfo(2, problemIdx)
+      userInfo.solved.push(problemIdx)
+    }
     setResult(true)
-    handleResult(problemInfo.problemIdx, username, userLevel, problemInfo.level, true)
     if (auto) {
       moveToAdjacentProblem(1)
     }
@@ -275,7 +305,12 @@ export function Problem({ pi }: ProblemProps) {
   const mobileTopMenu = 
   <Box display="flex" justifyContent={"space-around"}>
     <Button sx={{width: "40%",  textTransform: "none"}} onClick={() => moveToAdjacentProblem(-1)}>{menuWords.previousProblem[languageIdx]}</Button>
-    {problemInfo.problemIdx? <Like problemIdx={problemInfo.problemIdx} username={username} creator={problemInfo.creator}></Like> : <></>}
+    <Like 
+      problemIdx={problemIdx} 
+      username={username} 
+      creator={problemInfo.creator}
+      likeCount={likeCount}
+    ></Like>
     <Button sx={{width: "40%",  textTransform: "none"}} onClick={() => moveToAdjacentProblem(1)}>{menuWords.nextProblem[languageIdx]}</Button>
   </Box>
 
@@ -292,7 +327,7 @@ export function Problem({ pi }: ProblemProps) {
     </ButtonGroup>
     {
       username === creator? 
-      <Button sx={mobileButtonStyle} onClick={() => navigate(`/modify/${problemInfo.problemIdx}`)}>{menuWords.enterVariations[languageIdx]}</Button> 
+      <Button sx={mobileButtonStyle} onClick={() => navigate(`/modify/${problemIdx}`)}>{menuWords.enterVariations[languageIdx]}</Button> 
       : mode === TRY? 
       <Button sx={mobileButtonStyle} onClick={setAnswerModeAndsetSolved}>{menuWords.showAnswer[languageIdx]}</Button>
       :
@@ -317,19 +352,28 @@ export function Problem({ pi }: ProblemProps) {
     </Button>
     {
       username === creator? 
-      <Button sx={wideButtonStyle} onClick={() => navigate(`/modify/${problemInfo.problemIdx}`)}>{menuWords.enterVariations[languageIdx]}</Button> 
+      <Button sx={wideButtonStyle} onClick={() => navigate(`/modify/${problemIdx}`)}>{menuWords.enterVariations[languageIdx]}</Button> 
       : mode === TRY? 
       <Button sx={wideButtonStyle} onClick={setAnswerModeAndsetSolved}>{menuWords.showAnswer[languageIdx]}</Button>
       :
       <Button sx={wideButtonStyle} onClick={request}>{menuWords.requestVariation[languageIdx]}</Button>
     }
-    {problemInfo.problemIdx? <Like problemIdx={problemInfo.problemIdx} username={username} creator={problemInfo.creator}></Like> : <></>}
+    <Like 
+      problemIdx={problemIdx} 
+      username={username} 
+      creator={problemInfo.creator}
+      likeCount={likeCount}
+    ></Like>
   </Box>
   
   return (
     <Box display={isMobile? "grid" : "flex"} justifyContent="center">
       <Box display="grid" margin={margin} alignContent="start">
-        {problemInfo.problemIdx? <ProblemInformation problemInfo={problemInfo}></ProblemInformation> : <></>}
+        <ProblemInformationBox 
+          problemInfo={problemInfo} 
+          problemInformations={problemInformations}
+          isMobile={isMobile}
+        />
         <Typography sx={{color: "red", margin: margin, textAlign: "center", display: answerRegistered? "none" : ""}}>{menuWords.noAnswerWarning[languageIdx]}</Typography>
         {isMobile? mobileTopMenu : wideMenu}   
       </Box>
@@ -345,10 +389,10 @@ export function Problem({ pi }: ProblemProps) {
         />
       </Box>
       <Box margin={margin} alignItems="center">
-        {!isMobile && problemInfo.problemIdx? <ReplyBox problemId={problemInfo._id}></ReplyBox> : mobileBottomMenu}
+        {!isMobile && problemIdx? <ReplyBox problemId={problemInfo._id}></ReplyBox> : mobileBottomMenu}
       </Box>
       <Box>
-        {isMobile && problemInfo.problemIdx? <ReplyBox problemId={problemInfo._id}></ReplyBox> : <></>}
+        {isMobile && problemIdx? <ReplyBox problemId={problemInfo._id}></ReplyBox> : <></>}
       </Box>
       <ResultSnackbar result={result}/>
       {dialogComponent}

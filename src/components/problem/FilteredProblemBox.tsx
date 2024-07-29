@@ -1,10 +1,8 @@
-import { FilterForm, SampleProblemInformation, UserInfo } from '../../util/types'
+import { FilterForm, SampleProblemInformation } from '../../util/types/types'
 import { useEffect, useState } from 'react'
-
-import { USERINFO } from '../../util/constants'
 import { ownParse } from '../../util/functions'
 import { useParams } from 'react-router-dom'
-import { initFilter, initialUserInfo } from '../../util/initialForms'
+import { initFilter } from '../../util/initialForms'
 import { LoadingPage } from '../LoadingPage'
 import { useGetSampleByFilterQuery } from '../../slices/sampleProblemApiSlice'
 import FilteredProblems from './FilteredProblems'

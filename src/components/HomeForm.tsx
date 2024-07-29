@@ -2,7 +2,7 @@
 import { Box, Typography, useMediaQuery } from '@mui/material'
 import { menuWords } from '../util/menuWords'
 import { USERINFO } from '../util/constants'
-import { SampleProblemInformation, UserInfo } from '../util/types'
+import { SampleProblemInformation, UserInfo } from '../util/types/types'
 import { initialUserInfo } from '../util/initialForms'
 import { useEffect, useState } from 'react'
 import { useWindowSize } from 'react-use'

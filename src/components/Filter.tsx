@@ -2,7 +2,7 @@ import { Autocomplete, Box, Button, FormControl, InputLabel, MenuItem, Select, S
 import { menuWords } from "../util/menuWords"
 import { PAGE } from "../util/constants"
 import { useEffect, useState } from "react"
-import { FilterForm } from "../util/types"
+import { FilterForm } from "../util/types/types"
 import { detailLevel, tiersList } from "../util/initialForms"
 import { getLanguageIdx, getLevelText, ownStringify } from "../util/functions"
 import { useNavigate } from "react-router-dom"

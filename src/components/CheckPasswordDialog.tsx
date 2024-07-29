@@ -7,7 +7,7 @@ import DialogContentText from '@mui/material/DialogContentText';
 import { useState } from 'react';
 import { checkPassword } from '../network/user';
 import { USERINFO } from '../util/constants';
-import { UserInfo } from '../util/types';
+import { UserInfo } from '../util/types/types';
 import { useNavigate } from 'react-router-dom';
 import { menuWords } from '../util/menuWords';
 import React from 'react';

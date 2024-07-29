@@ -36,4 +36,6 @@ export const PATCH = "PATCH"
 export const DELETE = "DELETE"
 export const TOKEN = "Token"
 export const REQUESTS = "requests"
+export const problemKeepingTime = 300
+export const INFO_FOR_MODIFYING = "info_for_modifying"
 

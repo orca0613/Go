@@ -26,7 +26,7 @@ export type CreatorInfo = {
 }
 
 export type ProblemInformation = {
-  _id: string,
+  _id?: string,
   problemId: string,
   problemIndex: number,
   initialState: Board,
@@ -35,7 +35,6 @@ export type ProblemInformation = {
   view: number,
   correctUser: string[],
   wrong: number,
-  reply?: object[]
   totalCorrectUserLevel: number,
   totalWrongUserLevel: number,
   time: Date,
@@ -86,6 +85,11 @@ export type UserDetailFromServer = {
   totalWrong: number,
   correctPerLevel: object,
   totalCorrect: number
+}
+
+export type LikeForm = {
+  like: boolean,
+  likeCount: number,
 }
 
 export type FilterForm = {
@@ -171,9 +175,7 @@ export type AddProblemIndexForm = {
 
 export type ChangeCountForm = {
   problemIdx: number,
-  where: string,
   name: string,
-  count: number,
 }
 
 export type UpdateVariationsForm = {
@@ -201,3 +203,13 @@ export type CreateAccountForm = {
   level: number,
   language: number,
 }
+
+export type AddUserForm = {
+  problemIndex: number,
+  name: string,
+  level: number,
+  problemLevel: number
+}
+
+
+

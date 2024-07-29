@@ -1,26 +1,24 @@
 import { useParams } from "react-router-dom"
 import { initialProblemInfo, initialProblemInformation } from "../../util/initialForms"
-import { Problem } from "./Problem"
 import { LoadingPage } from "../LoadingPage"
 import { useGetProblemByIdxQuery } from "../../slices/problemApiSlice"
 import { useGetProblemInformationsQuery } from "../../slices/problemInformationApiSlice"
-import { useGetLikeCountQuery } from "../../slices/sampleProblemApiSlice"
+import { ModifyVariations } from "./ModifyVariations"
+// import { MobileModifyVariations } from "../mobile/MobileModifyVariations"
 
-export function ProblemBox() {
+export function ModifyVariationsBox() {
 
   const { param } = useParams()
 
   const { data: pi, isLoading: piLoading } = useGetProblemByIdxQuery(Number(param))
   const { data: problemInformations, isLoading: pInfoLoading } = useGetProblemInformationsQuery(Number(param))
-  const { data: likeCount, isLoading: lcLoading } = useGetLikeCountQuery(Number(param))
 
-  if (piLoading || pInfoLoading || lcLoading) return <LoadingPage></LoadingPage>
+  if (piLoading || pInfoLoading) return <LoadingPage/>
 
   return (
-    <Problem 
+    <ModifyVariations 
       pi={pi ?? initialProblemInfo} 
-      problemInformations={problemInformations ?? initialProblemInformation}
-      likeCount={Number(likeCount)}
+      pInfo={problemInformations || initialProblemInformation}
     />
   )
 

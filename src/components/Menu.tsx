@@ -10,11 +10,11 @@ import { menuWords } from '../util/menuWords';
 import { useNavigate } from 'react-router-dom';
 import { Badge, Divider, Typography } from '@mui/material';
 import { getNumberUnchecked } from '../network/message';
-import { getUnsolvedIdxArray, resetSortingForm } from '../util/functions';
+import { getUnsolvedIdxArray, resetSortingForm, saveLoginInfo } from '../util/functions';
 import { LOGIN_PATH, MYPAGE_PATH } from '../util/paths';
 import { nameButtonStyle } from '../util/styles';
 import { useGetUserDetailQuery } from '../slices/userDetailApiSlice';
-import { UserInfo } from '../util/types';
+import { UserInfo } from '../util/types/types';
 import { initialUserInfo } from '../util/initialForms';
 
 export function Menu() {
@@ -66,6 +66,7 @@ export function Menu() {
 
   function logoutAndMove() {
     sessionStorage.clear()
+    saveLoginInfo("", "", false)
     navigate(LOGIN_PATH)
   }
 

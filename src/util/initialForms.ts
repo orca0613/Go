@@ -1,4 +1,4 @@
-import { BoardInfo, Coordinate, Filter, ProblemAndVariations } from "./types"
+import { BoardInfo, Coordinate, FilterForm, ProblemAndVariations, ProblemInformation } from "./types/types"
 
 export const flowerPointPosition: Coordinate[][] = [
   [],
@@ -36,6 +36,22 @@ export const initialProblemInfo: ProblemAndVariations = {
   time: new Date()
 }
 
+export const initialProblemInformation: ProblemInformation = {
+  _id: "",
+  problemId: "",
+  problemIndex: 0,
+  initialState: [],
+  level: 0,
+  creator: "",
+  view: 0,
+  correctUser: [],
+  wrong: 0,
+  totalCorrectUserLevel: 0,
+  totalWrongUserLevel: 0,
+  time: new Date(),
+  liked: 0
+}
+
 export const initialUserInfo = '{"name":"","token":"","level":0,"point":0,"created":[],"withQuestions":[],"tried":[],"solved":[],"liked":[],"language":0,"auto":"false","totalLike":0}'
 export const initialVariations = {"0": []}
 export const boardSizeArray = Array.from({length: 17}, (_, index) => index + 3)
@@ -52,7 +68,7 @@ export const tiersList = [
   ["所有级别", "最难的 (5段 ~ 9段)", "难的 (1段 ~ 4段)", "中等难度 (6级 ~ 1级)", "简单的 (12级 ~ 7级)", "最简单的 (18级 ~ 13级)"],
   ["すべてのレベル", "最も難しい (5段 ~ 9段)", "難しい (1段 ~ 4段)", "普通 (6級 ~ 1級)", "簡単 (12級 ~ 7級)", "最も簡単 (18級 ~ 13級)"]
 ]
-export const initFilter: Filter = {
+export const initFilter: FilterForm = {
   tier: 0,
   level: 0,
   creator: "",

@@ -3,7 +3,7 @@ import { getLanguageIdx, getRequestForm } from "../util/functions"
 import { initialUserInfo } from "../util/initialForms"
 import { menuWords } from "../util/menuWords"
 import { MESSAGE_DB_PATH } from "../util/paths"
-import { UserInfo } from "../util/types"
+import { UserInfo } from "../util/types/types"
 
 export async function sendMessage(sender: string, receiver: string, title: string, contents: string, quotation: string) {
   const languageIdx = getLanguageIdx()

@@ -5,7 +5,6 @@ import { Signup } from "./components/SignUp";
 import { HomeForm } from "./components/HomeForm";
 import { MakingProblem } from "./components/problem/MakingProblem";
 import Layout from "./components/layout";
-import { ModifyVariations } from "./components/problem/ModifyVariations";
 import VerifyMail from "./components/VerifyMail";
 import { ModifyProblem } from "./components/problem/ModifyProblem";
 import ChangePassword from "./components/ChangePassword";
@@ -15,6 +14,7 @@ import UserPage from "./components/UserPage";
 import { ProblemBox } from "./components/problem/ProblemBox";
 import { MyPageProblemBox } from "./components/problem/MyPageProblemBox";
 import FilteredProblemBox from "./components/problem/FilteredProblemBox";
+import { ModifyVariationsBox } from "./components/problem/ModifyVariationsBox";
 
 
 
@@ -30,7 +30,7 @@ function App() {
           <Route path="/create" element={<MakingProblem />} />
           <Route path="/mypage/:param" element={<MyPageProblemBox></MyPageProblemBox>} />
           <Route path="/problem/:param" element={<ProblemBox />} />
-          <Route path="/modify/:param" element={<ModifyVariations />} />
+          <Route path="/modify/:param" element={<ModifyVariationsBox />} />
           <Route path="/verify/:userId" element={<VerifyMail />} />
           <Route path="/modify-problem/:param" element={<ModifyProblem />} />
           <Route path="/change-password/:userId" element={<ChangePassword />} />

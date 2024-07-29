@@ -1,6 +1,6 @@
 
 import { CSSProperties, useEffect, useRef } from 'react';
-import { Coordinate } from '../../util/types';
+import { Coordinate } from '../../util/types/types';
 import { resolution } from '../../util/constants';
 import { flowerPointPosition } from '../../util/initialForms';
 

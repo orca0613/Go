@@ -5,7 +5,7 @@ import { HOME, USERINFO, mobileFontSize } from "../../util/constants";
 import { menuWords } from "../../util/menuWords";
 import Language from "../Language";
 import { Menu } from "../Menu";
-import { FilterForm, UserInfo } from "../../util/types";
+import { FilterForm, UserInfo } from "../../util/types/types";
 import { getLanguageIdx, getTier, ownStringify, resetSortingForm } from "../../util/functions";
 import { CREATE_PATH, LOGIN_PATH, PROBLEM_PATH } from "../../util/paths";
 import { initialUserInfo } from "../../util/initialForms";

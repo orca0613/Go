@@ -3,7 +3,7 @@ import { getLanguageIdx } from "../util/functions"
 import { initialUserInfo } from "../util/initialForms"
 import { menuWords } from "../util/menuWords"
 import { USER_DB_PATH } from "../util/paths"
-import { UserInfo } from "../util/types"
+import { UserInfo } from "../util/types/types"
 
 export async function checkMail(email: string) {
   const response = await fetch(`${API_URL}${USER_DB_PATH}/check-email/${email}`)

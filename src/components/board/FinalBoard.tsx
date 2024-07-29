@@ -1,5 +1,5 @@
 import { Box } from "@mui/system";
-import { Board, Coordinate } from "../../util/types";
+import { Board, Coordinate } from "../../util/types/types";
 import Background from "./Background";
 import EmptyBoard from "./EmptyBoard";
 import Stones from "./Stones";

@@ -6,7 +6,7 @@ import { CREATED, LIKED, REQUESTS, SOLVED, UNRESOLVED, USERINFO } from "../../ut
 import { getUnsolvedIdxArray } from "../../util/functions"
 import MyPageProblems from "./MyPageProblems"
 import { useEffect, useState } from "react"
-import { SampleProblemInformation } from "../../util/types"
+import { SampleProblemInformation } from "../../util/types/types"
 
 export function MyPageProblemBox() {
 
@@ -25,30 +25,36 @@ export function MyPageProblemBox() {
   const { data: requests, isLoading: rpLoading } = useGetSampleRequestsQuery(requestsString)
 
   const [problemList, setProblemList] = useState<SampleProblemInformation[]>([])
+  const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     switch (param) {
       case CREATED:
         setProblemList(created || [])
+        setLoading(cpLoading)
         break
       case SOLVED:
         setProblemList(solved || []) 
+        setLoading(spLoading)
         break
       case UNRESOLVED:
         setProblemList(unsolved || [])
+        setLoading(upLoading)
         break
       case LIKED:
         setProblemList(liked || [])
+        setLoading(lpLoading)
         break
       case REQUESTS:
         setProblemList(requests || [])
+        setLoading(rpLoading)
         break
       default:
         break
     }
   }, [param, created, solved, unsolved, liked, requests])
 
-  if (cpLoading || spLoading || upLoading || lpLoading || rpLoading) return <LoadingPage></LoadingPage>
+  if (loading) return <LoadingPage></LoadingPage>
 
   return (
     <MyPageProblems problemList={problemList} part={String(param)} request={param === REQUESTS}></MyPageProblems>

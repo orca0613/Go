@@ -1,7 +1,7 @@
 import { Box, Typography, useMediaQuery } from "@mui/material"
 import { MARGIN, PAGE, PROBLEM_INDEX, USERINFO, problemsPerPage } from "../../util/constants"
 import { useNavigate } from "react-router-dom"
-import { ProblemInformation, SampleProblemInformation, UserInfo } from "../../util/types"
+import { ProblemInformation, SampleProblemInformation, UserInfo } from "../../util/types/types"
 import { useWindowSize } from "react-use"
 import FinalBoard from "../board/FinalBoard"
 import { menuWords } from "../../util/menuWords"

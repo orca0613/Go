@@ -1,4 +1,4 @@
-import { FilterForm, SampleProblemInformation, UserInfo } from '../../util/types'
+import { FilterForm, SampleProblemInformation, UserInfo } from '../../util/types/types'
 import { ChangeEvent, useEffect, useState } from 'react'
 import SampleProblemBox from './SampleProblemBox'
 import {Box, Divider, FormControl, FormControlLabel, InputLabel, MenuItem, Pagination, Select, SelectChangeEvent, Stack, Switch, useMediaQuery } from '@mui/material'

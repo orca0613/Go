@@ -10,7 +10,7 @@ import { useNavigate } from 'react-router-dom';
 import { menuWords } from '../util/menuWords';
 import React from 'react';
 import { LOGIN_PATH } from '../util/paths';
-import { UserInfo } from '../util/types';
+import { UserInfo } from '../util/types/types';
 import { USERINFO } from '../util/constants';
 import { initialUserInfo } from '../util/initialForms';
 

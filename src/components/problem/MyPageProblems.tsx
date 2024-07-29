@@ -5,7 +5,7 @@ import { initialUserInfo, sortingMethods } from "../../util/initialForms"
 import { Box, Divider, FormControl, InputLabel, MenuItem, Pagination, Select, SelectChangeEvent, Stack, Typography } from "@mui/material"
 import { menuWords } from "../../util/menuWords"
 import SampleProblemBox from "./SampleProblemBox"
-import { SampleProblemInformation, UserInfo } from "../../util/types"
+import { SampleProblemInformation, UserInfo } from "../../util/types/types"
 
 interface MpProps {
   problemList: SampleProblemInformation[]
@@ -34,7 +34,6 @@ export default function MyPageProblems({problemList, part, request}: MpProps) {
 
   function sorting(e: SelectChangeEvent) {
     const p = Number(e.target.value)
-    console.log(p)
     setSortingIdx(p)
     sessionStorage.setItem(SORTING_IDX, String(p))
     const sorted = sortingProblemList(problems, p)

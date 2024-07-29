@@ -1,13 +1,9 @@
 import { getDeadGroup, handleMove } from "../gologic/logic"
 import { CREATED, LANGUAGE_IDX, LIKED, PAGE, PROBLEM_INDEX, PROBLEM_INDICES, REQUESTS, SOLVED, SORTING_IDX, UNRESOLVED, USERINFO, expires } from "./constants"
-import { initIndices, initialUserInfo } from "./initialForms"
+import { initialUserInfo } from "./initialForms"
 import { menuWords } from "./menuWords"
-import { Board, ChangeCountForm, Coordinate, FilterForm, SampleProblemInformation, UserInfo, Variations } from "./types"
+import { Board, Coordinate, FilterForm, SampleProblemInformation, UserInfo, Variations } from "./types/types"
 import _ from 'lodash'
-import { useChangeCountMutation } from "../slices/problemInformationApiSlice"
-import { addCorrectUser, addWrongUser, changeCount } from "../network/problemInformation"
-import { number, object } from "zod"
-import { addTried } from "../network/userDetail"
 
 export function playMoveAndReturnNewBoard(board: Board, coord: Coordinate, color: string) {
   const newBoard = handleMove(board, color, coord)
@@ -61,21 +57,21 @@ export function removeCurrentVariation(currentKey: string, variations: Variation
   const newVariations = _.cloneDeep(variations)
   let key = currentKey
   const newKey = currentKey + "-"
+  Object.keys(newVariations).forEach(k => {
+    if (k.startsWith(newKey)) {
+      delete newVariations[k]
+    }
+  })
   const l = currentKey.split("-")
-  while (true) {
-    if (newVariations.hasOwnProperty(key) && newVariations[key].length === 0 && key !== '0') {
-      delete newVariations[key]
-      const lastMove = l.pop()
-      key = lastMove? key.slice(0, key.length - (lastMove.length + 1)) : key
-      newVariations[key] = newVariations[key].filter(element => element !== lastMove)
-    } else {
+  while (l) {
+    if (!newVariations.hasOwnProperty(key)) return newVariations
+    delete newVariations[key]
+    const lastMove = l.pop()
+    key = lastMove? key.slice(0, key.length - (lastMove.length + 1)) : key
+    newVariations[key] = newVariations[key].filter(element => element !== lastMove)
+    if (!newVariations.hasOwnProperty(key) || newVariations[key].length > 0 || key === '0') {
       break
-    }
-  }
-  for (const key in Object.keys(newVariations)) {
-    if (key.startsWith(newKey)) {
-      delete newVariations[key]
-    }
+    } 
   }
   return newVariations
 }
@@ -323,29 +319,6 @@ export function getAdjacentProblemIndex(isNext: boolean): number {
   return nextProblemIdx
 }
 
-export async function addView(problemIndex: number, name: string) {
-  const userInfo: UserInfo = JSON.parse(sessionStorage.getItem(USERINFO) || initialUserInfo)
-  if (!userInfo.tried.includes(problemIndex)) {
-    addProblemIndexToUserInfo(1, problemIndex)
-    await addTried(problemIndex, name)
-  }
-
-  await changeCount(problemIndex, "view", name, 1)
-}
-
-export function handleResult(problemIndex: number, name: string, level: number, problemLevel: number, correct: boolean) {
-  const userInfo: UserInfo = JSON.parse(sessionStorage.getItem(USERINFO) || initialUserInfo)
-  if (userInfo.solved.includes(problemIndex)) {
-    return
-  }
-  if (correct) {
-    addProblemIndexToUserInfo(2, problemIndex)
-    addCorrectUser(problemIndex, name, level, problemLevel)
-  } else {
-    addWrongUser(problemIndex, name, level, problemLevel)
-  }
-}
-
 export function addProblemIndexToUserInfo(where: number, problemIndex: number) {
   const userInfo: UserInfo = JSON.parse(sessionStorage.getItem(USERINFO) || initialUserInfo)
   let idx = NaN
@@ -389,6 +362,18 @@ function setCookie(name: string, val: string) {
   let date = new Date()
   date.setTime(date.getTime() + expires)
   document.cookie = `${name}=${val}; expires=${date.toUTCString()}; SameSite=None; Secure`
+}
+
+export function getCookie(name: string) {
+  const nameEQ = name + "="
+  const cookies = document.cookie.split(";")
+  for (let i = 0; i < cookies.length; i++) {
+    const cookie = cookies[i].trimStart()
+    if (cookie.indexOf(nameEQ) === 0) {
+      return cookie.substring(nameEQ.length, cookie.length)
+    }
+  }
+  return ""
 }
 
 export function saveLoginInfo(email: string, pw: string, save: boolean) {

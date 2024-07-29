@@ -1,5 +1,5 @@
 import _ from "lodash";
-import { Board, Coordinate, Variations, BoardInfo } from "../util/types";
+import { Board, Coordinate, Variations, BoardInfo } from "../util/types/types";
 import { addToKey, makeRandomNumber, playMoveAndReturnNewBoard } from "../util/functions";
 
 export class Game {

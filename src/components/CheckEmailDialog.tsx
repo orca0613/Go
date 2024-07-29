@@ -7,7 +7,7 @@ import DialogContent from '@mui/material/DialogContent';
 import DialogContentText from '@mui/material/DialogContentText';
 import { useState } from 'react';
 import { checkMailAndSendUrl } from '../network/user';
-import { HOME, LANGUAGE_IDX } from '../util/constants';
+import { HOME } from '../util/constants';
 import { useNavigate } from 'react-router-dom';
 import { menuWords } from '../util/menuWords';
 import { getLanguageIdx } from '../util/functions';
