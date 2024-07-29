@@ -138,7 +138,7 @@ export function Problem({ pi, problemInformations, likeCount }: ProblemProps) {
       problemIndex: pi.problemIdx,
       problemLevel: pi.level
     })
-  }, [pi, mode])
+  }, [pi])
 
   function reset() {
     setInfo(initInfo)
