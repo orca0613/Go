@@ -1,63 +1,51 @@
-import { Filter, SampleProblemInformation, UserInfo } from '../../util/types'
+import { FilterForm, SampleProblemInformation, UserInfo } from '../../util/types/types'
 import { ChangeEvent, useEffect, useState } from 'react'
 import SampleProblemBox from './SampleProblemBox'
 import {Box, Divider, FormControl, FormControlLabel, InputLabel, MenuItem, Pagination, Select, SelectChangeEvent, Stack, Switch, useMediaQuery } from '@mui/material'
-import { PAGE, SORTING_IDX, USERINFO, problemsPerPage } from '../../util/constants'
+import { USERINFO, problemsPerPage } from '../../util/constants'
 import { useWindowSize } from 'react-use'
-import { excludeSolvedProblems, getLanguageIdx, loginWarning, ownParse, resetSortingForm, setProblemIndicies, sortingProblemList } from '../../util/functions'
-import { useNavigate, useParams } from 'react-router-dom'
-import { initFilter, initialUserInfo, sortingMethods } from '../../util/initialForms'
-import FilterBox from '../FilterBox'
+import { excludeSolvedProblems, getLanguageIdx, resetSortingForm, setProblemIndicies, sortingProblemList } from '../../util/functions'
+import { initialUserInfo, sortingMethods } from '../../util/initialForms'
 import { menuWords } from '../../util/menuWords'
-import { getSampleProblemByFilter } from '../../network/sampleProblem'
-import { LOGIN_PATH } from '../../util/paths'
-import { LoadingPage } from '../LoadingPage'
+import Filter from '../Filter'
 
-export default function FilteredProblems() {
+interface FPProps {
+  problemList: SampleProblemInformation[]
+  tier: number
+  level: number
+  creator: string
+}
 
-  const { params } = useParams()
-  const f = params? ownParse(params) : initFilter
-  const filter: Filter = {
-    tier: Number(f.tier),
-    level: Number(f.level),
-    creator: String(f.creator)
+export default function FilteredProblems({ problemList, tier, level, creator }: FPProps) {
+
+  const filter: FilterForm = {
+    tier: tier,
+    level: level,
+    creator: creator,
   }
   const userInfo: UserInfo = JSON.parse(sessionStorage.getItem(USERINFO) || initialUserInfo)
   const languageIdx = getLanguageIdx()
   const methods = sortingMethods[languageIdx]
   const {width, height} = useWindowSize()
   const isMobile = useMediaQuery("(max-width: 800px)")
-  const [sortingIdx, setSortingIdx] = useState(Number(sessionStorage.getItem(SORTING_IDX)))
+  const [sortingIdx, setSortingIdx] = useState(0)
   const [exclude, setExclude] = useState<boolean>(sessionStorage.getItem("exclude") === "true")
-  const [problems, setProblems] = useState<SampleProblemInformation[]>([])
-  const [unsolved, setUnsolved] = useState<SampleProblemInformation[]>([])
-  const [page, setPage] = useState(Number(sessionStorage.getItem(PAGE)))
-  const [loading, setLoading] = useState(true)
+  const [problems, setProblems] = useState<SampleProblemInformation[]>(problemList)
+  const [unsolved, setUnsolved] = useState<SampleProblemInformation[]>(excludeSolvedProblems(problemList, userInfo.solved))
+  const [page, setPage] = useState(1)
   const divider = <Divider orientation="horizontal" sx={{borderColor: "black", my: "5%", border: "0.5px solid black"}} />
-  const navigate = useNavigate()
 
   useEffect(() => {
-    if (!userInfo.name) {
-      loginWarning()
-      navigate(LOGIN_PATH)
-    }
-    if (!params) {
-      return
-    }
-    const result = getSampleProblemByFilter(params)
-    const newPage = Number(sessionStorage.getItem(PAGE))
-    result.then(r => {
-      setSortingIdx(Number(sessionStorage.getItem(SORTING_IDX)))
-      const newUnsolved = excludeSolvedProblems(r, userInfo.solved)
+
+      setSortingIdx(0)
+      const newUnsolved = excludeSolvedProblems(problemList, userInfo.solved)
       const sortedUnsolved: SampleProblemInformation[] = sortingProblemList(newUnsolved, sortingIdx)
-      const sortedProblems: SampleProblemInformation[] = sortingProblemList(r, sortingIdx)
+      const sortedProblems: SampleProblemInformation[] = sortingProblemList(problemList, sortingIdx)
       exclude? setProblemIndicies(sortedUnsolved) : setProblemIndicies(sortedProblems)
       setProblems(sortedProblems)
       setUnsolved(newUnsolved)
-      setPage(newPage)
-      setLoading(false)
-    })
-  }, [params])
+      setPage(1)
+  }, [problemList])
 
   const methodBox = 
   <Box sx={{width: isMobile? width / 1.1 : width / 2.5}} display="flex" justifyContent="space-around">
@@ -121,16 +109,10 @@ export default function FilteredProblems() {
     return showProblems
   }
 
-  if (loading) {
-    return (
-      <LoadingPage></LoadingPage>
-    )
-  }
-
   return (
     <Box display="grid">
       <Box display="grid" justifyContent="center">
-        <FilterBox f={filter} width={width}></FilterBox>
+        <Filter f={filter} width={width}></Filter>
         {methodBox}
       </Box>
       {divider}

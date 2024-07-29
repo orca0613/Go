@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react"
-import { Coordinate, CreateProblemForm, UserInfo } from "../../util/types"
+import { Coordinate, CreateProblemForm, UserInfo } from "../../util/types/types"
 import { COMMENT, LEVEL, MARGIN, TURN, USERINFO } from "../../util/constants"
 import { Box, Button, ButtonGroup, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, FormControl, InputLabel, MenuItem, Select, SelectChangeEvent, TextField } from "@mui/material"
 import { getLanguageIdx, getLevelText, isLegalBoard, loginWarning, makingEmptyBoard } from "../../util/functions"

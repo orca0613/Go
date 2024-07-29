@@ -1,5 +1,5 @@
 import { addNeighbors, changeStatus, getDeadGroup, getStatus, handleMove, isOutside, removeDeadGroup } from './gologic/logic';
-import { Board, Coordinate } from './util/types';
+import { Board, Coordinate } from './util/types/types';
 
 
 

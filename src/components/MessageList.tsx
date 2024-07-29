@@ -1,9 +1,9 @@
 import { Box, Button, Checkbox, Divider, Modal, Pagination, Stack, Typography, useMediaQuery } from "@mui/material";
-import { MessageForm, UserInfo } from "../util/types";
+import { MessageForm, UserInfo } from "../util/types/types";
 import { ChangeEvent, useEffect, useState } from "react";
 import { checkMessage, getReceivedMessage, getSentMessage, hideMessage } from "../network/message";
 import { menuWords } from "../util/menuWords";
-import { HOME, LANGUAGE_IDX, USERINFO, messagesPerPage } from "../util/constants";
+import { LANGUAGE_IDX, USERINFO, messagesPerPage } from "../util/constants";
 import { useNavigate } from "react-router-dom";
 import { nameButtonStyle } from "../util/styles";
 import SendMessageForm from "./SendMessageForm";

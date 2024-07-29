@@ -5,16 +5,16 @@ import ListItem from '@mui/material/ListItem';
 import IconButton from '@mui/material/IconButton';
 import MenuIcon from '@mui/icons-material/Menu';
 import { NavButton } from './layout/NavButton';
-import { CREATED, LANGUAGE_IDX, LIKED, SOLVED, UNRESOLVED, USERINFO, WITHQUESTIONS, mobileFontSize } from '../util/constants';
+import { CREATED, LANGUAGE_IDX, LIKED, SOLVED, UNRESOLVED, USERINFO, mobileFontSize } from '../util/constants';
 import { menuWords } from '../util/menuWords';
 import { useNavigate } from 'react-router-dom';
 import { Badge, Divider, Typography } from '@mui/material';
 import { getNumberUnchecked } from '../network/message';
-import { getUnsolvedIdxArray, resetSortingForm } from '../util/functions';
+import { getUnsolvedIdxArray, resetSortingForm, saveLoginInfo } from '../util/functions';
 import { LOGIN_PATH, MYPAGE_PATH } from '../util/paths';
 import { nameButtonStyle } from '../util/styles';
 import { useGetUserDetailQuery } from '../slices/userDetailApiSlice';
-import { UserInfo } from '../util/types';
+import { UserInfo } from '../util/types/types';
 import { initialUserInfo } from '../util/initialForms';
 
 export function Menu() {
@@ -27,6 +27,19 @@ export function Menu() {
   const divider = <Divider orientation="horizontal" sx={{borderColor: "gray"}} />
 
   useEffect(() => {
+    if (userDetail) {
+      const newUserInfo: UserInfo = {
+        ...userInfo,
+        created: userDetail.created,
+        tried: userDetail.tried,
+        solved: userDetail.solved,
+        withQuestions: userDetail.withQuestions,
+        liked: userDetail.liked,
+        point: userDetail.point,
+        auto: userDetail.auto
+      }
+      sessionStorage.setItem(USERINFO, JSON.stringify(newUserInfo))
+    }
     getNumberUnchecked()
     .then(n => {
       setUnchecked(n)
@@ -53,6 +66,7 @@ export function Menu() {
 
   function logoutAndMove() {
     sessionStorage.clear()
+    saveLoginInfo("", "", false)
     navigate(LOGIN_PATH)
   }
 
@@ -65,9 +79,9 @@ export function Menu() {
     navigate(`${MYPAGE_PATH}/${where}`)
   }
 
-  const problemMenuButton = (key: number, count: number, where: string, title: string) => {
+  const problemMenuButton = (key: number, where: string, title: string) => {
     return (
-      <ListItem sx={{display: count? "" : "none", justifyContent: "center"}}>
+      <ListItem sx={{justifyContent: "center"}}>
         <NavButton 
           key={key}
           onClick={() => resetPageAndMove(where, key)}
@@ -110,8 +124,8 @@ export function Menu() {
   anchorOrigin={{vertical: "top", horizontal: "right"}}
   >
     <NavButton 
-    key="withQuestions" 
-    onClick={() => resetPageAndMove(WITHQUESTIONS, 4)}
+    key="requests" 
+    onClick={() => resetPageAndMove("requests", 4)}
     sx={buttonStyle}
   >
     {menuWords.requestsReceived[languageIdx]}
@@ -169,10 +183,10 @@ export function Menu() {
             {message}
           </ListItem>
           {divider}
-          {problemMenuButton(0, userInfo.created.length, CREATED, menuWords.created[languageIdx])}
-          {problemMenuButton(1, userInfo.solved.length, SOLVED, menuWords.solved[languageIdx])}
-          {problemMenuButton(2, unsolved.length, UNRESOLVED, menuWords.unresolved[languageIdx])}
-          {problemMenuButton(3, userInfo.liked.length, LIKED, menuWords.liked[languageIdx])}
+          {problemMenuButton(0, CREATED, menuWords.created[languageIdx])}
+          {problemMenuButton(1, SOLVED, menuWords.solved[languageIdx])}
+          {problemMenuButton(2, UNRESOLVED, menuWords.unresolved[languageIdx])}
+          {problemMenuButton(3, LIKED, menuWords.liked[languageIdx])}
           <ListItem sx={{display: userInfo.withQuestions.length? "" : "none", justifyContent: "center"}}>
             {withQuestions}
           </ListItem>

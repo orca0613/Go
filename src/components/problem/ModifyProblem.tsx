@@ -1,36 +1,35 @@
 import { useEffect, useState } from "react"
-import { Coordinate, UserInfo } from "../../util/types"
-import { COMMENT, HOME, LEVEL, MARGIN, TURN, USERINFO } from "../../util/constants"
+import { Coordinate, ModifyProblemForm, ProblemAndVariations, UserInfo } from "../../util/types/types"
+import { COMMENT, HOME, INFO_FOR_MODIFYING, LEVEL, MARGIN, TURN, USERINFO } from "../../util/constants"
 import { Box, Button, ButtonGroup, FormControl, InputLabel, MenuItem, Select, SelectChangeEvent, TextField } from "@mui/material"
 import { getLanguageIdx, getLevelText, isLegalBoard, loginWarning, makingEmptyBoard } from "../../util/functions"
 import { isOutside } from "../../gologic/logic"
 import FinalBoard from "../board/FinalBoard"
 import { menuWords } from "../../util/menuWords"
-import { getProblemByIdx, modifyProblem } from "../../network/problem"
 import { useWindowSize } from "react-use"
 import { useNavigate, useParams } from "react-router-dom"
-import { boardSizeArray, initialUserInfo, levelArray } from "../../util/initialForms"
+import { boardSizeArray, initialProblemInfo, initialUserInfo, levelArray } from "../../util/initialForms"
 import { mobileButtonStyle } from "../../util/styles"
-import { LOGIN_PATH } from "../../util/paths"
+import { useModifyProblemMutation } from "../../slices/problemApiSlice"
 
 export function ModifyProblem() {
   const { param } = useParams()
-  const problemIdx = Number(param)
-  const userInfo: UserInfo = JSON.parse(sessionStorage.getItem(USERINFO) || initialUserInfo)
-  const [boardSize, setBoardSize] = useState(9)
-  let emptyBoard = makingEmptyBoard(boardSize)
-  const [problem, setProblem] = useState(emptyBoard)
+  const pi = localStorage.getItem("problemInfo")
+  const [problemInfo, setProblemInfo] = useState<ProblemAndVariations>(pi? JSON.parse(pi) : initialProblemInfo)
+  const [boardSize, setBoardSize] = useState(problemInfo.initialState.length)
+  const [problem, setProblem] = useState(problemInfo.initialState)
+  const [mp, { isLoading: mpLoading }] = useModifyProblemMutation()
   const {width, height} = useWindowSize()
   const navigate = useNavigate()
   const isMobile = height > width * 2 / 3 || width < 1000
   const margin = MARGIN
   const languageIdx = getLanguageIdx()
   const [info, setInfo] = useState({
-    creator: "",
-    comment: "",
-    turn: "b",
-    color: "",
-    level: 18,
+    creator: problemInfo.creator,
+    comment: problemInfo.comment,
+    turn: problemInfo.color,
+    color: "b",
+    level: problemInfo.level,
   })  
   
   function changeInfo(where: string, val:any) {
@@ -56,7 +55,8 @@ export function ModifyProblem() {
   function addMove(coord: Coordinate) {
     const y = coord[0], x = coord[1]
     const newProblem = [...problem]
-    newProblem[y][x] = info.color
+    console.log(info.color)
+    newProblem[y][x] = problem[y][x] === info.color? "." : info.color
     setProblem(newProblem)
   }
 
@@ -93,37 +93,39 @@ export function ModifyProblem() {
       alert(menuWords.invalidBoardWarning[languageIdx])
       return
     }
-    await modifyProblem(problemIdx, problem, info.comment, info.level, info.turn, info.creator)
+    const form: ModifyProblemForm = {
+      creator: info.creator,
+      problemIdx: problemInfo.problemIdx,
+      initialState: problem,
+      comment: info.comment,
+      level: info.level,
+      color: info.turn,
+    }
+    await mp(form).unwrap()
+    alert(menuWords.modifiedNotice[languageIdx])
   }
 
   useEffect(() => {
-    if (!userInfo.name) {
-      loginWarning()
-      navigate(LOGIN_PATH)
+    const pi = localStorage.getItem(INFO_FOR_MODIFYING)
+    if (!pi) {
+      console.log("shit")
+      return navigate(HOME)
     }
-    getProblemByIdx(problemIdx)
-    .then(p => {
-      if (!p) {
-        alert(menuWords.wrongIndexWarning[languageIdx])
-        return navigate(HOME)
-      } 
-      if (p.creator !== userInfo.name) {
-        alert(menuWords.permissionWarning[languageIdx])
-        sessionStorage.clear()
-        navigate(HOME)
-      }
-      const initialState = p.initialState
-      setProblem(initialState)
-      setInfo({
-        creator: p.creator,
-        comment: p.comment,
-        turn: p.color,
-        color: "",
-        level: p.level
-      })
-      setBoardSize(initialState.length)
+    const newProblemInfo: ProblemAndVariations = JSON.parse(pi)
+    if (newProblemInfo.problemIdx !== Number(param)) {
+      return navigate(HOME)
+    }
+    setProblemInfo(newProblemInfo)
+    setProblem(newProblemInfo.initialState)
+    setInfo({
+      creator: newProblemInfo.creator,
+      comment: newProblemInfo.comment,
+      turn: newProblemInfo.color,
+      color: "b",
+      level: newProblemInfo.level
     })
-  }, [problemIdx])
+    setBoardSize(newProblemInfo.initialState.length)
+  }, [param])
 
   const topMenu = 
   <Box mt="5%" textAlign="center" justifyContent={isMobile? "space-evenly" : "center"} display={isMobile? "flex" : ""}>

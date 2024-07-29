@@ -3,7 +3,7 @@ import { getLanguageIdx } from "../util/functions"
 import { initialUserInfo } from "../util/initialForms"
 import { menuWords } from "../util/menuWords"
 import { USER_DB_PATH } from "../util/paths"
-import { UserInfo } from "../util/types"
+import { UserInfo } from "../util/types/types"
 
 export async function checkMail(email: string) {
   const response = await fetch(`${API_URL}${USER_DB_PATH}/check-email/${email}`)
@@ -36,41 +36,6 @@ export async function createUser(email: string, password: string, name: string, 
   }
   throw new Error(`Error: ${response.status}`)
 }
-
-// export async function logIn(email: string, password: string): Promise<string> {
-//   const languageIdx = getLanguageIdx()
-//   const userInfo = getUserInfo()
-//   const response = await fetch(`${API_URL}${USER_DB_PATH}/login`, {
-//     method: 'POST',
-//     headers: {
-//       'Content-Type': 'application/json',
-//     },
-//     body: JSON.stringify({ email, password }),
-//   })
-//   if (!response.ok) {
-//     if (response.status === 404) {
-//       alert(menuWords.noMailWarning[languageIdx])
-//     } else if (response.status === 403) {
-//       alert(menuWords.verifyWarning[languageIdx])
-//     } else if (response.status === 400) {
-//       alert(menuWords.incorrectPasswordWarning[languageIdx])
-//     } else {
-//       throw new Error(`Error: ${response.status}`)
-//     }
-//     return ""
-//   }
-//   const userData = await response.json()
-//   const newUserInfo: UserInfo = {
-//     ...userInfo,
-//     name: userData.name,
-//     level: userData.level,
-//     token: userData.token,
-//     language: userData.language
-//   }
-//   localStorage.setItem(LANGUAGE_IDX, userData.language)
-//   sessionStorage.setItem(USERINFO, JSON.stringify(newUserInfo))
-//   return userData.name
-// }
 
 export async function verifyMail(userId: string): Promise<boolean> {
   const response = await fetch(`${API_URL}${USER_DB_PATH}/verify/${userId}`, {method: 'PATCH'})

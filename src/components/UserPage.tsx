@@ -3,7 +3,7 @@ import { Box, Button, Divider, Typography, useMediaQuery } from '@mui/material';
 import { useNavigate, useParams } from 'react-router-dom';
 import { menuWords } from '../util/menuWords';
 import { PAGE, PROBLEM_INDEX, PROBLEM_INDICES, USERINFO } from '../util/constants';
-import { SampleProblemInformation, UserInfo } from '../util/types';
+import { SampleProblemInformation, UserInfo } from '../util/types/types';
 import { useWindowSize } from 'react-use';
 import FinalBoard from './board/FinalBoard';
 import SendMessageForm from './SendMessageForm';
@@ -16,7 +16,6 @@ import { initialUserInfo } from '../util/initialForms';
 export default function UserPage() {
   const { name } = useParams()
   const userInfo: UserInfo = JSON.parse(sessionStorage.getItem(USERINFO) || initialUserInfo)
-  // const [info, setInfo] = useState<UserInfo>(JSON.parse(initialUserInfo))
   const { data: info, isLoading: gudLoading } = useGetUserDetailQuery(String(name))
   const navigate = useNavigate()
   const languageIdx = getLanguageIdx()

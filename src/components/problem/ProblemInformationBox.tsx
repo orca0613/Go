@@ -1,55 +1,46 @@
 import { Box, Button, Typography } from "@mui/material";
 import { menuWords } from "../../util/menuWords";
-import { LANGUAGE_IDX } from "../../util/constants";
-import { ProblemAndVariations } from "../../util/types";
+import { ProblemAndVariations, ProblemInformation } from "../../util/types/types";
 import { useEffect, useState } from "react";
-import { getProblemInformations } from "../../network/problemInformation";
-import { useWindowSize } from "react-use";
 import { useNavigate } from "react-router-dom";
 import { nameButtonStyle } from "../../util/styles";
 import { getLanguageIdx, getLevelText } from "../../util/functions";
-import { LoadingPage } from "../LoadingPage";
 
 interface PIProps {
   problemInfo: ProblemAndVariations
+  problemInformations: ProblemInformation
+  isMobile: boolean
 }
 
-export function ProblemInformation({ problemInfo }: PIProps) {
+export function ProblemInformationBox({ problemInfo, problemInformations, isMobile }: PIProps) {
   const languageIdx = getLanguageIdx()
   const navigate = useNavigate()
-  const {width, height} = useWindowSize()
-  const isMobile = height > width * 2 / 3 || width < 1000
   const margin = isMobile? 1 : 2
   const [info, setInfo] = useState({
     color: problemInfo.color,
     creator: problemInfo.creator,
     level: problemInfo.level,
-    view: 0,
-    correct: 0,
-    wrong: 0,
-    totalCorrectUserLevel: 0,
-    totalWrongUserLevel: 0,
+    view: problemInformations.view,
+    correct: problemInformations.correctUser.length,
+    wrong: problemInformations.wrong,
+    totalCorrectUserLevel: problemInformations.totalCorrectUserLevel,
+    totalWrongUserLevel: problemInformations.totalWrongUserLevel,
     comment: problemInfo.comment,
   })
 
   useEffect(() => {
-    getProblemInformations(problemInfo.problemIdx)
-    .then(information => {
-      setInfo({
-        color: problemInfo.color,
-        creator: problemInfo.creator,
-        level: problemInfo.level,
-        view: information.view,
-        correct: information.correctUser.length,
-        wrong: information.wrong,
-        totalCorrectUserLevel: information.totalCorrectUserLevel,
-        totalWrongUserLevel: information.totalWrongUserLevel,
-        comment: problemInfo.comment
-      })
+    setInfo({
+      color: problemInfo.color,
+      creator: problemInfo.creator,
+      level: problemInfo.level,
+      view: problemInformations.view,
+      correct: problemInformations.correctUser.length,
+      wrong: problemInformations.wrong,
+      totalCorrectUserLevel: problemInformations.totalCorrectUserLevel,
+      totalWrongUserLevel: problemInformations.totalWrongUserLevel,
+      comment: problemInfo.comment
     })
-  }, [problemInfo])
-
-  if (!problemInfo.creator) return <LoadingPage></LoadingPage>
+  }, [problemInfo, problemInformations])
 
   const mobileVersion = 
   <Box textAlign="center" display="grid">

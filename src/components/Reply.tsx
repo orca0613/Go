@@ -1,5 +1,5 @@
 import { Avatar, Box, Button, Divider, Typography } from "@mui/material";
-import { ReplyForm, UserInfo } from "../util/types";
+import { ReplyForm, UserInfo } from "../util/types/types";
 import { LANGUAGE_IDX, USERINFO } from "../util/constants";
 import { hideReply } from "../network/reply";
 import { menuWords } from "../util/menuWords";

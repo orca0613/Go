@@ -1,6 +1,6 @@
 
 import { CSSProperties, useEffect, useRef } from 'react';
-import { Board, Coordinate, Variations } from '../../util/types';
+import { Board, Coordinate, Variations } from '../../util/types/types';
 import _ from 'lodash';
 import { resolution } from '../../util/constants';
 import { divmod } from '../../util/functions';

@@ -1,5 +1,5 @@
 import _ from 'lodash'
-import { Board, Coordinate } from '../util/types'
+import { Board, Coordinate } from '../util/types/types'
 
 export function isOutside(coord: Coordinate, size: number) {
     const y = coord[0], x = coord[1]

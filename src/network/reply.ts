@@ -3,7 +3,7 @@ import { getLanguageIdx, getRequestForm } from "../util/functions"
 import { initialUserInfo } from "../util/initialForms"
 import { menuWords } from "../util/menuWords"
 import { REPLY_DB_PATH } from "../util/paths"
-import { ReplyForm, UserInfo } from "../util/types"
+import { ReplyForm, UserInfo } from "../util/types/types"
 
 export async function addReply(problemId: string, comment: string, name: string) {
   const languageIdx = getLanguageIdx()

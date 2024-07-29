@@ -1,6 +1,6 @@
 import { Box, Button, Modal, TextField, Typography } from "@mui/material"
 import { menuWords } from "../util/menuWords";
-import { HOME, LANGUAGE_IDX } from "../util/constants";
+import { LANGUAGE_IDX } from "../util/constants";
 import { ChangeEvent, useEffect, useState } from "react";
 import { sendMessage } from "../network/message";
 import { useNavigate } from "react-router-dom";

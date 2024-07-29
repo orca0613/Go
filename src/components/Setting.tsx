@@ -1,8 +1,8 @@
 import Switch from '@mui/material/Switch';
 import { HOME, LANGUAGE_IDX, USERINFO, languageList } from '../util/constants';
-import { ChangeSettingForm, UserInfo } from '../util/types';
+import { ChangeSettingForm, UserInfo } from '../util/types/types';
 import { ChangeEvent, useEffect, useState } from 'react';
-import { Box, Button, FormControl, FormControlLabel, FormLabel, InputLabel, MenuItem, Radio, RadioGroup, Select, SelectChangeEvent, useMediaQuery } from '@mui/material';
+import { Box, Button, FormControl, FormControlLabel, FormLabel, MenuItem, Radio, RadioGroup, Select, SelectChangeEvent } from '@mui/material';
 import { menuWords } from '../util/menuWords';
 import { useNavigate } from 'react-router-dom';
 import CheckPasswordDialog from './CheckPasswordDialog';

@@ -1,8 +1,8 @@
 import { Autocomplete, Box, Button, FormControl, InputLabel, MenuItem, Select, SelectChangeEvent, TextField, useMediaQuery } from "@mui/material"
 import { menuWords } from "../util/menuWords"
-import { LANGUAGE_IDX, PAGE } from "../util/constants"
+import { PAGE } from "../util/constants"
 import { useEffect, useState } from "react"
-import { Filter } from "../util/types"
+import { FilterForm } from "../util/types/types"
 import { detailLevel, tiersList } from "../util/initialForms"
 import { getLanguageIdx, getLevelText, ownStringify } from "../util/functions"
 import { useNavigate } from "react-router-dom"
@@ -10,10 +10,10 @@ import { useGetAllCreatorsQuery } from "../slices/userDetailApiSlice"
 
 interface FilterBoxProps {
   width: number
-  f: Filter
+  f: FilterForm
 }
 
-export default function FilterBox({ width, f }: FilterBoxProps) {
+export default function Filter({ width, f }: FilterBoxProps) {
 
   const languageIdx = getLanguageIdx()
   const navigate = useNavigate()
@@ -23,7 +23,7 @@ export default function FilterBox({ width, f }: FilterBoxProps) {
   const tiers = tiersList[languageIdx]
 
   const dropDownStyle = {margin: 1, minWidth: "20%"}
-  const [filter, setFilter] = useState<Filter>(f)
+  const [filter, setFilter] = useState<FilterForm>(f)
   const [detail, setDetail] = useState(detailLevel[filter.tier])
   const initIdx = f.level === 0 ? 0 : detail.indexOf((f.level))
   const [levelIdx, setLevelIdx] = useState(initIdx)

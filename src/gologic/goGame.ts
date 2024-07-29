@@ -1,5 +1,5 @@
 import _ from "lodash";
-import { Board, Coordinate, Variations, BoardInfo } from "../util/types";
+import { Board, Coordinate, Variations, BoardInfo } from "../util/types/types";
 import { addToKey, makeRandomNumber, playMoveAndReturnNewBoard } from "../util/functions";
 
 export class Game {
@@ -39,19 +39,23 @@ export class Game {
   }
 
   private getResponseList(key: string): string[] {
-    let responseList: string[] = []
+    let responseList: string[] = [];
+  
     if (this.variations.hasOwnProperty(key)) {
-      responseList = this.variations[key]
+      responseList = Array.isArray(this.variations[key]) ? [...this.variations[key]] : [];
     }
+  
     if (this.answers.hasOwnProperty(key)) {
-      this.answers[key].map(move => {
+      this.answers[key].forEach(move => {
         if (!responseList.includes(move)) {
-          responseList.push(move)
+          responseList.push(move);
         }
-      })
+      });
     }
-    return responseList
+  
+    return responseList;
   }
+  
 
   public playMove(info: BoardInfo, currentMove: Coordinate): BoardInfo {
     const color = info.color
@@ -110,15 +114,17 @@ export class Game {
 
   private addHistory(boardInfo: BoardInfo) {
     this.idx += 1
+  
     if (this.idx === this.history.length) {
-      this.history.push(boardInfo)
+      this.history = [...this.history, boardInfo]
       return
     }
+  
     if (_.isEqual(boardInfo.board, this.history[this.idx].board)) {
       return
     }
-    const newHistory = this.history.slice(0, this.idx)
-    newHistory.push(boardInfo)
+  
+    const newHistory = [...this.history.slice(0, this.idx), boardInfo]
     this.history = newHistory
   }
 

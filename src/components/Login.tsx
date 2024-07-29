@@ -1,43 +1,31 @@
 import { Box, Button, Checkbox, FormControlLabel, TextField } from '@mui/material'
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { menuWords } from '../util/menuWords'
-// import { logIn } from '../network/user'
-import { HOME, LANGUAGE_IDX, TOKEN, USERINFO, expires } from '../util/constants'
+import { HOME, LANGUAGE_IDX, TOKEN, USERINFO } from '../util/constants'
 import { useWindowSize } from 'react-use'
 import CheckEmailDialog from './CheckEmailDialog'
-import { isValidEmail } from '../util/functions'
+import { getCookie, isValidEmail, saveLoginInfo } from '../util/functions'
 import { useLoginMutation } from '../slices/userApiSlice'
-import { UserInfo } from '../util/types'
+import { UserInfo } from '../util/types/types'
 import { initialUserInfo } from '../util/initialForms'
 
 export function Login() {
 	const navigate = useNavigate()
   const [login, { isLoading: loginLoading }] = useLoginMutation()
 
-  function setCookie(name: string, val: string) {
-    let date = new Date()
-    date.setTime(date.getTime() + expires)
-    document.cookie = `${name}=${val}; expires=${date.toUTCString()}; SameSite=None; Secure`
-  }
-
-  function getCookie(name: string) {
-    const nameEQ = name + "="
-    const cookies = document.cookie.split(";")
-    for (let i = 0; i < cookies.length; i++) {
-      const cookie = cookies[i].trimStart()
-      if (cookie.indexOf(nameEQ) === 0) {
-        return cookie.substring(nameEQ.length, cookie.length)
-      }
-    }
-    return ""
-  }
   const [email, setEmail] = useState(getCookie("email"))
   const [emailErrorMessage, setEmailErrorMessage] = useState("")
   const [saveInfo, setSaveInfo] = useState(Boolean(getCookie("saved")))
   const [password, setPassword] = useState(getCookie("pw"))
   const languageIdx = Number(localStorage.getItem(LANGUAGE_IDX))
   const {width, height} = useWindowSize()
+
+  useEffect(() => {
+    if (email && password && saveInfo) {
+      logInAndSetting()
+    }
+  }, [])
 
   const inputEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newEmail = e.target.value
@@ -71,20 +59,12 @@ export function Login() {
       ...userInfo,
       name: res.name,
       level: res.level,
-      language: res.language
+      language: res.language,
     }
     localStorage.setItem(LANGUAGE_IDX, String(res.language))
     sessionStorage.setItem(USERINFO, JSON.stringify(newUserInfo))
     sessionStorage.setItem(TOKEN, res.token)
-    if (saveInfo) {
-      setCookie("email", email)
-      setCookie("pw", password)
-      setCookie("saved", JSON.stringify(true))
-    } else {
-      setCookie("email", "")
-      setCookie("pw", "")
-      setCookie("saved", "")
-    }
+    saveLoginInfo(email, password, saveInfo)
     navigate(HOME)
   }
 
@@ -117,7 +97,7 @@ export function Login() {
         onClick={logInAndSetting}>
           {menuWords.login[languageIdx]}
         </Button>
-        <FormControlLabel labelPlacement='start' control={<Checkbox checked={saveInfo} onChange={() => setSaveInfo(!saveInfo)}/>} label={menuWords.saveInformations[languageIdx]}/>
+        <FormControlLabel labelPlacement='start' control={<Checkbox checked={saveInfo} onChange={() => setSaveInfo(!saveInfo)}/>} label={menuWords.autoLogin[languageIdx]}/>
 
         <Box sx={{margin: 3}}>
           <Button sx={{color: "red", textTransform: "none"}} onClick={() => navigate('/signup')}>{menuWords.signup[languageIdx]}</Button>

@@ -1,5 +1,5 @@
 import { Box, Button, TextField } from "@mui/material"
-import { ReplyForm, UserInfo } from "../util/types"
+import { ReplyForm, UserInfo } from "../util/types/types"
 import { useEffect, useState } from "react"
 import { Reply } from "./Reply"
 import { LANGUAGE_IDX, USERINFO } from "../util/constants"
