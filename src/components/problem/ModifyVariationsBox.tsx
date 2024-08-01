@@ -4,7 +4,6 @@ import { LoadingPage } from "../LoadingPage"
 import { useGetProblemByIdxQuery } from "../../slices/problemApiSlice"
 import { useGetProblemInformationsQuery } from "../../slices/problemInformationApiSlice"
 import { ModifyVariations } from "./ModifyVariations"
-// import { MobileModifyVariations } from "../mobile/MobileModifyVariations"
 
 export function ModifyVariationsBox() {
 

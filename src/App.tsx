@@ -5,16 +5,15 @@ import { Signup } from "./components/SignUp";
 import { HomeForm } from "./components/HomeForm";
 import { MakingProblem } from "./components/problem/MakingProblem";
 import Layout from "./components/layout";
-import VerifyMail from "./components/VerifyMail";
 import { ModifyProblem } from "./components/problem/ModifyProblem";
 import ChangePassword from "./components/ChangePassword";
 import Setting from "./components/Setting";
-import MessageList from "./components/MessageList";
 import UserPage from "./components/UserPage";
 import { ProblemBox } from "./components/problem/ProblemBox";
 import { MyPageProblemBox } from "./components/problem/MyPageProblemBox";
 import FilteredProblemBox from "./components/problem/FilteredProblemBox";
 import { ModifyVariationsBox } from "./components/problem/ModifyVariationsBox";
+import { MessagePage } from "./components/MessagePage";
 
 
 
@@ -31,12 +30,11 @@ function App() {
           <Route path="/mypage/:param" element={<MyPageProblemBox></MyPageProblemBox>} />
           <Route path="/problem/:param" element={<ProblemBox />} />
           <Route path="/modify/:param" element={<ModifyVariationsBox />} />
-          <Route path="/verify/:userId" element={<VerifyMail />} />
           <Route path="/modify-problem/:param" element={<ModifyProblem />} />
           <Route path="/change-password/:userId" element={<ChangePassword />} />
           <Route path="/setting" element={<Setting/>} />
           <Route path="/problems/:params" element={<FilteredProblemBox />} />
-          <Route path="/message" element={<MessageList />} />
+          <Route path="/message" element={<MessagePage />} />
           <Route path="/userpage/:name" element={<UserPage/>}/>
           
 

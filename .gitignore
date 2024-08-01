@@ -8,4 +8,5 @@ firebase.json
 src/components/mobile
 src/shadcn
 src/toast
+src/util/constants.ts
 .env

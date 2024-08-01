@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react"
-import { Coordinate, CreateProblemForm, UserInfo } from "../../util/types/types"
+import { Coordinate, UserInfo } from "../../util/types/types"
 import { COMMENT, LEVEL, MARGIN, TURN, USERINFO } from "../../util/constants"
 import { Box, Button, ButtonGroup, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, FormControl, InputLabel, MenuItem, Select, SelectChangeEvent, TextField } from "@mui/material"
-import { getLanguageIdx, getLevelText, isLegalBoard, loginWarning, makingEmptyBoard } from "../../util/functions"
+import { alertErrorMessage, getLanguageIdx, getLevelText, isLegalBoard, loginWarning, makingEmptyBoard } from "../../util/functions"
 import { isOutside } from "../../gologic/logic"
 import FinalBoard from "../board/FinalBoard"
 import { menuWords } from "../../util/menuWords"
@@ -13,6 +13,7 @@ import { mobileButtonStyle } from "../../util/styles"
 import { useNavigate } from "react-router-dom"
 import { LOGIN_PATH } from "../../util/paths"
 import { useCreateProblemMutation } from "../../slices/problemApiSlice"
+import { CreateProblemForm } from "../../util/types/queryTypes"
 
 export function MakingProblem() {
   const userInfo: UserInfo = JSON.parse(sessionStorage.getItem(USERINFO) || initialUserInfo)
@@ -90,14 +91,20 @@ export function MakingProblem() {
       level: info.level,
       color: info.turn
     }
-    const newIdx = await create(form).unwrap()
-    if (!newIdx) {
-      return
+    try {
+      const newIdx = await create(form).unwrap()
+      if (!newIdx) {
+        return
+      }
+      setProblemIndex(newIdx)
+      setProblem(emptyBoard)
+      setOpenSuggestion(true)
+      changeInfo(COMMENT, "")
+    } catch (error) {
+      if (typeof error === "object" && error !== null && "originalStatus" in error) {
+        alertErrorMessage(Number(error.originalStatus))
+      }
     }
-    setProblemIndex(newIdx)
-    setProblem(emptyBoard)
-    setOpenSuggestion(true)
-    changeInfo(COMMENT, "")
   }
 
   function handleTurnChange(e: SelectChangeEvent) {

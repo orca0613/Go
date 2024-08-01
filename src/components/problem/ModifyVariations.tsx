@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
-import { BoardInfo, Coordinate, DeleteProblemFrom, ProblemAndVariations, ProblemInformation, UpdateVariationsForm, UserInfo, Variations } from '../../util/types/types'
+import { BoardInfo, Coordinate, ProblemAndVariations, ProblemInformation, UserInfo, Variations } from '../../util/types/types'
 import _ from 'lodash'
-import { addCurrentVariation, getLanguageIdx, removeCurrentVariation } from '../../util/functions'
+import { addCurrentVariation, alertErrorMessage, getLanguageIdx, logOut, removeCurrentVariation } from '../../util/functions'
 import { Box, Button, ButtonGroup, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle } from '@mui/material'
 import { HOME, INFO_FOR_MODIFYING, MARGIN, USERINFO } from '../../util/constants'
 import FinalBoard from '../board/FinalBoard'
@@ -14,7 +14,8 @@ import { initialUserInfo } from '../../util/initialForms'
 import { mobileButtonStyle, wideButtonStyle } from '../../util/styles'
 import { useDeleteProblemMutation, useUpdateVariationsMutation } from '../../slices/problemApiSlice'
 import { useCheckRequestMutation } from '../../slices/requestApiSlice'
-import { checkRequestForm } from '../../util/types/queryTypes'
+import { DeleteProblemForm, CheckRequestForm, UpdateVariationsForm } from '../../util/types/queryTypes'
+import { errorMessages } from '../../util/errorMessages'
 
 interface MVProps {
   pi: ProblemAndVariations
@@ -51,6 +52,10 @@ export function ModifyVariations({ pi, pInfo }: MVProps) {
   const [openWarning, setOpenWarning] = useState(false)
 
   useEffect(() => {
+    if (pi.creator !== username) {
+      alert(errorMessages[403][languageIdx])
+      logOut()
+    }
     if (pi.problemIdx === problemInfo.problemIdx) {
       return 
     }
@@ -192,18 +197,24 @@ export function ModifyVariations({ pi, pInfo }: MVProps) {
     const newInfo = game.playMove(info, coord)
     setInfo(newInfo)
     if (problemInfo.questions.hasOwnProperty(newInfo.key) && problemInfo.questions[newInfo.key].length === 0) {
-      const form: checkRequestForm = {
+      const form: CheckRequestForm = {
         problemIdx: problemIdx,
         creator: problemInfo.creator,
         key: newInfo.key
       }
       removeVariationsAndSetVariations(newInfo.key)
-      await checkRequest(form).unwrap()
+      try {
+        await checkRequest(form).unwrap()
+      } catch (error) {
+        if (typeof error === "object" && error !== null && "originalStatus" in error) {
+          alertErrorMessage(Number(error.originalStatus))
+        }
+      }
     }
   }
 
   async function deleteProblemAndGoHome() {
-    const form: DeleteProblemFrom = {
+    const form: DeleteProblemForm = {
       problemIdx: problemIdx,
       creator: username,
       level: problemInfo.level,

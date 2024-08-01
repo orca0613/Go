@@ -5,7 +5,8 @@ import { UserInfo } from "../util/types/types"
 import { Favorite, FavoriteBorder } from "@mui/icons-material"
 import { initialUserInfo } from "../util/initialForms"
 import { useHandleLikedMutation } from "../slices/sampleProblemApiSlice"
-import { handleLikedForm } from "../util/types/queryTypes"
+import { HandleLikedForm } from "../util/types/queryTypes"
+import { alertErrorMessage } from "../util/functions"
 
 interface LADProps {
   problemIdx: number,
@@ -25,31 +26,37 @@ export function Like({ problemIdx, username, creator, likeCount }: LADProps) {
   async function handleLike() {
     const c = info.likeCount
     const idx = userInfo.liked.indexOf(problemIdx)
-    const form: handleLikedForm = {
+    const form: HandleLikedForm = {
       problemIndex: problemIdx,
       name: username,
       creator: creator,
       add: !info.like
     }
-    await handleLiked(form).unwrap()
-    if (info.like) {
-      setInfo({
-        like: false,
-        likeCount: c - 1
-      })
-      if (idx !== -1) {
-        userInfo.liked.splice(idx, 1)
+    try {
+      await handleLiked(form).unwrap()
+      if (info.like) {
+        setInfo({
+          like: false,
+          likeCount: c - 1
+        })
+        if (idx !== -1) {
+          userInfo.liked.splice(idx, 1)
+        }
+      } else {
+        setInfo({
+          like: true,
+          likeCount: c + 1
+        })
+        if (idx === -1) {
+          userInfo.liked.push(problemIdx)
+        }
       }
-    } else {
-      setInfo({
-        like: true,
-        likeCount: c + 1
-      })
-      if (idx === -1) {
-        userInfo.liked.push(problemIdx)
+      sessionStorage.setItem(USERINFO, JSON.stringify(userInfo))
+    } catch (error) {
+      if (typeof error === "object" && error !== null && "originalStatus" in error) {
+        alertErrorMessage(Number(error.originalStatus))
       }
     }
-    sessionStorage.setItem(USERINFO, JSON.stringify(userInfo))
   }
 
   useEffect(() => {

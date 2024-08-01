@@ -5,13 +5,14 @@ import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
 import DialogContentText from '@mui/material/DialogContentText';
 import { useState } from 'react';
-import { checkPassword } from '../network/user';
 import { USERINFO } from '../util/constants';
 import { UserInfo } from '../util/types/types';
 import { useNavigate } from 'react-router-dom';
 import { menuWords } from '../util/menuWords';
 import React from 'react';
 import { initialUserInfo } from '../util/initialForms';
+import { useCheckPasswordQuery } from '../slices/userApiSlice';
+import { alertErrorMessage } from '../util/functions';
 
 interface CPDProps {
   languageIdx: number
@@ -21,14 +22,26 @@ export default function CheckPasswordDialog({ languageIdx }: CPDProps) {
   const userInfo: UserInfo = JSON.parse(sessionStorage.getItem(USERINFO) || initialUserInfo)
   const navigate = useNavigate()
   const [open, setOpen] = useState(false);
+  const [password, setPassword] = useState("")
+  const { data: form, isLoading, refetch } = useCheckPasswordQuery(userInfo.name + " " + password)
 
-  async function checkPasswordAndMovePage(password: string) {
-    const id = await checkPassword(userInfo.name, password)
-    if (id) {
-      return navigate(`/change-password/${id}`)
+  async function checkPasswordAndMovePage() {
+    try {
+      await refetch().unwrap()
+      if (form && form.match) {
+        return navigate(`/change-password/${form.id}`)
+      }
+      alert(menuWords.incorrectPasswordWarning[languageIdx])
+      return
+    } catch (error) {
+      if (typeof error === "object" && error !== null && "originalStatus" in error) {
+        alertErrorMessage(Number(error.originalStatus))
+      }
     }
-    alert(menuWords.incorrectPasswordWarning[languageIdx])
-    return
+  }
+
+  const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setPassword(e.target.value)
   }
 
   return (
@@ -39,17 +52,6 @@ export default function CheckPasswordDialog({ languageIdx }: CPDProps) {
       <Dialog
         open={open}
         onClose={() => setOpen(false)}
-        PaperProps={{
-          component: 'form',
-          onSubmit: (event: React.FormEvent<HTMLFormElement>) => {
-            event.preventDefault();
-            const formData = new FormData(event.currentTarget);
-            const formJson = Object.fromEntries((formData as any).entries());
-            const password = formJson.password;
-            checkPasswordAndMovePage(password)
-            setOpen(false);
-          },
-        }}
       >
         <DialogContent>
           <DialogContentText>
@@ -63,11 +65,12 @@ export default function CheckPasswordDialog({ languageIdx }: CPDProps) {
             type="password"
             autoComplete="off"
             variant="standard"
+            onChange={handlePasswordChange}
           />
         </DialogContent>
         <DialogActions sx={{justifyContent: "space-around"}}>
           <Button sx={{textTransform: "none"}} onClick={() => setOpen(false)}>{menuWords.cancel[languageIdx]}</Button>
-          <Button sx={{textTransform: "none"}} type="submit">{menuWords.confirm[languageIdx]}</Button>
+          <Button sx={{textTransform: "none"}} onClick={checkPasswordAndMovePage}>{menuWords.confirm[languageIdx]}</Button>
         </DialogActions>
       </Dialog>
     </React.Fragment>

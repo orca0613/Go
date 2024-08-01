@@ -1,126 +1,55 @@
-import { Box, Button, Checkbox, Divider, Modal, Pagination, Stack, Typography, useMediaQuery } from "@mui/material";
+import { Box, Button, Checkbox, Divider, Pagination, Stack, Typography, useMediaQuery } from "@mui/material";
 import { MessageForm, UserInfo } from "../util/types/types";
-import { ChangeEvent, useEffect, useState } from "react";
-import { checkMessage, getReceivedMessage, getSentMessage, hideMessage } from "../network/message";
+import { ChangeEvent, useState } from "react";
 import { menuWords } from "../util/menuWords";
 import { LANGUAGE_IDX, USERINFO, messagesPerPage } from "../util/constants";
 import { useNavigate } from "react-router-dom";
 import { nameButtonStyle } from "../util/styles";
-import SendMessageForm from "./SendMessageForm";
-import { initialUserInfo } from "../util/initialForms";
-import { loginWarning } from "../util/functions";
-import { LOGIN_PATH } from "../util/paths";
+import { initialMessageForm, initialUserInfo } from "../util/initialForms";
+import { MessageBox } from "./MessageBox";
+import { useCheckMessageMutation, useHideMessageMutation } from "../slices/messageApiSlice";
+import { CheckMessageForm, HideMessageForm } from "../util/types/queryTypes";
+import { alertErrorMessage } from "../util/functions";
 
-export default function MessageList() {
+interface MLProps {
+  receivedMessages: MessageForm[]
+  sentMessages: MessageForm[]
+}
+
+export default function MessageList({ receivedMessages, sentMessages }: MLProps) {
   const userInfo: UserInfo = JSON.parse(sessionStorage.getItem(USERINFO) || initialUserInfo)
   const languageIdx = Number(localStorage.getItem(LANGUAGE_IDX))
   const navigate = useNavigate()
   const isMobile = useMediaQuery("(max-width: 600px)")
   const divider = <Divider orientation="horizontal" sx={{borderColor: "ger"}} />
-  const [received, setReceived] = useState(true)
+  const [isReceived, setIsReceived] = useState(true)
+  const [received, setReceived] = useState(receivedMessages)
+  const [sent, setSent] = useState(sentMessages)
   const [checked, setChecked] = useState(0)
   const [page, setPage] = useState(1)
-  const [deleted, setDeleted] = useState(false)
-  const [messageList, setMessageList] = useState<MessageForm[]>([])
-  const [open, setOpen] = useState(false)
-  const [openSend, setOpenSend] = useState(0)
-  const [sendForm, setSendForm] = useState({
-    receiver: "",
-    sender: ""
-  })
+  const [messageList, setMessageList] = useState<MessageForm[]>(receivedMessages)
+  const [openCount, setOpenCount] = useState(0)
   const all = 2 ** messagesPerPage - 1
-  const [contents, setContents] = useState<MessageForm>({
-    _id: "",
-    sender: "",
-    receiver: "",
-    title: "",
-    contents: "",
-    quotation: "",
-    time: new Date(),
-    checked: false,
-    hideToReceiver: false,
-    hideToSender: false,
-    includeUrl: false,
-    url: ""
-  })
-
-  const style = {
-    position: 'absolute' as 'absolute',
-    top: '50%',
-    left: '50%',
-    transform: 'translate(-50%, -50%)',
-    bgcolor: 'background.paper',
-    border: '2px solid #000',
-    boxShadow: 24,
-    p: 2,
-  };
-
-  useEffect(() => {
-    if (!userInfo.name) {
-      loginWarning()
-      navigate(LOGIN_PATH)
-    }
-    if (received) {
-      getReceivedMessage()
-      .then(m => {
-        setMessageList(m)
-      })
-      return
-    } 
-    getSentMessage()
-    .then(m => {
-      setMessageList(m)
-    })
-
-  }, [received, deleted])
-
-  const modal = 
-      <Modal
-        open={open}
-        onClose={() => setOpen(false)}
-      >
-        <Box sx={style} minWidth={isMobile? "70%" : "30%"} minHeight={"150px"}>
-          <Box display="flex">
-            <Typography color="teal" mb={2}>{contents.sender}</Typography>
-          </Box>
-          {divider}
-          <Box>
-            <Typography mb={2}>{contents.contents}</Typography>
-            {contents.includeUrl? <Button onClick={() => navigate(`/problem/${contents.url}`)} sx={{color: "teal", textDecoration: "none", left: 0}}>{menuWords.goToTheProblem[languageIdx]}</Button> : <></>}
-          </Box>
-          {divider}
-          <Box display="flex" alignItems="center" justifyContent="right">
-            <Button onClick={() => openSendMessageForm(contents.sender, userInfo.name)} sx={{right: 0, textTransform: "none", display: received? "" : "none"}}>{menuWords.reply[languageIdx]}</Button>
-          </Box>
-        </Box>
-      </Modal>
-
-  function openSendMessageForm(receiver: string, sender: string) {
-    setSendForm({
-      receiver: receiver,
-      sender: sender
-    })
-    setOpenSend(openSend + 1)
-  }
+  const [contents, setContents] = useState<MessageForm>(initialMessageForm)
+  const [hideMessage, { isLoading: dmLoading }] = useHideMessageMutation()
+  const [checkMessage, { isLoading: cmLoading }] = useCheckMessageMutation()
 
   async function openMessage(message: MessageForm) {
     if (!message.checked) {
-      await checkMessage(message._id)
-    }
-    let content = ""
-    let url = ""
-    if (message.includeUrl) {
-      [content, url] = message.contents.split("&")
-      const newMessage = {
-        ...message,
-        contents: content,
-        url: url
+      const form: CheckMessageForm = {
+        id: message._id,
+        name: userInfo.name,
       }
-      setContents(newMessage)
-    } else {
-      setContents(message)
+      try {
+        await checkMessage(form).unwrap()
+      } catch (error) {
+        if (typeof error === "object" && error !== null && "originalStatus" in error) {
+          alertErrorMessage(Number(error.originalStatus))
+        }
+      }
     }
-    setOpen(true)
+    setContents(message)
+    setOpenCount(openCount + 1)
   }
 
   function handleCheckedChange(idx: number) {
@@ -134,7 +63,7 @@ export default function MessageList() {
   }
 
   async function deleteMessage() {
-    const where = received? "hideToReceiver" : "hideToSender"
+    const where = isReceived? "hideToReceiver" : "hideToSender"
     const startIdx = (page - 1) * messagesPerPage
     const idList: string[] = []
     for (let i = 0; i < 20; i++) {
@@ -142,9 +71,20 @@ export default function MessageList() {
         idList.push(messageList[startIdx + i]._id)
       }
     }
-    await hideMessage(idList.join("&"), where)
-    setChecked(0)
-    setDeleted(!deleted)
+    const form: HideMessageForm = {
+      idList: idList.join("&"),
+      name: userInfo.name,
+      where: where
+    }
+    try {
+      await hideMessage(form).unwrap()
+      setChecked(0)
+      location.reload()
+    } catch (error) {
+      if (typeof error === "object" && error !== null && "originalStatus" in error) {
+        alertErrorMessage(Number(error.originalStatus))
+      }
+    }
   }
 
   const handlePageChange = (event: ChangeEvent<unknown>, val: number) => {
@@ -154,9 +94,14 @@ export default function MessageList() {
   }
 
   function handleReceived(r: boolean) {
-    setReceived(r)
+    setIsReceived(r)
     setChecked(0)
     setPage(1)
+    if (r) {
+      setMessageList(received)
+    } else {
+      setMessageList(sent)
+    }
   }
 
   const topMenu = 
@@ -172,14 +117,14 @@ export default function MessageList() {
     <Box>
       <Button 
         sx={{mx: 1, textTransform: "none", fontSize: isMobile? "70%" : "100%"}} 
-        variant={received? "contained" : "outlined"} 
+        variant={isReceived? "contained" : "outlined"} 
         onClick={() => handleReceived(true)}
       >
         {menuWords.receivedMessage[languageIdx]}
       </Button>
       <Button 
         sx={{mx: 1, textTransform: "none", fontSize: isMobile? "70%" : "100%"}} 
-        variant={received? "outlined" : "contained"} 
+        variant={isReceived? "outlined" : "contained"} 
         onClick={() => handleReceived(false)}
       >
         {menuWords.sentMessage[languageIdx]}
@@ -198,7 +143,7 @@ export default function MessageList() {
               size="small"
             />
             {
-              received? <Button onClick={() => navigate(`/userpage/${message.sender}`)} sx={nameButtonStyle}>{message.sender}</Button> : 
+              isReceived? <Button onClick={() => navigate(`/userpage/${message.sender}`)} sx={nameButtonStyle}>{message.sender}</Button> : 
               <Button onClick={() => navigate(`/userpage/${message.receiver}`)} sx={nameButtonStyle}>{message.receiver}</Button>
             }
           </Box>
@@ -227,7 +172,7 @@ export default function MessageList() {
               size="small"
             />
             {
-              received? <Button onClick={() => navigate(`/userpage/${message.sender}`)} sx={nameButtonStyle}>{message.sender}</Button> : 
+              isReceived? <Button onClick={() => navigate(`/userpage/${message.sender}`)} sx={nameButtonStyle}>{message.sender}</Button> : 
               <Button onClick={() => navigate(`/userpage/${message.receiver}`)} sx={nameButtonStyle}>{message.receiver}</Button>
             }
           </Box>
@@ -262,8 +207,12 @@ export default function MessageList() {
         
         />
       </Stack>
-      {modal}
-      <SendMessageForm receiver={sendForm.receiver} sender={sendForm.sender} open={openSend}></SendMessageForm>
+      <MessageBox
+        contents={contents}
+        isMobile={isMobile}
+        isReceived={isReceived}
+        openCount={openCount}
+      />
     </Box>
   )
 }

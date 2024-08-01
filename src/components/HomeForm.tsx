@@ -31,7 +31,6 @@ export function HomeForm() {
     }
     const newGreetings = getGreetings(username, languageIdx)
     setGreetings(newGreetings)
-    // useGetRecommendedQuery(username)
   }, [username])
 
   function setIdexAndOpenProblem(index: number, problemIdx: number, problemList: SampleProblemInformation[]) {

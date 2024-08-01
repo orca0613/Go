@@ -1,7 +1,8 @@
 import { ALL_CREATOR_TAG, CREATED_TAG, FILTER_TAG, LIKED_TAG, NEWEST_TAG, PROBLEM_TAG, RECOMMENDED_TAG, REPRESENTATIVE_TAG, SOLVED_TAG, UNSOLVED_TAG, USER_DETAIL_TAG, USER_SOLVED_TAG, apiSlice } from "../rtk/api";
 import { DELETE, PATCH, POST } from "../util/constants";
 import { PROBLEM_DB_PATH } from "../util/paths";
-import { CreateProblemForm, DeleteProblemFrom, ModifyProblemForm, ProblemAndVariations, UpdateVariationsForm } from "../util/types/types";
+import { CreateProblemForm, DeleteProblemForm, ModifyProblemForm, UpdateVariationsForm } from "../util/types/queryTypes";
+import { ProblemAndVariations } from "../util/types/types";
 
 const problemApiSlice = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
@@ -23,7 +24,7 @@ const problemApiSlice = apiSlice.injectEndpoints({
         USER_DETAIL_TAG,
       ]
     }),
-    deleteProblem: builder.mutation<void, DeleteProblemFrom>({
+    deleteProblem: builder.mutation<void, DeleteProblemForm>({
       query: (body) =>({
         url: `${PROBLEM_DB_PATH}/delete`,
         method: DELETE,

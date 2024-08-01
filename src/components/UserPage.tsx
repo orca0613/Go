@@ -6,7 +6,7 @@ import { PAGE, PROBLEM_INDEX, PROBLEM_INDICES, USERINFO } from '../util/constant
 import { SampleProblemInformation, UserInfo } from '../util/types/types';
 import { useWindowSize } from 'react-use';
 import FinalBoard from './board/FinalBoard';
-import SendMessageForm from './SendMessageForm';
+import SendMessageForm from './SendMessageBox';
 import { getLanguageIdx, getLevelText } from '../util/functions';
 import { LoadingPage } from './LoadingPage';
 import { useGetUserRepresentativeQuery, useGetUserSolvedQuery } from '../slices/sampleProblemApiSlice';

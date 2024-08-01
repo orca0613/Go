@@ -5,7 +5,6 @@ import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
 import DialogContentText from '@mui/material/DialogContentText';
 import { useState } from 'react';
-import { deleteAccount } from '../network/user';
 import { useNavigate } from 'react-router-dom';
 import { menuWords } from '../util/menuWords';
 import React from 'react';
@@ -13,6 +12,9 @@ import { LOGIN_PATH } from '../util/paths';
 import { UserInfo } from '../util/types/types';
 import { USERINFO } from '../util/constants';
 import { initialUserInfo } from '../util/initialForms';
+import { useDeleteAccountMutation } from '../slices/userApiSlice';
+import { DeleteAccountForm } from '../util/types/queryTypes';
+import { alertErrorMessage, saveLoginInfo } from '../util/functions';
 
 interface DADProps {
   languageIdx: number
@@ -22,13 +24,25 @@ export default function DeleteAccountDialog({ languageIdx }: DADProps) {
   const userInfo: UserInfo = JSON.parse(sessionStorage.getItem(USERINFO) || initialUserInfo)
   const navigate = useNavigate()
   const [open, setOpen] = useState(false);
+  const [deleteAccount, { isLoading: daLoading }] = useDeleteAccountMutation()
 
 
   async function deleteAccountAndMovePage(email: string, password: string) {
-    const result = await deleteAccount(userInfo.name, email, password)
-    if (result) {
+    const form: DeleteAccountForm = {
+      name: userInfo.name,
+      email: email,
+      password: password
+    }
+    try {
+      await deleteAccount(form).unwrap()
       sessionStorage.clear()
+      saveLoginInfo("", "", false)
+      alert(menuWords.deletedNotice[languageIdx])
       navigate(LOGIN_PATH)
+    } catch (error) {
+      if (typeof error === "object" && error !== null && "originalStatus" in error) {
+        alertErrorMessage(Number(error.originalStatus))
+      }
     }
   }
 
@@ -69,7 +83,7 @@ export default function DeleteAccountDialog({ languageIdx }: DADProps) {
         </DialogContent>
         <DialogContent>
           <DialogContentText>
-            {menuWords.curPasswordNotice[languageIdx]}
+            {menuWords.password[languageIdx]}
           </DialogContentText>
           <TextField
             sx={{width: "100%"}}

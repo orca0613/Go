@@ -1,16 +1,17 @@
 import Switch from '@mui/material/Switch';
 import { HOME, LANGUAGE_IDX, USERINFO, languageList } from '../util/constants';
-import { ChangeSettingForm, UserInfo } from '../util/types/types';
+import { UserInfo } from '../util/types/types';
 import { ChangeEvent, useEffect, useState } from 'react';
 import { Box, Button, FormControl, FormControlLabel, FormLabel, MenuItem, Radio, RadioGroup, Select, SelectChangeEvent } from '@mui/material';
 import { menuWords } from '../util/menuWords';
 import { useNavigate } from 'react-router-dom';
 import CheckPasswordDialog from './CheckPasswordDialog';
 import { initialUserInfo, levelArray } from '../util/initialForms';
-import { getLevelText, loginWarning, saveChanging } from '../util/functions';
+import { alertErrorMessage, getLevelText, loginWarning, saveChanging } from '../util/functions';
 import { LOGIN_PATH } from '../util/paths';
 import DeleteAccountDialog from './DeleteAccountDialog';
 import { useChangeSettingMutation } from '../slices/userDetailApiSlice';
+import { ChangeSettingForm } from '../util/types/queryTypes';
 
 export default function Setting() {
   const userInfo: UserInfo = JSON.parse(sessionStorage.getItem(USERINFO) || initialUserInfo)
@@ -48,10 +49,16 @@ export default function Setting() {
       level: level,
       auto: auto
     }
-    await changeSetting(form).unwrap()
-    saveChanging(language, level, auto)
-    alert(menuWords.modifiedNotice[language])
-    navigate(HOME)
+    try {
+      await changeSetting(form).unwrap()
+      saveChanging(language, level, auto)
+      alert(menuWords.modifiedNotice[language])
+      navigate(HOME)
+    } catch (error) {
+      if (typeof error === "object" && error !== null && "originalStatus" in error) {
+        alertErrorMessage(Number(error.originalStatus))
+      }
+    }
   }
 
   return (

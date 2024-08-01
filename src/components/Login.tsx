@@ -5,10 +5,11 @@ import { menuWords } from '../util/menuWords'
 import { HOME, LANGUAGE_IDX, TOKEN, USERINFO } from '../util/constants'
 import { useWindowSize } from 'react-use'
 import CheckEmailDialog from './CheckEmailDialog'
-import { getCookie, isValidEmail, saveLoginInfo } from '../util/functions'
+import { alertErrorMessage, getCookie, isValidEmail, saveLoginInfo } from '../util/functions'
 import { useLoginMutation } from '../slices/userApiSlice'
 import { UserInfo } from '../util/types/types'
 import { initialUserInfo } from '../util/initialForms'
+import { LoginRequest } from '../util/types/queryTypes'
 
 export function Login() {
 	const navigate = useNavigate()
@@ -46,26 +47,37 @@ export function Login() {
       setEmailErrorMessage(menuWords.invalidEmailFormWarning[languageIdx])
       return
     }
-    const data = {
+    const form: LoginRequest = {
       email: email,
       password: password
     }
-    const res = await login(data).unwrap();
-    if (!res) {
-      return
+    try {
+      const res = await login(form).unwrap()
+      const userInfo: UserInfo = JSON.parse(sessionStorage.getItem(USERINFO) || initialUserInfo)
+      const newUserInfo: UserInfo = {
+        ...userInfo,
+        name: res.name,
+        level: res.level,
+        language: res.language,
+      }
+      localStorage.setItem(LANGUAGE_IDX, String(res.language))
+      sessionStorage.setItem(USERINFO, JSON.stringify(newUserInfo))
+      sessionStorage.setItem(TOKEN, res.token)
+      saveLoginInfo(email, password, saveInfo)
+      navigate(HOME)
+    } catch (error) {
+      if (typeof error === "object" && error !== null && "originalStatus" in error) {
+        console.log(error)
+        switch (error.originalStatus) {
+          case 400:
+            return alert(menuWords.incorrectPasswordWarning[languageIdx])
+          case 404:
+            return alert(menuWords.noEmailWarning[languageIdx])
+          default:
+            return alertErrorMessage(Number(error.originalStatus))
+        }
+      }
     }
-    const userInfo: UserInfo = JSON.parse(sessionStorage.getItem(USERINFO) || initialUserInfo)
-    const newUserInfo: UserInfo = {
-      ...userInfo,
-      name: res.name,
-      level: res.level,
-      language: res.language,
-    }
-    localStorage.setItem(LANGUAGE_IDX, String(res.language))
-    sessionStorage.setItem(USERINFO, JSON.stringify(newUserInfo))
-    sessionStorage.setItem(TOKEN, res.token)
-    saveLoginInfo(email, password, saveInfo)
-    navigate(HOME)
   }
 
   return (

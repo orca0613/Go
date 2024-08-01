@@ -1,11 +1,13 @@
 import { useState } from 'react';
 import { Box, Button, TextField, Typography } from '@mui/material';
 import { useNavigate, useParams } from 'react-router-dom';
-import { changePassword } from '../network/user';
 import { menuWords } from '../util/menuWords';
 import { useWindowSize } from 'react-use';
 import { LOGIN_PATH } from '../util/paths';
-import { getLanguageIdx } from '../util/functions';
+import { alertErrorMessage, getLanguageIdx, saveLoginInfo } from '../util/functions';
+import { useChangePasswordMutation } from '../slices/userApiSlice';
+import { ChangePasswordForm } from '../util/types/queryTypes';
+import { error } from 'console';
 
 export default function ChangePassword() {
   const { userId } = useParams()
@@ -13,6 +15,7 @@ export default function ChangePassword() {
   const [errorMessage, setErrorMessage] = useState("")
   const [password, setPassword] = useState("")
   const [repeat, setRepeat] = useState("")
+  const [changePassword, { isLoading: cpLoading }] = useChangePasswordMutation()
   const {width, height} = useWindowSize()
   const languageIdx = getLanguageIdx()
 
@@ -28,14 +31,24 @@ export default function ChangePassword() {
     if (password.length < 8) {
       setErrorMessage(menuWords.passwordWarning[languageIdx])
       return
-    } else if (password !== repeat) {
+    } 
+    if (password !== repeat) {
       setErrorMessage(menuWords.repeatPasswordWarning[languageIdx])
       return
-    } else {
-      const result = await changePassword(userId || "", password)
-      if (result) {
-        sessionStorage.clear()
-        navigate(LOGIN_PATH)
+    }
+    const form: ChangePasswordForm = {
+      id: userId || "",
+      password: password
+    }
+    try {
+      await changePassword(form).unwrap()
+      alert(menuWords.modifiedNotice[languageIdx])
+      sessionStorage.clear()
+      saveLoginInfo("", "", false)
+      navigate(LOGIN_PATH)
+    } catch (error) {
+      if (typeof error === "object" && error !== null && "originalStatus" in error) {
+        alertErrorMessage(Number(error.originalStatus))
       }
     }
   }

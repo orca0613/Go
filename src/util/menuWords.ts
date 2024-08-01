@@ -162,4 +162,5 @@ export const menuWords = {
   loadingWarning: ["Loading data.", "데이터를 불러오고 있습니다.", "加载数据中。", "データのロード。"],
   deleteAccount: ["Delete account", "계정 삭제하기", "删除帐户", "アカウントの削除"],
   autoLogin: ["Auto Login", "자동 로그인", "自动登录", "自動ログイン"],
+  welcomeSignup: ["Your account has been created successfully.", "계정이 성공적으로 생성되었습니다.", "您的帐户已成功创建。", "アカウントは正常に作成されました。"]
 }

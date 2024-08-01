@@ -13,7 +13,11 @@ export const UNSOLVED_TAG = "Unsolved"
 export const LIKED_TAG = "Liked"
 export const USER_DETAIL_TAG = "UserDetail"
 export const PROBLEM_TAG = "Problem"
-export const LIKE_COUNT_TAG = "LikeCount "
+export const LIKE_COUNT_TAG = "LikeCount"
+export const RECEIVED_MESSAGE_TAG = "ReceivedMessage"
+export const SENT_MESSAGE_TAG = "SentMessage"
+export const UNCHECKED_MESSAGE_TAG = "UncheckedMessage"
+export const REPLY_TAG = "Reply"
 
 const baseQuery = fetchBaseQuery({
   baseUrl: API_URL,
@@ -44,6 +48,9 @@ export const apiSlice = createApi({
     USER_DETAIL_TAG,
     PROBLEM_TAG,
     LIKE_COUNT_TAG,
-    
+    RECEIVED_MESSAGE_TAG,
+    SENT_MESSAGE_TAG,
+    UNCHECKED_MESSAGE_TAG,
+    REPLY_TAG,
   ],
 });

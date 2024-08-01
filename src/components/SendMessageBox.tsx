@@ -2,8 +2,9 @@ import { Box, Button, Modal, TextField, Typography } from "@mui/material"
 import { menuWords } from "../util/menuWords";
 import { LANGUAGE_IDX } from "../util/constants";
 import { ChangeEvent, useEffect, useState } from "react";
-import { sendMessage } from "../network/message";
-import { useNavigate } from "react-router-dom";
+import { useSendMessageMutation } from "../slices/messageApiSlice";
+import { SendMessageForm } from "../util/types/queryTypes";
+import { alertErrorMessage } from "../util/functions";
 
 
 interface SendMessageFormProps {
@@ -12,10 +13,10 @@ interface SendMessageFormProps {
   open: number
 }
 
-export default function SendMessageForm({ receiver, sender, open }: SendMessageFormProps) {
+export default function SendMessageBox({ receiver, sender, open }: SendMessageFormProps) {
 
   const languageIdx = Number(localStorage.getItem(LANGUAGE_IDX))
-  const navigate = useNavigate()
+  const [sendMessage, { isLoading: smLoading }] = useSendMessageMutation()
   const [messageTitle, setMessageTitle] = useState("")
   const [messageContents, setMessageContents] = useState("")
   const [openModal, setOpenModal] = useState(false)
@@ -83,8 +84,22 @@ export default function SendMessageForm({ receiver, sender, open }: SendMessageF
   </Modal>
 
   async function sendMessageAndClose() {
-    await sendMessage(sender, receiver, messageTitle, messageContents, "")
-    setOpenModal(false)
+    const form: SendMessageForm = {
+      sender: sender,
+      receiver: receiver,
+      title: messageTitle,
+      contents: messageContents,
+      quotation: ""
+    }
+    try {
+      await sendMessage(form).unwrap()
+      alert(menuWords.sent[languageIdx])
+      setOpenModal(false)
+    } catch (error) {
+      if (typeof error === "object" && error !== null && "originalStatus" in error) {
+        alertErrorMessage(Number(error.originalStatus))
+      }
+    }
   }
   return (
     <Box>

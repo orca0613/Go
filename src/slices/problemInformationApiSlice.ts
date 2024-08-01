@@ -1,7 +1,8 @@
 import { RECOMMENDED_TAG, SOLVED_TAG, UNSOLVED_TAG, apiSlice } from "../rtk/api";
 import { PATCH } from "../util/constants";
 import { PROBLEMINFO_DB_PATH } from "../util/paths";
-import { AddUserForm, ChangeCountForm, ProblemInformation } from "../util/types/types";
+import { AddUserForm, ChangeCountForm } from "../util/types/queryTypes";
+import { ProblemInformation } from "../util/types/types";
 
 const problemInformationApiSlice = apiSlice.injectEndpoints({
   endpoints: (builder) => ({

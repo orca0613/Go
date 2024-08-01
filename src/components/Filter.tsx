@@ -40,7 +40,6 @@ export default function Filter({ width, f }: FilterBoxProps) {
       const newLevelidx = f.level === 0 ? 0 : levelIdx
       setLevelIdx(newLevelidx)
       setEmphasize(false)
-    
   }, [f])
 
   function changeTier(e: SelectChangeEvent) {

@@ -3,10 +3,12 @@ import React, { useState } from 'react'
 import { LANGUAGE_IDX, languageList } from '../util/constants'
 import { useNavigate } from 'react-router-dom'
 import { menuWords } from '../util/menuWords'
-import { checkMail, checkUserName, createUser } from '../network/user'
-import { getLevelText, isValidEmail } from '../util/functions'
+import { alertErrorMessage, getLevelText, isValidEmail } from '../util/functions'
 import { useWindowSize } from 'react-use'
 import { levelArray } from '../util/initialForms'
+import { LOGIN_PATH } from '../util/paths'
+import { useCheckMailQuery, useCheckUserNameQuery, useCreateAccountMutation } from '../slices/userApiSlice'
+import { CreateAccountForm } from '../util/types/queryTypes'
 
 export function Signup() {
 
@@ -20,6 +22,9 @@ export function Signup() {
   const [passwordErrorMessage, setPasswordErrorMessage] = useState("")
   const [repeatPasswordErrorMessage, setRepeatPasswordErrorMessage] = useState("")
   const [nameErrorMessage, setNameErrorMessage] = useState("")
+  const { data: emailDuplicate, isLoading: edLoading, refetch: edRefetch } = useCheckMailQuery(email || "a")
+  const { data: nameDuplicate, isLoading: ndLoading, refetch: ndRefetch } = useCheckUserNameQuery(name || "a")
+  const [createAccount, { isLoading: caLoading }] = useCreateAccountMutation()
   const [language, setLanguage] = useState(Number(localStorage.getItem(LANGUAGE_IDX)))
   const invalidChars = [" ", "!", "@", "#", "$", "%", "^", "&", "*", "(", ")"]
   
@@ -74,29 +79,43 @@ export function Signup() {
   }
 
   async function checkMailAndSetEmailError() {
+    if (!email) return false
     // 이메일 중복여부 확인. 문자열이 이메일의 포맷에 맞는지 확인하는 기능은 아직 없음.
     if (!isValidEmail(email)) {
       setEmailErrorMessage(menuWords.invalidEmailFormWarning[language])
       return false
     }
-    const duplicated = await checkMail(email)
-    if (!duplicated) {
-      setEmailErrorMessage("")
-      return true
-    } else {
-      setEmailErrorMessage(menuWords.emailWarning[language])
-      return false
+    try {
+      edRefetch().unwrap()
+      if (!emailDuplicate) {
+        setEmailErrorMessage("")
+        return true
+      } else {
+        setEmailErrorMessage(menuWords.emailWarning[language])
+        return false
+      }
+    } catch (error) {
+      if (typeof error === "object" && error !== null && "originalStatus" in error) {
+        alertErrorMessage(Number(error.originalStatus))
+      }
     }
   }
 
   async function checkUserNameAndSetNameError() {
-    const duplicated = await checkUserName(name)
-    if (!duplicated) {
-      setNameErrorMessage("")
-      return true 
-    } else {
-      setNameErrorMessage(menuWords.nameWarning[language])
-      return false
+    if (!name) return false
+    try {
+      ndRefetch().unwrap()
+      if (!nameDuplicate) {
+        setNameErrorMessage("")
+        return true 
+      } else {
+        setNameErrorMessage(menuWords.nameWarning[language])
+        return false
+      }
+    } catch (error) {
+      if (typeof error === "object" && error !== null && "originalStatus" in error) {
+        alertErrorMessage(Number(error.originalStatus))
+      }
     }
   }
 
@@ -108,8 +127,22 @@ export function Signup() {
     const isValidName = await checkUserNameAndSetNameError()
 
     if (isValidEmail && isValidName) {
-      createUser(email, password, name, level, language)
-      navigate("/")
+      const form: CreateAccountForm = {
+        email: email,
+        password: password,
+        name: name,
+        level: level,
+        language: language,
+      }
+      try {
+        createAccount(form).unwrap()
+        alert(menuWords.welcomeSignup[language])
+        navigate(LOGIN_PATH)
+      } catch (error) {
+        if (typeof error === "object" && error !== null && "originalStatus" in error) {
+          alertErrorMessage(Number(error.originalStatus))
+        }
+      }
       
     } else {
       return

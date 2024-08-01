@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react'
-import { Coordinate, BoardInfo, UserInfo, UpdateVariationsForm, ProblemAndVariations, ChangeCountForm, AddUserForm, ProblemInformation, AddProblemIndexForm } from '../../util/types/types'
+import { Coordinate, BoardInfo, UserInfo, ProblemAndVariations, ProblemInformation } from '../../util/types/types'
 import _ from 'lodash'
-import { addCurrentVariation, addProblemIndexToUserInfo, getAdjacentProblemIndex, getLanguageIdx } from '../../util/functions'
-import { ANSWER, MARGIN, SELF, SOLVED, TRY, USERINFO } from '../../util/constants'
+import { addCurrentVariation, addProblemIndexToUserInfo, alertErrorMessage, getAdjacentProblemIndex, getLanguageIdx } from '../../util/functions'
+import { ANSWER, MARGIN, SELF, TRY, USERINFO } from '../../util/constants'
 import FinalBoard from '../board/FinalBoard'
 import { Box, Button, ButtonGroup, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, Typography } from '@mui/material'
 import { menuWords } from '../../util/menuWords'
@@ -11,7 +11,6 @@ import { ProblemInformationBox } from './ProblemInformationBox'
 import { Like } from '../Like'
 import { Game } from '../../gologic/goGame'
 import { useWindowSize } from 'react-use'
-import { sendRequest } from '../../network/requests'
 import { ReplyBox } from '../ReplyBox'
 import { initialUserInfo, initialVariations } from '../../util/initialForms'
 import { mobileButtonStyle, wideButtonStyle } from '../../util/styles'
@@ -19,6 +18,8 @@ import { useUpdateVariationsMutation } from '../../slices/problemApiSlice'
 import { ResultSnackbar } from '../ResultSnackbar'
 import { useAddCorrectUserMutation, useAddViewMutation, useAddWrongUserMutation } from '../../slices/problemInformationApiSlice'
 import { useAddSolvedMutation } from '../../slices/userDetailApiSlice'
+import { AddProblemIndexForm, AddUserForm, ChangeCountForm, SendRequestForm, UpdateVariationsForm } from '../../util/types/queryTypes'
+import { useSendRequestMutation } from '../../slices/requestApiSlice'
 
 interface ProblemProps {
   pi: ProblemAndVariations
@@ -37,6 +38,7 @@ export function Problem({ pi, problemInformations, likeCount }: ProblemProps) {
   const [addSolved, { isLoading: asLoading }] = useAddSolvedMutation()
   const [addCorrectUser, { isLoading: acLoading }] = useAddCorrectUserMutation()
   const [addWrongUser, { isLoading: awLoading }] = useAddWrongUserMutation()
+  const [sendRequest, { isLoading: srLoading }] = useSendRequestMutation()
 
   const initInfo: BoardInfo = {
     board: problemInfo.initialState,
@@ -221,19 +223,32 @@ export function Problem({ pi, problemInformations, likeCount }: ProblemProps) {
       ...problemInfo,
       questions: newQuestions
     })
-    const form: UpdateVariationsForm = {
+    const uvForm: UpdateVariationsForm = {
       problemIdx: problemIdx,
       name: username,
       creator: problemInfo.creator,
       questions: newQuestions
     }
-    await uv(form).unwrap()
-    await sendRequest(problemIdx, problemInfo.creator, username, info.key)
-    setDialogInfo({
-      ...dialogInfo,
-      open: false
-    })
-    alert(menuWords.saved[languageIdx])
+    const srForm: SendRequestForm = {
+      problemIdx: problemIdx,
+      creator: problemInfo.creator,
+      client: username,
+      key: info.key,
+      language: languageIdx
+    }
+    try {
+      await uv(uvForm).unwrap()
+      await sendRequest(srForm).unwrap()
+      setDialogInfo({
+        ...dialogInfo,
+        open: false
+      })
+      alert(menuWords.saved[languageIdx])
+    } catch (error) {
+      if (typeof error === "object" && error !== null && "originalStatus" in error) {
+        alertErrorMessage(Number(error.originalStatus))
+      }
+    }
   }
 
   function handleDialogOpen() {

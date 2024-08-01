@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react"
-import { Coordinate, ModifyProblemForm, ProblemAndVariations, UserInfo } from "../../util/types/types"
+import { Coordinate, ProblemAndVariations, UserInfo } from "../../util/types/types"
 import { COMMENT, HOME, INFO_FOR_MODIFYING, LEVEL, MARGIN, TURN, USERINFO } from "../../util/constants"
 import { Box, Button, ButtonGroup, FormControl, InputLabel, MenuItem, Select, SelectChangeEvent, TextField } from "@mui/material"
-import { getLanguageIdx, getLevelText, isLegalBoard, loginWarning, makingEmptyBoard } from "../../util/functions"
+import { alertErrorMessage, getLanguageIdx, getLevelText, isLegalBoard, logOut, makingEmptyBoard } from "../../util/functions"
 import { isOutside } from "../../gologic/logic"
 import FinalBoard from "../board/FinalBoard"
 import { menuWords } from "../../util/menuWords"
@@ -11,9 +11,12 @@ import { useNavigate, useParams } from "react-router-dom"
 import { boardSizeArray, initialProblemInfo, initialUserInfo, levelArray } from "../../util/initialForms"
 import { mobileButtonStyle } from "../../util/styles"
 import { useModifyProblemMutation } from "../../slices/problemApiSlice"
+import { ModifyProblemForm } from "../../util/types/queryTypes"
+import { errorMessages } from "../../util/errorMessages"
 
 export function ModifyProblem() {
   const { param } = useParams()
+  const userInfo: UserInfo = JSON.parse(sessionStorage.getItem(USERINFO) || initialUserInfo)
   const pi = localStorage.getItem("problemInfo")
   const [problemInfo, setProblemInfo] = useState<ProblemAndVariations>(pi? JSON.parse(pi) : initialProblemInfo)
   const [boardSize, setBoardSize] = useState(problemInfo.initialState.length)
@@ -55,7 +58,6 @@ export function ModifyProblem() {
   function addMove(coord: Coordinate) {
     const y = coord[0], x = coord[1]
     const newProblem = [...problem]
-    console.log(info.color)
     newProblem[y][x] = problem[y][x] === info.color? "." : info.color
     setProblem(newProblem)
   }
@@ -101,19 +103,28 @@ export function ModifyProblem() {
       level: info.level,
       color: info.turn,
     }
-    await mp(form).unwrap()
-    alert(menuWords.modifiedNotice[languageIdx])
+    try {
+      await mp(form).unwrap()
+      alert(menuWords.modifiedNotice[languageIdx])
+    } catch (error) {
+      if (typeof error === "object" && error !== null && "originalStatus" in error) {
+        alertErrorMessage(Number(error.originalStatus))
+      }
+    }
   }
 
   useEffect(() => {
     const pi = localStorage.getItem(INFO_FOR_MODIFYING)
     if (!pi) {
-      console.log("shit")
       return navigate(HOME)
     }
     const newProblemInfo: ProblemAndVariations = JSON.parse(pi)
     if (newProblemInfo.problemIdx !== Number(param)) {
       return navigate(HOME)
+    }
+    if (newProblemInfo.creator !== userInfo.name) {
+      alert(errorMessages[403][languageIdx])
+      logOut()
     }
     setProblemInfo(newProblemInfo)
     setProblem(newProblemInfo.initialState)

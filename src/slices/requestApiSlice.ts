@@ -1,19 +1,18 @@
-import { USER_DETAIL_TAG, apiSlice } from "../rtk/api";
-import { REQUESTS_DB_PATH, USER_DB_PATH } from "../util/paths";
-import { CreateAccountForm, LoginRequest, LoginResponse } from "../util/types/types";
+import { apiSlice } from "../rtk/api";
+import { REQUESTS_DB_PATH } from "../util/paths";
 import { PATCH, POST } from "../util/constants";
-import { checkRequestForm, sendRequestForm } from "../util/types/queryTypes";
+import { CheckRequestForm, SendRequestForm } from "../util/types/queryTypes";
 
 const requestApiSlice = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
-    sendRequest: builder.mutation<void, sendRequestForm>({
+    sendRequest: builder.mutation<void, SendRequestForm>({
       query: (body) => ({
         url: `${REQUESTS_DB_PATH}/send`,
         method: POST,
         body,
       })
     }),
-    checkRequest: builder.mutation<void, checkRequestForm>({
+    checkRequest: builder.mutation<void, CheckRequestForm>({
       query: (body) => ({
         url: `${REQUESTS_DB_PATH}/check`,
         method: PATCH,

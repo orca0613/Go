@@ -1,12 +1,11 @@
 import { Avatar, Box, Button, Divider, Typography } from "@mui/material";
 import { ReplyForm, UserInfo } from "../util/types/types";
 import { LANGUAGE_IDX, USERINFO } from "../util/constants";
-import { hideReply } from "../network/reply";
 import { menuWords } from "../util/menuWords";
 import { initialUserInfo } from "../util/initialForms";
-import { loginWarning } from "../util/functions";
-import { useNavigate } from "react-router-dom";
-import { LOGIN_PATH } from "../util/paths";
+import { useHideReplyMutation } from "../slices/replyApiSlice";
+import { HideReplyForm } from "../util/types/queryTypes";
+import { alertErrorMessage } from "../util/functions";
 
 
 interface ReplyProps {
@@ -15,20 +14,25 @@ interface ReplyProps {
 export function Reply({ replyForm }: ReplyProps) {
   const userInfo: UserInfo = JSON.parse(sessionStorage.getItem(USERINFO) || initialUserInfo)
   const languageIdx = Number(localStorage.getItem(LANGUAGE_IDX))
-  const navigate = useNavigate()
+  const [hideReply, { isLoading: hrLoading }] = useHideReplyMutation()
   const divider = <Divider orientation="horizontal" sx={{borderColor: "whitesmoke" }} />
 
   const comment = replyForm.deleted? menuWords.deletedComment[languageIdx] : replyForm.comment
   
   async function deleteReplyAndRefresh() {
-    const del = await hideReply(replyForm._id, userInfo.name)
-    if (del) {
+    const form: HideReplyForm = {
+      id: replyForm._id,
+      name: userInfo.name,
+    }
+    try {
+      await hideReply(form).unwrap()
       alert(menuWords.deletedNotice[languageIdx])
       return location.reload()
+    } catch (error) {
+      if (typeof error === "object" && error !== null && "originalStatus" in error) {
+        alertErrorMessage(Number(error.originalStatus))
+      }
     }
-    loginWarning()
-    sessionStorage.clear()
-    navigate(LOGIN_PATH)
   }
 
 

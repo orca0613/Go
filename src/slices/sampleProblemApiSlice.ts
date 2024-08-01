@@ -1,8 +1,8 @@
-import { CREATED_TAG, FILTER_TAG, LIKED_TAG, LIKE_COUNT_TAG, NEWEST_TAG, PROBLEM_TAG, RECOMMENDED_TAG, REPRESENTATIVE_TAG, SOLVED_TAG, UNSOLVED_TAG, USER_SOLVED_TAG, apiSlice } from "../rtk/api";
+import { CREATED_TAG, FILTER_TAG, LIKED_TAG, LIKE_COUNT_TAG, NEWEST_TAG, RECOMMENDED_TAG, REPRESENTATIVE_TAG, SOLVED_TAG, UNSOLVED_TAG, USER_SOLVED_TAG, apiSlice } from "../rtk/api";
 import { PATCH, problemKeepingTime } from "../util/constants";
 
 import { SAMPLE_PATH } from "../util/paths";
-import { handleLikedForm } from "../util/types/queryTypes";
+import { HandleLikedForm } from "../util/types/queryTypes";
 import { SampleProblemInformation } from "../util/types/types";
 
 const sampleProblemApiSlice = apiSlice.injectEndpoints({
@@ -85,7 +85,7 @@ const sampleProblemApiSlice = apiSlice.injectEndpoints({
         return res
       },
     }),
-    handleLiked: builder.mutation<void, handleLikedForm>({
+    handleLiked: builder.mutation<void, HandleLikedForm>({
       query: (body) => ({
         url: `${SAMPLE_PATH}/handle-liked`,
         method: PATCH,

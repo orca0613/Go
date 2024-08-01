@@ -1,4 +1,4 @@
-import { BoardInfo, Coordinate, FilterForm, ProblemAndVariations, ProblemInformation } from "./types/types"
+import { BoardInfo, Coordinate, FilterForm, MessageForm, ProblemAndVariations, ProblemInformation } from "./types/types"
 
 export const flowerPointPosition: Coordinate[][] = [
   [],
@@ -87,4 +87,19 @@ export const initBoardInfo: BoardInfo = {
   board: [],
   color: "b",
   key: "0"
+}
+
+export const initialMessageForm: MessageForm = {
+  _id: "",
+  sender: "",
+  receiver: "",
+  title: "",
+  contents: "",
+  quotation: "",
+  time: new Date(),
+  checked: false,
+  hideToReceiver: false,
+  hideToSender: false,
+  includeUrl: false,
+  url: ""
 }

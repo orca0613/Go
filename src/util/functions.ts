@@ -1,9 +1,12 @@
+import { string } from "zod"
 import { getDeadGroup, handleMove } from "../gologic/logic"
 import { CREATED, LANGUAGE_IDX, LIKED, PAGE, PROBLEM_INDEX, PROBLEM_INDICES, REQUESTS, SOLVED, SORTING_IDX, UNRESOLVED, USERINFO, expires } from "./constants"
 import { initialUserInfo } from "./initialForms"
 import { menuWords } from "./menuWords"
 import { Board, Coordinate, FilterForm, SampleProblemInformation, UserInfo, Variations } from "./types/types"
 import _ from 'lodash'
+import { LOGIN_PATH } from "./paths"
+import { errorMessages } from "./errorMessages"
 
 export function playMoveAndReturnNewBoard(board: Board, coord: Coordinate, color: string) {
   const newBoard = handleMove(board, color, coord)
@@ -411,4 +414,34 @@ export function getPageName(part: string) {
       break
   }
   return pageName
+}
+
+export function alertErrorMessage(status: number, message?: string) {
+  const languageIdx = getLanguageIdx()
+  if (message) {
+    alert(message)
+    return
+  }
+  switch (status) {
+    case 400:
+      return alert(errorMessages[400][languageIdx])
+    case 401:
+      alert(errorMessages[401][languageIdx])
+      return window.location.replace(LOGIN_PATH)
+    case 403:
+      alert(errorMessages[403][languageIdx])
+      return window.location.replace(LOGIN_PATH)
+    case 404:
+      return alert(errorMessages[404][languageIdx])
+    case 500:
+      return alert(errorMessages[500][languageIdx])
+    default:
+      return alert(errorMessages[0][languageIdx])
+  }
+}
+
+export function logOut() {
+  sessionStorage.clear()
+  saveLoginInfo("", "", false)
+  window.location.replace(LOGIN_PATH)
 }

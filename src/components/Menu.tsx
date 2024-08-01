@@ -9,41 +9,46 @@ import { CREATED, LANGUAGE_IDX, LIKED, SOLVED, UNRESOLVED, USERINFO, mobileFontS
 import { menuWords } from '../util/menuWords';
 import { useNavigate } from 'react-router-dom';
 import { Badge, Divider, Typography } from '@mui/material';
-import { getNumberUnchecked } from '../network/message';
-import { getUnsolvedIdxArray, resetSortingForm, saveLoginInfo } from '../util/functions';
+import { alertErrorMessage, resetSortingForm, saveLoginInfo } from '../util/functions';
 import { LOGIN_PATH, MYPAGE_PATH } from '../util/paths';
 import { nameButtonStyle } from '../util/styles';
 import { useGetUserDetailQuery } from '../slices/userDetailApiSlice';
 import { UserInfo } from '../util/types/types';
 import { initialUserInfo } from '../util/initialForms';
+import { useGetNumberUncheckedQuery } from '../slices/messageApiSlice';
 
 export function Menu() {
   const [open, setOpen] = useState(false);
   const userInfo: UserInfo = JSON.parse(sessionStorage.getItem(USERINFO) || initialUserInfo)
   const level = userInfo.level
-  const { data: userDetail, isLoading: gudLoading } = useGetUserDetailQuery(userInfo.name)
-  const unsolved = getUnsolvedIdxArray(userDetail?.tried, userDetail?.solved)
-  const [unchecked, setUnchecked] = useState(0)
+  const { data: userDetail, isLoading: gudLoading, refetch: gudRefetch } = useGetUserDetailQuery(userInfo.name)
+  const { data: uncheckedMessage, isLoading: umLoading, refetch: umRefetch } = useGetNumberUncheckedQuery(userInfo.name)
+  const [unchecked, setUnchecked] = useState<number>(uncheckedMessage || 0)
   const divider = <Divider orientation="horizontal" sx={{borderColor: "gray"}} />
 
   useEffect(() => {
-    if (userDetail) {
-      const newUserInfo: UserInfo = {
-        ...userInfo,
-        created: userDetail.created,
-        tried: userDetail.tried,
-        solved: userDetail.solved,
-        withQuestions: userDetail.withQuestions,
-        liked: userDetail.liked,
-        point: userDetail.point,
-        auto: userDetail.auto
+    try {
+      umRefetch().unwrap()
+      gudRefetch().unwrap()
+      if (userDetail) {
+        const newUserInfo: UserInfo = {
+          ...userInfo,
+          created: userDetail.created,
+          tried: userDetail.tried,
+          solved: userDetail.solved,
+          withQuestions: userDetail.withQuestions,
+          liked: userDetail.liked,
+          point: userDetail.point,
+          auto: userDetail.auto
+        }
+        sessionStorage.setItem(USERINFO, JSON.stringify(newUserInfo))
       }
-      sessionStorage.setItem(USERINFO, JSON.stringify(newUserInfo))
+      setUnchecked(uncheckedMessage || 0)
+    } catch (error) {
+      if (typeof error === "object" && error !== null && "originalStatus" in error) {
+        alertErrorMessage(Number(error.originalStatus))
+      }
     }
-    getNumberUnchecked()
-    .then(n => {
-      setUnchecked(n)
-    })
   }, [open])
 
 
